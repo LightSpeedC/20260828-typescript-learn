@@ -1,0 +1,21 @@
+# 生成物・一時ファイル（HTML から作り直せる）
+tmp/
+
+# セッションログ・補助ファイル
+etc/
+
+# ローカル設定（チームで共有するものだけ名指しで許可する）
+.claude/*
+!.claude/settings.json
+!.claude/commands/
+!.claude/agents/
+!.claude/skills/
+
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Windows
+Thumbs.db
+desktop.ini
