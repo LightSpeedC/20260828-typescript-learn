@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="docs/css/style.css">
+<style>
+/* 本文の章アクセント（4章 / 刻み 93.3） */
+.ch01 { --accent: hsl(280,78%,25%);   --accent2: hsl(280,58%,55%);   --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(186.7,78%,25%); --accent2: hsl(186.7,58%,55%); --soft: hsl(186.7,28%,95%); }
+.ch03 { --accent: hsl(93.3,78%,25%);  --accent2: hsl(93.3,58%,55%);  --soft: hsl(93.3,28%,95%); }
+.ch04 { --accent: hsl(0,78%,25%);     --accent2: hsl(0,58%,55%);     --soft: hsl(0,28%,95%); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>TypeScript 学習資料</h1>
+		<p class="lead">Node+JavaScript ／ Java ／ C# のいずれかの経験がある方向け ／ 本編12章 ＋ 付録4本</p>
+		<p class="date">📅 作成: 2026-08-28 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="intro"><strong>JavaScript を書いたことがある方</strong>、または <strong>Java か C# を知っている方</strong>を対象にした TypeScript の学習資料です。プログラミングの基礎（変数・条件分岐・繰り返し・関数・クラス）は説明しません。</p>
+
+<p class="intro">ゴールは<strong>型の付いた <code>.ts</code> を自分で書き、<code>tsc</code> が出すエラーを自力で読み解いて直せるようになること</strong>です。上から順に読んでも、必要な章だけ引いても使えます。</p>
+
+<div class="toc">
+	<h2>資料一覧</h2>
+	<ul>
+		<li class="doc01"><a class="doclink doc01" href="docs/01-背景.html"><span class="no">01.</span><strong>背景</strong></a></li>
+		<li class="doc02"><a class="doclink doc02" href="docs/02-実行環境.html"><span class="no">02.</span><strong>実行環境</strong></a></li>
+		<li class="doc03"><a class="doclink doc03" href="docs/03-tsconfig.html"><span class="no">03.</span><strong>tsconfig</strong></a></li>
+		<li class="doc04"><a class="doclink doc04" href="docs/04-型の基本.html"><span class="no">04.</span><strong>型の基本</strong></a></li>
+		<li class="doc05"><a class="doclink doc05" href="docs/05-構造的型付け.html"><span class="no">05.</span><strong>構造的型付け</strong></a></li>
+		<li class="doc06"><a class="doclink doc06" href="docs/06-any-unknown-アサーション.html"><span class="no">06.</span><strong>any・unknown・型アサーション</strong></a></li>
+		<li class="doc07"><a class="doclink doc07" href="docs/07-関数の型.html"><span class="no">07.</span><strong>関数の型</strong></a></li>
+		<li class="doc08"><a class="doclink doc08" href="docs/08-型の絞り込み.html"><span class="no">08.</span><strong>型の絞り込み</strong></a></li>
+		<li class="doc09"><a class="doclink doc09" href="docs/09-ジェネリクス.html"><span class="no">09.</span><strong>ジェネリクス</strong></a></li>
+		<li class="doc10"><a class="doclink doc10" href="docs/10-モジュールと宣言ファイル.html"><span class="no">10.</span><strong>モジュールと宣言ファイル</strong></a></li>
+		<li class="doc11"><a class="doclink doc11" href="docs/11-非同期とエラー処理.html"><span class="no">11.</span><strong>非同期とエラー処理</strong></a></li>
+		<li class="doc12"><a class="doclink doc12" href="docs/12-ハンズオン.html"><span class="no">12.</span><strong>ハンズオン</strong></a></li>
+		<li class="doc13"><a class="doclink doc13" href="docs/A1-逆引き.html"><span class="no">A1.</span><strong>逆引き</strong></a></li>
+		<li class="doc14"><a class="doclink doc14" href="docs/A2-型レシピ集.html"><span class="no">A2.</span><strong>型レシピ集</strong></a></li>
+		<li class="doc15"><a class="doclink doc15" href="docs/A3-実務パターン集.html"><span class="no">A3.</span><strong>実務パターン集</strong></a></li>
+		<li class="doc16"><a class="doclink doc16" href="docs/A4-型レベルプログラミング.html"><span class="no">A4.</span><strong>型レベルプログラミング</strong></a></li>
+	</ul>
+	<p class="tocnote"><strong>01〜12 は順に読む</strong>前提です。<strong>A1〜A4 は必要になったときに引く</strong>もので、順番に読む必要はありません。どこから手を付けるか迷ったら <a class="doclink doc13" href="docs/A1-逆引き.html">A1. 逆引き</a> から入ってください。</p>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01">
+	<h1>1. この資料の約束事</h1>
+
+	<h2>バッジ</h2>
+
+	<p>TypeScript は<strong>同じコードでも設定と実行環境で結果が変わります</strong>。差がある箇所だけ、その場でバッジを付けています。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">バッジ</th><th>意味</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><span class="badge b-strict">strict</span></td><td><code>tsconfig.json</code> の <code>strict: true</code> のときだけエラーになる、または挙動が変わる</td></tr>
+			<tr><td class="nowrap"><span class="badge b-esm">ESM</span><span class="badge b-cjs">CJS</span></td><td>モジュール形式によって書き方が変わる</td></tr>
+			<tr><td class="nowrap"><span class="badge b-strip">Node型ストリップ</span></td><td>Node が <code>.ts</code> を直接実行する場合の制約</td></tr>
+			<tr><td class="nowrap"><span class="badge b-ts7">TS7</span></td><td><strong>TypeScript 7 と 5 系で挙動が違う</strong>箇所。移行時の注意点</td></tr>
+			<tr><td class="nowrap">（なし）</td><td>どの環境でも同じ。大半の内容にはバッジが付きません</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>補足枠「Java・C# から来た人へ」</h2>
+
+	<p>本文は <strong>JavaScript を知っている読者</strong>を基準に書いています。Java・C# の経験者がつまずきやすい箇所には、この見出しの枠を添えました。JavaScript 経験者は<strong>読み飛ばして構いません</strong>。</p>
+
+	<div class="callout">
+		<p><strong>補うのは静的型付け言語との差分だけです。</strong></p>
+		<p>「変数とは」「クラスとは」といったプログラミングの基礎は扱いません。逆に、<strong>Java・C# の経験がかえって邪魔をする箇所</strong>（構造的型付け、型が実行時に消えること、ジェネリクスの扱い）には必ず枠を置いています。</p>
+	</div>
+
+	<h2>コードの前提</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>前提</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">TypeScript</td><td>5.x 以降。バージョン番号は、差が問題になる箇所にだけ書いています</td></tr>
+			<tr><td class="nowrap">Node.js</td><td>26 系を対象にしています。<code>.ts</code> の直接実行（型ストリップ）が既定で有効なバージョンです</td></tr>
+			<tr><td class="nowrap">実行方法</td><td>コード例は <code>npx tsx ファイル名.ts</code> でそのまま動きます</td></tr>
+			<tr><td class="nowrap"><code>.ts</code> の文字コード</td><td>UTF-8（BOM なし）＋ LF</td></tr>
+			<tr><td class="nowrap">エラーメッセージ</td><td>既定の<strong>英語</strong>をそのまま載せ、日本語訳を添えています（訳は <code>tsc --locale ja</code> の出力に準拠）</td></tr>
+			<tr><td class="nowrap">動作確認環境</td><td>Node.js 26.8.1 ／ npm 11.19.0 ／ TypeScript <strong>7.0.2 と 5.9.3 の両方</strong>（エラーメッセージ・出力とも差はありませんでした）</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02">
+	<h1>2. 読み方</h1>
+
+	<h2>順に読む場合</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">範囲</th><th>位置づけ</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">01 → 02 → 03</td><td><strong>順番必須。</strong>環境が整わないと以降のコードを動かせません</td></tr>
+			<tr><td class="nowrap">04・05</td><td><strong>核心。</strong>ここだけは飛ばさないでください</td></tr>
+			<tr><td class="nowrap">06 〜 09</td><td>05 の内容に依存します。順に読むのが確実です</td></tr>
+			<tr><td class="nowrap">10・11</td><td>独立性が高く、必要な順に読んで構いません</td></tr>
+			<tr><td class="nowrap">12</td><td>09 まで終わっていれば着手できます</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>山場は 05 と 08 です。</strong></p>
+		<p><a class="doclink doc05" href="docs/05-構造的型付け.html">05. 構造的型付け</a>は <strong>Java・C# 経験者</strong>が、<a class="doclink doc08" href="docs/08-型の絞り込み.html">08. 型の絞り込み</a>は <strong>JavaScript 経験者</strong>が最もつまずく箇所です。読者によって難所が違うため、どちらも時間を取って読んでください。</p>
+	</div>
+
+	<h2>目的から引く場合</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>状況</th><th class="nowrap">引く先</th></tr>
+		</thead>
+		<tbody>
+			<tr><td><code>tsc</code> のエラーの意味が分からない</td><td class="nowrap"><a class="doclink doc13" href="docs/A1-逆引き.html">A1. 逆引き</a>（エラー番号から）</td></tr>
+			<tr><td>こういう<strong>型</strong>を書きたい</td><td class="nowrap"><a class="doclink doc14" href="docs/A2-型レシピ集.html">A2. 型レシピ集</a></td></tr>
+			<tr><td>こういう<strong>処理</strong>を書きたい</td><td class="nowrap"><a class="doclink doc15" href="docs/A3-実務パターン集.html">A3. 実務パターン集</a></td></tr>
+			<tr><td>ライブラリの型定義が読めない</td><td class="nowrap"><a class="doclink doc16" href="docs/A4-型レベルプログラミング.html">A4. 型レベルプログラミング</a></td></tr>
+			<tr><td>環境が動かない・<code>import</code> が解決できない</td><td class="nowrap"><a class="doclink doc03" href="docs/03-tsconfig.html">03. tsconfig</a> ／ <a class="doclink doc10" href="docs/10-モジュールと宣言ファイル.html">10. モジュールと宣言ファイル</a></td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03">
+	<h1>3. 勉強会で使う場合</h1>
+
+	<h2>全5回・1回90分</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">回</th><th class="nowrap">範囲</th><th>ねらい</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">第1回</td><td class="nowrap">01〜03</td><td>環境を動かす。全員が <code>tsc</code> の通る状態を作る</td></tr>
+			<tr><td class="nowrap">第2回</td><td class="nowrap">04〜06</td><td>型を書く。<code>any</code> に逃げない習慣をつける</td></tr>
+			<tr><td class="nowrap">第3回</td><td class="nowrap">07〜08</td><td>絞り込みと網羅性チェック</td></tr>
+			<tr><td class="nowrap">第4回</td><td class="nowrap">09〜11</td><td>ジェネリクスとモジュール</td></tr>
+			<tr><td class="nowrap">第5回</td><td class="nowrap">12</td><td>ハンズオン</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>参加前の準備</h2>
+
+	<p>第1回の冒頭で環境構築に時間を使わないよう、次の3点を<strong>必ず済ませてから</strong>参加してください。</p>
+
+	<ul>
+		<li>Node.js の LTS 版を入れておく</li>
+		<li><code>npx tsx --version</code> が通る状態にしておく</li>
+		<li>エディタ（VS Code 想定）で <code>.ts</code> を開き、型エラーが波線で表示されることを確認しておく</li>
+	</ul>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04">
+	<h1>4. この資料について</h1>
+
+	<h2>作者</h2>
+
+	<p><strong>LightSpeedC</strong>　<a href="https://lightspeedc.com">https://lightspeedc.com</a></p>
+
+	<h2>この資料の構成</h2>
+
+	<p>対象読者の想定、章立ての意図、執筆の方針は <a class="doclink doczz" href="docs/ZZ-構成.html">ZZ. 資料の構成</a> にまとめています。</p>
+</section>
+
+</div>
+
+</body>
+</html>
