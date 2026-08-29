@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A1. 逆引き — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（4章 / 刻み 93.3） */
+.ch01 { --accent: hsl(280,78%,25%);   --accent2: hsl(280,58%,55%);   --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(186.7,78%,25%); --accent2: hsl(186.7,58%,55%); --soft: hsl(186.7,28%,95%); }
+.ch03 { --accent: hsl(93.3,78%,25%);  --accent2: hsl(93.3,58%,55%);  --soft: hsl(93.3,28%,95%); }
+.ch04 { --accent: hsl(0,78%,25%);     --accent2: hsl(0,58%,55%);     --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "A1." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "A1." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>A1. 逆引き</h1>
+		<p class="lead">4つの入口から本編へ ／ 順番に読む必要はありません</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この付録の使い方</h2>
+	<ul>
+		<li><strong>手が止まったときに引くもの</strong>です。通読は不要です</li>
+		<li>4つの入口があります。<strong>いま分かっていること</strong>に近い入口から入ってください</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>4つの入口</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">やりたいことから引く</a></li>
+		<li class="ch02"><a href="#c2">エラー番号から引く</a></li>
+		<li class="ch03"><a href="#c3">他の言語の構文から引く</a></li>
+		<li class="ch04"><a href="#c4">用語から引く</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>A1.1 やりたいことから引く</h1>
+
+	<h2>型を書く</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>やりたいこと</th><th class="nowrap">書き方</th><th class="nowrap">詳しくは</th></tr>
+		</thead>
+		<tbody>
+			<tr><td>取りうる値を限定したい</td><td class="nowrap"><code>type S = "a" | "b";</code></td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.3</a></td></tr>
+			<tr><td><code>enum</code> のようなものが欲しい</td><td class="nowrap">文字列リテラルの union</td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.3</a></td></tr>
+			<tr><td>プロパティを省略可能にしたい</td><td class="nowrap"><code>age?: number</code></td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.2</a></td></tr>
+			<tr><td>書き換えを禁止したい</td><td class="nowrap"><code>readonly</code></td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.1</a></td></tr>
+			<tr><td>2つの型を合体したい</td><td class="nowrap"><code>A &amp; B</code></td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.4</a></td></tr>
+			<tr><td>値をそのまま型にしたい</td><td class="nowrap"><code>as const</code></td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.3</a></td></tr>
+			<tr><td>一部だけ省略可能にしたい</td><td class="nowrap"><code>Partial&lt;T&gt;</code></td><td class="nowrap"><a class="doclink doc16" href="A4-型レベルプログラミング.html">A4.1</a></td></tr>
+			<tr><td>特定のキーだけ取り出したい</td><td class="nowrap"><code>Pick&lt;T, K&gt;</code> / <code>Omit&lt;T, K&gt;</code></td><td class="nowrap"><a class="doclink doc16" href="A4-型レベルプログラミング.html">A4.1</a></td></tr>
+			<tr><td>同じ形の ID を取り違えたくない</td><td class="nowrap">ブランド型</td><td class="nowrap"><a class="doclink doc05" href="05-構造的型付け.html">05.4</a></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>値を扱う</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>やりたいこと</th><th class="nowrap">書き方</th><th class="nowrap">詳しくは</th></tr>
+		</thead>
+		<tbody>
+			<tr><td>union のどれか判定したい</td><td class="nowrap"><code>typeof</code> / <code>in</code> / 判別可能ユニオン</td><td class="nowrap"><a class="doclink doc08" href="08-型の絞り込み.html">08</a></td></tr>
+			<tr><td>分岐の漏れを検出したい</td><td class="nowrap"><code>never</code> による網羅性チェック</td><td class="nowrap"><a class="doclink doc08" href="08-型の絞り込み.html">08.5</a></td></tr>
+			<tr><td>判定を関数に切り出したい</td><td class="nowrap"><code>v is T</code></td><td class="nowrap"><a class="doclink doc08" href="08-型の絞り込み.html">08.4</a></td></tr>
+			<tr><td><code>null</code> のとき既定値を使いたい</td><td class="nowrap"><code>??</code>（<code>||</code> ではない）</td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.5</a></td></tr>
+			<tr><td>外部から来た JSON を安全に使いたい</td><td class="nowrap"><code>unknown</code> ＋ 型ガード</td><td class="nowrap"><a class="doclink doc06" href="06-any-unknown-アサーション.html">06.2</a>・<a class="doclink doc15" href="A3-実務パターン集.html">A3.1</a></td></tr>
+			<tr><td>失敗を戻り値で返したい</td><td class="nowrap"><code>Result&lt;T, E&gt;</code></td><td class="nowrap"><a class="doclink doc11" href="11-非同期とエラー処理.html">11.4</a>・<a class="doclink doc14" href="A2-型レシピ集.html">A2.1</a></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>環境・設定</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>やりたいこと</th><th class="nowrap">方法</th><th class="nowrap">詳しくは</th></tr>
+		</thead>
+		<tbody>
+			<tr><td><code>.ts</code> をすぐ実行したい</td><td class="nowrap"><code>npx tsx file.ts</code></td><td class="nowrap"><a class="doclink doc02" href="02-実行環境.html">02.3</a></td></tr>
+			<tr><td>型検査だけしたい</td><td class="nowrap"><code>npx tsc --noEmit</code></td><td class="nowrap"><a class="doclink doc02" href="02-実行環境.html">02.2</a></td></tr>
+			<tr><td>実際に使われる設定を見たい</td><td class="nowrap"><code>npx tsc --showConfig</code></td><td class="nowrap"><a class="doclink doc03" href="03-tsconfig.html">03.4</a></td></tr>
+			<tr><td>Node の型を使いたい</td><td class="nowrap"><code>@types/node</code> ＋ <code>"types": ["node"]</code></td><td class="nowrap"><a class="doclink doc02" href="02-実行環境.html">02.4</a></td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>A1.2 エラー番号から引く</h1>
+
+	<div class="callout">
+		<p><strong>エラーメッセージは既定で英語です。</strong></p>
+		<p><code>npx tsc --locale ja</code> で日本語になります。ただし<strong>検索するときは英語のほうが情報が見つかります。</strong>番号（<code>TS2322</code> など）で検索するのが最も確実です。</p>
+	</div>
+
+	<h2>型の不一致</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">番号</th><th>メッセージ（抜粋）</th><th>原因と対処</th><th class="nowrap">詳しくは</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>TS2322</code></td><td>Type 'X' is not assignable to type 'Y'.</td><td>代入しようとした型が合わない。<code>strictNullChecks</code> による <code>null</code> の混入が多い</td><td class="nowrap"><a class="doclink doc03" href="03-tsconfig.html">03.2</a></td></tr>
+			<tr><td class="nowrap"><code>TS2345</code></td><td>Argument of type 'X' is not assignable to parameter of type 'Y'.</td><td>引数の型が合わない</td><td class="nowrap"><a class="doclink doc07" href="07-関数の型.html">07.1</a></td></tr>
+			<tr><td class="nowrap"><code>TS2353</code></td><td>Object literal may only specify known properties…</td><td><strong>余剰プロパティチェック。</strong>打ち間違いか、意図的な追加</td><td class="nowrap"><a class="doclink doc05" href="05-構造的型付け.html">05.2</a></td></tr>
+			<tr><td class="nowrap"><code>TS2339</code></td><td>Property 'x' does not exist on type 'Y'.</td><td>union のまま使っている。絞り込みが要る</td><td class="nowrap"><a class="doclink doc08" href="08-型の絞り込み.html">08</a></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>null・undefined</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">番号</th><th>メッセージ（抜粋）</th><th>原因と対処</th><th class="nowrap">詳しくは</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>TS18048</code></td><td>'x' is possibly 'undefined'.</td><td><code>?.</code> か <code>??</code>、または <code>if</code> で確かめる</td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.5</a></td></tr>
+			<tr><td class="nowrap"><code>TS2531</code></td><td>Object is possibly 'null'.</td><td>同上</td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.5</a></td></tr>
+			<tr><td class="nowrap"><code>TS18046</code></td><td>'e' is of type 'unknown'.</td><td><code>catch</code> の変数。<code>instanceof Error</code> で確かめる</td><td class="nowrap"><a class="doclink doc11" href="11-非同期とエラー処理.html">11.3</a></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>any・型の宣言</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">番号</th><th>メッセージ（抜粋）</th><th>原因と対処</th><th class="nowrap">詳しくは</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>TS7006</code></td><td>Parameter 'x' implicitly has an 'any' type.</td><td>引数に型を書く。<span class="badge b-ts7">TS7</span> <strong>7 では <code>strict</code> が既定で有効</strong></td><td class="nowrap"><a class="doclink doc03" href="03-tsconfig.html">03.2</a></td></tr>
+			<tr><td class="nowrap"><code>TS2693</code></td><td>'X' only refers to a type, but is being used as a value here.</td><td><strong>型を値として使った。</strong><code>interface</code> に <code>instanceof</code> は使えない</td><td class="nowrap"><a class="doclink doc01" href="01-背景.html">01.3</a></td></tr>
+			<tr><td class="nowrap"><code>TS2591</code></td><td>Cannot find name 'node:fs'. …install type definitions for node?</td><td><span class="badge b-ts7">TS7</span> <code>@types/node</code> と <code>"types": ["node"]</code> の両方が要る</td><td class="nowrap"><a class="doclink doc02" href="02-実行環境.html">02.4</a></td></tr>
+			<tr><td class="nowrap"><code>TS2564</code></td><td>Property 'x' has no initializer…</td><td>クラスのプロパティを初期化する</td><td class="nowrap"><a class="doclink doc03" href="03-tsconfig.html">03.2</a></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>設定・モジュール</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">番号</th><th>メッセージ（抜粋）</th><th>原因と対処</th><th class="nowrap">詳しくは</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>TS5112</code></td><td>tsconfig.json is present but will not be loaded…</td><td><span class="badge b-ts7">TS7</span> <strong>コマンドラインにファイル名を書くと設定が無視される</strong></td><td class="nowrap"><a class="doclink doc02" href="02-実行環境.html">02.2</a></td></tr>
+			<tr><td class="nowrap"><code>TS1064</code></td><td>The return type of an async function must be the global Promise&lt;T&gt; type.</td><td><code>async</code> の戻り値を <code>Promise&lt;T&gt;</code> にする</td><td class="nowrap"><a class="doclink doc11" href="11-非同期とエラー処理.html">11.1</a></td></tr>
+			<tr><td class="nowrap"><code>TS2307</code></td><td>Cannot find module 'x' or its corresponding type declarations.</td><td>型定義がない。<code>@types</code> を探すか自分で書く</td><td class="nowrap"><a class="doclink doc10" href="10-モジュールと宣言ファイル.html">10.4</a></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>実行時のエラー（型検査では出ない）</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>メッセージ</th><th>原因</th><th class="nowrap">詳しくは</th></tr>
+		</thead>
+		<tbody>
+			<tr><td><code>ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX</code></td><td><span class="badge b-strip">Node型ストリップ</span> <code>enum</code> などが使われている</td><td class="nowrap"><a class="doclink doc02" href="02-実行環境.html">02.3</a></td></tr>
+			<tr><td><code>ERR_MODULE_NOT_FOUND</code></td><td><span class="badge b-esm">ESM</span> 拡張子を省略した</td><td class="nowrap"><a class="doclink doc10" href="10-モジュールと宣言ファイル.html">10.2</a></td></tr>
+			<tr><td><code>ERR_REQUIRE_ESM</code></td><td>CJS から ESM を <code>require</code> した</td><td class="nowrap"><a class="doclink doc10" href="10-モジュールと宣言ファイル.html">10.2</a></td></tr>
+			<tr><td><code>__dirname is not defined</code></td><td><span class="badge b-esm">ESM</span> <code>import.meta.dirname</code> を使う</td><td class="nowrap"><a class="doclink doc10" href="10-モジュールと宣言ファイル.html">10.2</a></td></tr>
+			<tr><td><code>x is not a function</code></td><td><code>as</code> で嘘をついた、または default export の食い違い</td><td class="nowrap"><a class="doclink doc06" href="06-any-unknown-アサーション.html">06.3</a>・<a class="doclink doc10" href="10-モジュールと宣言ファイル.html">10.2</a></td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>A1.3 他の言語の構文から引く</h1>
+
+	<h2>JavaScript から</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>JavaScript でのやり方</th><th>TypeScript で足すこと</th><th class="nowrap">詳しくは</th></tr>
+		</thead>
+		<tbody>
+			<tr><td><code>const x = 1;</code></td><td>そのままでよい（推論される）</td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.1</a></td></tr>
+			<tr><td><code>function f(a, b) {}</code></td><td>引数に型を書く（<span class="badge b-strict">strict</span> では必須）</td><td class="nowrap"><a class="doclink doc07" href="07-関数の型.html">07.1</a></td></tr>
+			<tr><td><code>JSON.parse(s)</code></td><td>戻り値は <code>any</code>。<code>unknown</code> で受けて検証する</td><td class="nowrap"><a class="doclink doc06" href="06-any-unknown-アサーション.html">06.2</a></td></tr>
+			<tr><td><code>arr.filter(x =&gt; x)</code></td><td>型を絞りたいなら <code>(x): x is T =&gt;</code></td><td class="nowrap"><a class="doclink doc08" href="08-型の絞り込み.html">08.4</a></td></tr>
+			<tr><td><code>catch (e) { e.message }</code></td><td><code>e</code> は <code>unknown</code>。<code>instanceof Error</code> で確かめる</td><td class="nowrap"><a class="doclink doc11" href="11-非同期とエラー処理.html">11.3</a></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>Java から</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>Java</th><th>TypeScript</th><th class="nowrap">詳しくは</th></tr>
+		</thead>
+		<tbody>
+			<tr><td><code>enum Status { A, B }</code></td><td><code>type Status = "A" | "B";</code></td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.3</a></td></tr>
+			<tr><td><code>Optional&lt;T&gt;</code></td><td><code>T | undefined</code> と <code>?.</code>／<code>??</code></td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.5</a></td></tr>
+			<tr><td><code>implements</code></td><td><strong>不要</strong>（形が合えば互換）。書いてもよい</td><td class="nowrap"><a class="doclink doc05" href="05-構造的型付け.html">05.3</a></td></tr>
+			<tr><td><code>x instanceof MyInterface</code></td><td><strong>書けない。</strong>型ガード関数を書く</td><td class="nowrap"><a class="doclink doc08" href="08-型の絞り込み.html">08.4</a></td></tr>
+			<tr><td><code>List&lt;String&gt;</code></td><td><code>string[]</code></td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.1</a></td></tr>
+			<tr><td><code>Map&lt;K,V&gt;</code></td><td><code>Map&lt;K,V&gt;</code> または <code>Record&lt;K,V&gt;</code></td><td class="nowrap"><a class="doclink doc16" href="A4-型レベルプログラミング.html">A4.1</a></td></tr>
+			<tr><td><code>throws IOException</code></td><td><strong>型に現れない。</strong><code>Result</code> を検討する</td><td class="nowrap"><a class="doclink doc11" href="11-非同期とエラー処理.html">11.4</a></td></tr>
+			<tr><td><code>&lt;T extends Comparable&gt;</code></td><td><code>&lt;T extends { ... }&gt;</code></td><td class="nowrap"><a class="doclink doc09" href="09-ジェネリクス.html">09.2</a></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>C# から</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>C#</th><th>TypeScript</th><th class="nowrap">詳しくは</th></tr>
+		</thead>
+		<tbody>
+			<tr><td><code>string?</code>（nullable）</td><td><code>string | null</code> または <code>string | undefined</code></td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.5</a></td></tr>
+			<tr><td><code>??</code></td><td><code>??</code>（同じ）</td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.5</a></td></tr>
+			<tr><td><code>?.</code></td><td><code>?.</code>（同じ）</td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.5</a></td></tr>
+			<tr><td><code>(int)obj</code>（キャスト）</td><td><code>as</code>。<strong>実行時に検査されない</strong></td><td class="nowrap"><a class="doclink doc06" href="06-any-unknown-アサーション.html">06.3</a></td></tr>
+			<tr><td><code>record</code></td><td><code>type</code> ＋ <code>readonly</code></td><td class="nowrap"><a class="doclink doc04" href="04-型の基本.html">04.2</a></td></tr>
+			<tr><td><code>switch</code> の網羅性</td><td><code>never</code> による網羅性チェック</td><td class="nowrap"><a class="doclink doc08" href="08-型の絞り込み.html">08.5</a></td></tr>
+			<tr><td><code>where T : new()</code></td><td><strong>書けない。</strong>コンストラクタを引数で渡す</td><td class="nowrap"><a class="doclink doc09" href="09-ジェネリクス.html">09.4</a></td></tr>
+			<tr><td><code>typeof(T)</code></td><td><strong>書けない。</strong>型引数は実行時に消える</td><td class="nowrap"><a class="doclink doc09" href="09-ジェネリクス.html">09.4</a></td></tr>
+			<tr><td><code>in</code> / <code>out</code>（変性）</td><td><strong>指定しない。</strong>構造から自動で決まる</td><td class="nowrap"><a class="doclink doc09" href="09-ジェネリクス.html">09.4</a></td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>A1.4 用語から引く</h1>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">用語</th><th>意味</th><th class="nowrap">詳しくは</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">型消去</td><td>型が実行時に残らないこと。TypeScript の型はすべて消える</td><td class="nowrap"><a class="doclink doc01" href="01-背景.html">01.2</a></td></tr>
+			<tr><td class="nowrap">構造的型付け</td><td><strong>名前ではなく形</strong>で互換を判定する方式</td><td class="nowrap"><a class="doclink doc05" href="05-構造的型付け.html">05.1</a></td></tr>
+			<tr><td class="nowrap">名前的型付け</td><td>型の名前が一致しないと互換にならない方式（Java・C#）</td><td class="nowrap"><a class="doclink doc05" href="05-構造的型付け.html">05.1</a></td></tr>
+			<tr><td class="nowrap">余剰プロパティチェック</td><td>オブジェクトリテラルを直接書いたときだけ、余分なプロパティを弾く仕組み</td><td class="nowrap"><a class="doclink doc05" href="05-構造的型付け.html">05.2</a></td></tr>
+			<tr><td class="nowrap">ブランド型</td><td>実体のない目印を足して、同じ形の型を区別する手法</td><td class="nowrap"><a class="doclink doc05" href="05-構造的型付け.html">05.4</a></td></tr>
+			<tr><td class="nowrap">型アサーション</td><td><code>as</code>。<strong>検査を黙らせるだけ</strong>で、値は変わらない</td><td class="nowrap"><a class="doclink doc06" href="06-any-unknown-アサーション.html">06.3</a></td></tr>
+			<tr><td class="nowrap">絞り込み（narrowing）</td><td>条件分岐によって、その位置での型が狭まること</td><td class="nowrap"><a class="doclink doc08" href="08-型の絞り込み.html">08.1</a></td></tr>
+			<tr><td class="nowrap">判別可能ユニオン</td><td>共通のキーに別々のリテラル型を持たせた union</td><td class="nowrap"><a class="doclink doc08" href="08-型の絞り込み.html">08.3</a></td></tr>
+			<tr><td class="nowrap">型ガード</td><td><code>v is T</code> を返す関数。絞り込みを関数に切り出す</td><td class="nowrap"><a class="doclink doc08" href="08-型の絞り込み.html">08.4</a></td></tr>
+			<tr><td class="nowrap">網羅性チェック</td><td><code>never</code> を使い、分岐の漏れをコンパイル時に検出する手法</td><td class="nowrap"><a class="doclink doc08" href="08-型の絞り込み.html">08.5</a></td></tr>
+			<tr><td class="nowrap">変性（共変・反変）</td><td>ある型の代わりに、広い／狭い型を使えるかの規則</td><td class="nowrap"><a class="doclink doc09" href="09-ジェネリクス.html">09.4</a></td></tr>
+			<tr><td class="nowrap">ESM / CJS</td><td>2つのモジュール方式。<code>package.json</code> の <code>"type"</code> が決める</td><td class="nowrap"><a class="doclink doc10" href="10-モジュールと宣言ファイル.html">10.2</a></td></tr>
+			<tr><td class="nowrap">宣言ファイル（<code>.d.ts</code>）</td><td>型だけを書いたファイル。実装は含まない</td><td class="nowrap"><a class="doclink doc10" href="10-モジュールと宣言ファイル.html">10.3</a></td></tr>
+			<tr><td class="nowrap">型ストリップ</td><td>型注釈を取り除くだけで実行する方式。Node が採用</td><td class="nowrap"><a class="doclink doc02" href="02-実行環境.html">02.3</a></td></tr>
+			<tr><td class="nowrap">Mapped Types</td><td>既存の型のキーを回して新しい型を作る記法</td><td class="nowrap"><a class="doclink doc16" href="A4-型レベルプログラミング.html">A4.2</a></td></tr>
+			<tr><td class="nowrap">Conditional Types</td><td>条件によって結果が変わる型（<code>T extends U ? X : Y</code>）</td><td class="nowrap"><a class="doclink doc16" href="A4-型レベルプログラミング.html">A4.3</a></td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A3. 実務パターン集 — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（5章 / 刻み 70） */
+.ch01 { --accent: hsl(280,78%,25%); --accent2: hsl(280,58%,55%); --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(210,78%,25%); --accent2: hsl(210,58%,55%); --soft: hsl(210,28%,95%); }
+.ch03 { --accent: hsl(140,78%,25%); --accent2: hsl(140,58%,55%); --soft: hsl(140,28%,95%); }
+.ch04 { --accent: hsl(70,78%,25%);  --accent2: hsl(70,58%,55%);  --soft: hsl(70,28%,95%); }
+.ch05 { --accent: hsl(0,78%,25%);   --accent2: hsl(0,58%,55%);   --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "A3." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "A3." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>A3. 実務パターン集</h1>
+		<p class="lead">そのまま貼って使えるコードのまとまり</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この付録の使い方</h2>
+	<ul>
+		<li><strong>「こういう<em>処理</em>を書きたい」</strong>から引きます</li>
+		<li>型の断片だけが欲しいときは <a class="doclink doc14" href="A2-型レシピ集.html">A2. 型レシピ集</a> を見てください</li>
+		<li>すべて <strong>Node で実際に動かしたコード</strong>です</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>パターン一覧</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">JSON を読んで検証する</a></li>
+		<li class="ch02"><a href="#c2">環境変数を型付きで読む</a></li>
+		<li class="ch03"><a href="#c3">API クライアント</a></li>
+		<li class="ch04"><a href="#c4">CLI 引数を解析する</a></li>
+		<li class="ch05"><a href="#c5">ファイル操作とエラー処理</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>A3.1 JSON を読んで検証する</h1>
+
+	<p><strong>外部から来るデータは、型を書いただけでは守られません。</strong>受け口で検証します。</p>
+
+<pre><code>// load-json.ts
+import { readFileSync } from "node:fs";
+
+type Result&lt;T, E = Error&gt; = { ok: true; value: T } | { ok: false; error: E };
+
+type Sale = { date: string; product: string; amount: number };
+
+function isSale(v: unknown): v is Sale {
+	if (typeof v !== "object" || v === null) return false;
+	const o = v as Record&lt;string, unknown&gt;;
+	return (
+		typeof o.date === "string" &amp;&amp;
+		typeof o.product === "string" &amp;&amp;
+		typeof o.amount === "number"
+	);
+}
+
+export function loadSales(path: string): Result&lt;Sale[]&gt; {
+	let text: string;
+	try {
+		text = readFileSync(path, "utf8");
+	} catch {
+		return { ok: false, error: new Error(`ファイルを読めません: ${path}`) };
+	}
+
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(text);
+	} catch {
+		return { ok: false, error: new Error(`JSON として読めません: ${path}`) };
+	}
+
+	if (!Array.isArray(parsed)) {
+		return { ok: false, error: new Error("配列ではありません") };
+	}
+
+	const rows: Sale[] = [];
+	for (let i = 0; i &lt; parsed.length; i++) {
+		const row: unknown = parsed[i];
+		if (!isSale(row)) {
+			return { ok: false, error: new Error(`${i} 件目の形式が不正です`) };
+		}
+		rows.push(row);
+	}
+	return { ok: true, value: rows };
+}</code></pre>
+
+	<figure>
+		<svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="外部データが型の付いた値になるまで">
+			<defs>
+				<linearGradient id="g-a3-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-a3-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-a3-1c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-a3-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="16" y="60" width="150" height="60" rx="8" fill="url(#g-a3-1a)"/>
+			<text x="91" y="84" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">ファイル</text>
+			<text x="91" y="103" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">中身は不明</text>
+
+			<rect x="206" y="60" width="150" height="60" rx="8" fill="url(#g-a3-1b)"/>
+			<text x="281" y="84" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">文字列</text>
+			<text x="281" y="103" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">readFileSync</text>
+
+			<rect x="396" y="60" width="150" height="60" rx="8" fill="url(#g-a3-1b)"/>
+			<text x="471" y="84" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">unknown</text>
+			<text x="471" y="103" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">JSON.parse</text>
+
+			<rect x="586" y="60" width="150" height="60" rx="8" fill="url(#g-a3-1b)"/>
+			<text x="661" y="84" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">unknown[]</text>
+			<text x="661" y="103" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">Array.isArray</text>
+
+			<rect x="746" y="60" width="140" height="60" rx="8" fill="url(#g-a3-1c)"/>
+			<text x="816" y="84" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">Sale[]</text>
+			<text x="816" y="103" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">isSale で1件ずつ</text>
+
+			<path d="M166,90 L198,90" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-a3-1)"/>
+			<path d="M356,90 L388,90" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-a3-1)"/>
+			<path d="M546,90 L578,90" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-a3-1)"/>
+			<path d="M736,90 L740,90" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-a3-1)"/>
+
+			<text x="281" y="146" text-anchor="middle" fill="#a51f22" font-size="12" font-family="sans-serif">読めない</text>
+			<text x="471" y="146" text-anchor="middle" fill="#a51f22" font-size="12" font-family="sans-serif">JSON でない</text>
+			<text x="661" y="146" text-anchor="middle" fill="#a51f22" font-size="12" font-family="sans-serif">配列でない</text>
+			<text x="816" y="146" text-anchor="middle" fill="#a51f22" font-size="12" font-family="sans-serif">形が違う</text>
+
+			<path d="M281,124 L281,140" stroke="#a51f22" stroke-width="1.5" fill="none"/>
+			<path d="M471,124 L471,140" stroke="#a51f22" stroke-width="1.5" fill="none"/>
+			<path d="M661,124 L661,140" stroke="#a51f22" stroke-width="1.5" fill="none"/>
+			<path d="M816,124 L816,140" stroke="#a51f22" stroke-width="1.5" fill="none"/>
+
+			<rect x="206" y="164" width="680" height="34" rx="6" fill="#fdf0f0" stroke="#e0a0a0"/>
+			<text x="546" y="186" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">失敗の種類ごとに別のメッセージで Result を返す</text>
+
+			<text x="450" y="228" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">4段の関門をすべて通ったものだけが Sale[] になる</text>
+		</svg>
+		<figcaption>図 1 — 外部データが型の付いた値になるまでの4段階。各段で失敗の種類が違う</figcaption>
+	</figure>
+
+	<div class="callout">
+		<p><strong>ポイント3つ</strong></p>
+		<ul>
+			<li><code>JSON.parse</code> の戻り値を <strong><code>unknown</code> で受ける</strong>（<code>any</code> のまま使わない）</li>
+			<li><code>readFileSync</code> と <code>JSON.parse</code> を<strong>別々に <code>try</code> で囲む</strong>（原因を区別するため）</li>
+			<li>不正な行は<strong>何件目か</strong>を返す（デバッグにかかる時間が変わる）</li>
+		</ul>
+	</div>
+
+	<h2>スキーマ検証ライブラリを使う場合</h2>
+
+	<p>プロパティが増えると手書きは維持できません。<strong>実務では zod などを使います。</strong></p>
+
+<pre><code>import { z } from "zod";
+
+const SaleSchema = z.object({
+	date: z.string(),
+	product: z.string(),
+	amount: z.number(),
+});
+
+type Sale = z.infer&lt;typeof SaleSchema&gt;;      // 型はスキーマから生成される
+
+const result = SaleSchema.array().safeParse(JSON.parse(text));
+if (!result.success) {
+	console.error(result.error.issues);
+}</code></pre>
+
+	<p><strong>型定義と検証を1か所で書けます。</strong>手書きの型ガードと違い、<strong>型と検証がずれません。</strong></p>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>A3.2 環境変数を型付きで読む</h1>
+
+	<p><code>process.env.X</code> の型は <code>string | undefined</code> です。<strong>起動時にまとめて検証</strong>し、以降は型の付いた値だけを使います。</p>
+
+<pre><code>// env.ts
+function required(name: string): string {
+	const v = process.env[name];
+	if (v === undefined || v === "") {
+		throw new Error(`環境変数 ${name} が設定されていません`);
+	}
+	return v;
+}
+
+function optional(name: string, fallback: string): string {
+	const v = process.env[name];
+	return v === undefined || v === "" ? fallback : v;
+}
+
+function asPort(name: string, fallback: number): number {
+	const v = process.env[name];
+	if (v === undefined || v === "") return fallback;
+	const n = Number(v);
+	if (!Number.isInteger(n) || n &lt; 1 || n &gt; 65535) {
+		throw new Error(`環境変数 ${name} がポート番号として不正です: ${v}`);
+	}
+	return n;
+}
+
+export const ENV = {
+	nodeEnv: optional("NODE_ENV", "development"),
+	port: asPort("PORT", 3000),
+	// databaseUrl: required("DATABASE_URL"),
+} as const;</code></pre>
+
+	<div class="callout">
+		<p><strong>アプリの奥で <code>process.env</code> を直接読まないでください。</strong></p>
+		<p>読む場所が散らばると、<strong>どの環境変数が必要なのか分からなくなります。</strong>この <code>env.ts</code> を1か所に置き、<strong>起動時に落とす</strong>ようにすると、設定漏れが実行直後に分かります。</p>
+		<p><code>process.env.PORT!</code> のように <code>!</code> で黙らせるのは<strong>最悪の対処</strong>です（<a class="doclink doc06" href="06-any-unknown-アサーション.html">06.4</a>）。未設定なら <code>undefined</code> のまま先に進み、原因の分からないエラーになります。</p>
+	</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>A3.3 API クライアント</h1>
+
+	<p><code>fetch</code> の戻り値も検証が要ります。<strong><code>response.json()</code> は <code>any</code> を返します。</strong></p>
+
+<pre><code>// api.ts
+type Result&lt;T, E = Error&gt; = { ok: true; value: T } | { ok: false; error: E };
+
+type ApiError =
+	| { kind: "network"; cause: unknown }
+	| { kind: "status"; status: number }
+	| { kind: "shape"; detail: string };
+
+export async function getJson&lt;T&gt;(
+	url: string,
+	isValid: (v: unknown) =&gt; v is T,
+): Promise&lt;Result&lt;T, ApiError&gt;&gt; {
+	let res: Response;
+	try {
+		res = await fetch(url);
+	} catch (cause) {
+		return { ok: false, error: { kind: "network", cause } };
+	}
+
+	if (!res.ok) {
+		return { ok: false, error: { kind: "status", status: res.status } };
+	}
+
+	const body: unknown = await res.json();
+	if (!isValid(body)) {
+		return { ok: false, error: { kind: "shape", detail: "想定した形ではありません" } };
+	}
+	return { ok: true, value: body };
+}</code></pre>
+
+	<h3>使う側</h3>
+
+<pre><code>type User = { id: string; name: string };
+
+function isUser(v: unknown): v is User {
+	if (typeof v !== "object" || v === null) return false;
+	const o = v as Record&lt;string, unknown&gt;;
+	return typeof o.id === "string" &amp;&amp; typeof o.name === "string";
+}
+
+const r = await getJson("https://example.com/api/user/1", isUser);
+if (r.ok) {
+	console.log(r.value.name);
+} else {
+	switch (r.error.kind) {
+		case "network": console.error("通信に失敗しました"); break;
+		case "status":  console.error(`HTTP ${r.error.status}`); break;
+		case "shape":   console.error(r.error.detail); break;
+	}
+}</code></pre>
+
+	<div class="callout">
+		<p><strong>型引数 <code>&lt;T&gt;</code> だけを渡す設計にしないでください。</strong></p>
+<pre><code>// 危険 — 検証していないのに型が付く
+const user = await getJson&lt;User&gt;(url);</code></pre>
+		<p>これは <code>as User</code> と同じです（<a class="doclink doc09" href="09-ジェネリクス.html">09.3</a>）。<strong>検証関数を引数で受け取る</strong>形にすると、型と検証がセットになります。</p>
+	</div>
+
+	<h3>タイムアウトを付ける</h3>
+
+<pre><code>const controller = new AbortController();
+const timer = setTimeout(() =&gt; controller.abort(), 5000);
+try {
+	const res = await fetch(url, { signal: controller.signal });
+	// ...
+} finally {
+	clearTimeout(timer);
+}</code></pre>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>A3.4 CLI 引数を解析する</h1>
+
+	<p>Node には <code>parseArgs</code> が標準で入っています。<strong>ライブラリを足す必要はありません。</strong></p>
+
+<pre><code>// cli.ts
+import { parseArgs } from "node:util";
+
+const { values, positionals } = parseArgs({
+	options: {
+		input:   { type: "string",  short: "i" },
+		verbose: { type: "boolean", short: "v", default: false },
+		count:   { type: "string",  default: "1" },
+	},
+	allowPositionals: true,
+});
+
+// values.input は string | undefined
+if (values.input === undefined) {
+	console.error("使い方: cli.ts --input &lt;ファイル&gt; [--verbose] [--count N]");
+	process.exit(1);
+}
+
+const count = Number(values.count);
+if (!Number.isInteger(count) || count &lt; 1) {
+	console.error(`--count は 1 以上の整数で指定してください: ${values.count}`);
+	process.exit(1);
+}
+
+console.log({ input: values.input, verbose: values.verbose, count, positionals });</code></pre>
+
+<pre><code>$ npx tsx cli.ts --input data.json -v --count 3 extra
+{ input: 'data.json', verbose: true, count: 3, positionals: [ 'extra' ] }</code></pre>
+
+	<div class="callout">
+		<p><strong><code>parseArgs</code> は数値型を扱えません。</strong></p>
+		<p><code>type</code> に指定できるのは <code>"string"</code> と <code>"boolean"</code> だけです。<strong>数値は文字列で受けて、自分で変換・検証します。</strong>ここで検証しておくと、以降のコードは数値として扱えます。</p>
+	</div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="ch05" id="c5">
+	<h1>A3.5 ファイル操作とエラー処理</h1>
+
+	<h3>存在確認は「読んでみる」</h3>
+
+<pre><code>import { readFile } from "node:fs/promises";
+
+// 悪い例 — 確認と読み込みの間に状態が変わりうる
+// if (existsSync(path)) { const text = await readFile(path, "utf8"); }
+
+// よい例 — 読んでみて失敗を扱う
+async function readTextOrNull(path: string): Promise&lt;string | null&gt; {
+	try {
+		return await readFile(path, "utf8");
+	} catch (e) {
+		if (isNotFound(e)) return null;
+		throw e;                      // それ以外は握りつぶさない
+	}
+}
+
+function isNotFound(e: unknown): boolean {
+	return typeof e === "object" &amp;&amp; e !== null &amp;&amp;
+		(e as { code?: unknown }).code === "ENOENT";
+}</code></pre>
+
+	<div class="callout">
+		<p><strong>Node のエラーは <code>code</code> プロパティを持ちます。</strong></p>
+		<p><code>Error</code> の型定義には <code>code</code> がないため、<strong>そのままでは読めません。</strong>上のように型ガードを書くか、<code>NodeJS.ErrnoException</code> を使います。<strong>「エラーの種類で分岐する」ときは <code>code</code> を見ます</strong>（メッセージ文字列で判定しない）。</p>
+	</div>
+
+	<h3>よく使う code</h3>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">code</th><th>意味</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>ENOENT</code></td><td>ファイル・ディレクトリが存在しない</td></tr>
+			<tr><td class="nowrap"><code>EACCES</code></td><td>権限がない</td></tr>
+			<tr><td class="nowrap"><code>EISDIR</code></td><td>ディレクトリをファイルとして開こうとした</td></tr>
+			<tr><td class="nowrap"><code>EEXIST</code></td><td>すでに存在する</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h3>書き込みは一時ファイル経由</h3>
+
+<pre><code>import { writeFile, rename } from "node:fs/promises";
+
+// 書き込み中に落ちても、元のファイルが壊れない
+async function writeAtomic(path: string, text: string): Promise&lt;void&gt; {
+	const tmp = `${path}.tmp`;
+	await writeFile(tmp, text, "utf8");
+	await rename(tmp, path);
+}</code></pre>
+
+	<h3>エラーの原因を保つ</h3>
+
+<pre><code>try {
+	await readFile(path, "utf8");
+} catch (e) {
+	// cause を渡すと、元のエラーが失われない
+	throw new Error(`設定ファイルを読めません: ${path}`, { cause: e });
+}</code></pre>
+
+	<div class="callout">
+		<p><strong><code>{ cause: e }</code> は必ず付けてください。</strong></p>
+		<p>付けないと<strong>元のエラーの情報（<code>code</code>・スタックトレース）が失われます。</strong>「設定ファイルを読めません」とだけ言われても、権限の問題なのか存在しないのか分かりません。</p>
+	</div>
+
+	<h3>まとめ</h3>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>場面</th><th>やること</th></tr>
+		</thead>
+		<tbody>
+			<tr><td>外部データを受け取る</td><td><code>unknown</code> で受けて<strong>検証してから</strong>使う</td></tr>
+			<tr><td>環境変数</td><td><strong>起動時に1か所で検証</strong>し、以降は型付きの値を使う</td></tr>
+			<tr><td>API 呼び出し</td><td>検証関数を引数で渡す。<strong>型引数だけの指定は <code>as</code> と同じ</strong></td></tr>
+			<tr><td>CLI 引数</td><td><code>node:util</code> の <code>parseArgs</code>。<strong>数値は自分で変換・検証</strong></td></tr>
+			<tr><td>ファイル操作</td><td>存在確認より<strong>読んでみて失敗を扱う</strong>。<code>code</code> で分岐し、<code>cause</code> を残す</td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>

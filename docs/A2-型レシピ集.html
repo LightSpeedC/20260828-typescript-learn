@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2. 型レシピ集 — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（5章 / 刻み 70） */
+.ch01 { --accent: hsl(280,78%,25%); --accent2: hsl(280,58%,55%); --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(210,78%,25%); --accent2: hsl(210,58%,55%); --soft: hsl(210,28%,95%); }
+.ch03 { --accent: hsl(140,78%,25%); --accent2: hsl(140,58%,55%); --soft: hsl(140,28%,95%); }
+.ch04 { --accent: hsl(70,78%,25%);  --accent2: hsl(70,58%,55%);  --soft: hsl(70,28%,95%); }
+.ch05 { --accent: hsl(0,78%,25%);   --accent2: hsl(0,58%,55%);   --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "A2." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "A2." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>A2. 型レシピ集</h1>
+		<p class="lead">コピーして使う型定義の断片 ／ 1レシピ20行以内</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この付録の使い方</h2>
+	<ul>
+		<li><strong>「こういう<em>型</em>を書きたい」</strong>から引きます</li>
+		<li>処理ごとまとめて欲しいときは <a class="doclink doc15" href="A3-実務パターン集.html">A3. 実務パターン集</a> を見てください</li>
+		<li>すべて <strong><code>strict</code> で型検査を通したコード</strong>です</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>レシピ一覧</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">Result 型 — 失敗を戻り値で返す</a></li>
+		<li class="ch02"><a href="#c2">型ガード関数 — 外部データを確かめる</a></li>
+		<li class="ch03"><a href="#c3">設定オブジェクト型</a></li>
+		<li class="ch04"><a href="#c4">ブランド型 — 同じ形を区別する</a></li>
+		<li class="ch05"><a href="#c5">部分更新と読み取り専用</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>A2.1 Result 型 — 失敗を戻り値で返す</h1>
+
+<pre><code>type Result&lt;T, E = Error&gt; =
+	| { ok: true; value: T }
+	| { ok: false; error: E };
+
+// 生成を短く書くための補助
+const ok = &lt;T&gt;(value: T): Result&lt;T, never&gt; =&gt; ({ ok: true, value });
+const err = &lt;E&gt;(error: E): Result&lt;never, E&gt; =&gt; ({ ok: false, error });</code></pre>
+
+	<h3>使い方</h3>
+
+<pre><code>function parsePort(s: string): Result&lt;number&gt; {
+	const n = Number(s);
+	if (!Number.isInteger(n)) return err(new Error(`整数ではありません: ${s}`));
+	if (n &lt; 1 || n &gt; 65535) return err(new Error(`範囲外です: ${n}`));
+	return ok(n);
+}
+
+const r = parsePort("3000");
+if (r.ok) {
+	console.log(r.value);       // number
+} else {
+	console.error(r.error.message);
+}</code></pre>
+
+	<div class="callout">
+		<p><strong>使いどころ:</strong> 失敗が想定内で、呼ぶ側に対処を強制したいとき。<strong>外部入力の検証</strong>や<strong>ライブラリの境界</strong>に向きます。</p>
+		<p><strong>落とし穴:</strong> すべての関数に使うと分岐だらけになります。<strong>境界で使い、内側は例外</strong>が実務的です（<a class="doclink doc11" href="11-非同期とエラー処理.html">11.4</a>）。</p>
+	</div>
+
+	<h3>エラーの種類を型で区別する</h3>
+
+<pre><code>type LoadError =
+	| { kind: "not-found"; path: string }
+	| { kind: "invalid-json"; path: string }
+	| { kind: "invalid-shape"; index: number };
+
+function load(path: string): Result&lt;string[], LoadError&gt; { /* ... */ }
+
+const r = load("data.json");
+if (!r.ok) {
+	switch (r.error.kind) {
+		case "not-found":     console.error(`ファイルがありません: ${r.error.path}`); break;
+		case "invalid-json":  console.error(`JSON が壊れています: ${r.error.path}`); break;
+		case "invalid-shape": console.error(`${r.error.index} 件目が不正です`); break;
+	}
+}</code></pre>
+
+	<p><strong>エラーも判別可能ユニオンにする</strong>と、対処の網羅性を検査できます（<a class="doclink doc08" href="08-型の絞り込み.html">08.5</a>）。</p>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>A2.2 型ガード関数 — 外部データを確かめる</h1>
+
+	<h3>オブジェクトの形を確かめる</h3>
+
+<pre><code>type User = { name: string; age: number };
+
+function isUser(v: unknown): v is User {
+	if (typeof v !== "object" || v === null) return false;
+	const o = v as Record&lt;string, unknown&gt;;
+	return typeof o.name === "string" &amp;&amp; typeof o.age === "number";
+}</code></pre>
+
+	<h3>配列を確かめる</h3>
+
+<pre><code>function isArrayOf&lt;T&gt;(v: unknown, isItem: (x: unknown) =&gt; x is T): v is T[] {
+	return Array.isArray(v) &amp;&amp; v.every(isItem);
+}
+
+const data: unknown = JSON.parse(text);
+if (isArrayOf(data, isUser)) {
+	console.log(data.length);     // User[]
+}</code></pre>
+
+	<h3>undefined を除く（filter で型を絞る）</h3>
+
+<pre><code>function isDefined&lt;T&gt;(v: T | undefined | null): v is T {
+	return v !== undefined &amp;&amp; v !== null;
+}
+
+const values: (string | undefined)[] = ["a", undefined, "b"];
+const filtered = values.filter(isDefined);      // string[]</code></pre>
+
+	<h3>リテラルの union を確かめる</h3>
+
+<pre><code>const STATUSES = ["pending", "active", "closed"] as const;
+type Status = (typeof STATUSES)[number];        // "pending" | "active" | "closed"
+
+function isStatus(v: unknown): v is Status {
+	return typeof v === "string" &amp;&amp; (STATUSES as readonly string[]).includes(v);
+}</code></pre>
+
+	<div class="callout">
+		<p><strong><code>(typeof ARRAY)[number]</code> は覚えておくと便利です。</strong></p>
+		<p>配列の値から union 型を作れるため、<strong>値の一覧と型の一覧が二重管理になりません。</strong>要素を足せば型も自動で増えます。</p>
+	</div>
+
+	<div class="callout">
+		<p><strong>落とし穴:</strong> 型ガードの中身は<strong>検査されません</strong>（<a class="doclink doc08" href="08-型の絞り込み.html">08.4</a>）。<code>return true;</code> と書いても通ります。プロパティが増えたら<strong>ガードも直す必要があります。</strong>数が増えたら zod などのスキーマ検証ライブラリを検討してください。</p>
+	</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>A2.3 設定オブジェクト型</h1>
+
+	<h3>satisfies で型を確かめつつ具体的な型を残す</h3>
+
+<pre><code>type Config = {
+	host: string;
+	port: number;
+	features: readonly string[];
+};
+
+export const CONFIG = {
+	host: "localhost",
+	port: 3000,
+	features: ["auth", "logging"],
+} as const satisfies Config;
+
+// CONFIG.port の型は 3000（number ではない）
+// CONFIG.features[0] の型は "auth"</code></pre>
+
+	<div class="callout">
+		<p><strong><code>as Config</code> ではなく <code>satisfies Config</code> を使ってください。</strong></p>
+		<p><code>as</code> だと具体的な型が失われ、<code>port</code> は <code>number</code> になります。<code>satisfies</code> なら<strong>検査もされるし、リテラル型も残ります</strong>（<a class="doclink doc06" href="06-any-unknown-アサーション.html">06.3</a>）。</p>
+	</div>
+
+	<h3>省略可能な項目に既定値を与える</h3>
+
+<pre><code>type Options = {
+	host?: string;
+	port?: number;
+	timeout?: number;
+};
+
+// 内部で使う「すべて埋まった」形
+type ResolvedOptions = Required&lt;Options&gt;;
+
+const DEFAULTS: ResolvedOptions = {
+	host: "localhost",
+	port: 3000,
+	timeout: 5000,
+};
+
+function resolve(opts: Options = {}): ResolvedOptions {
+	return { ...DEFAULTS, ...opts };
+}</code></pre>
+
+	<div class="callout">
+		<p><strong><code>{ ...DEFAULTS, ...opts }</code> には落とし穴があります。</strong></p>
+		<p><code>opts.port</code> が<strong>明示的に <code>undefined</code></strong> だと、既定値を上書きして <code>undefined</code> になります。厳密にやるなら1項目ずつ <code>??</code> で埋めてください。</p>
+<pre><code>function resolve(opts: Options = {}): ResolvedOptions {
+	return {
+		host: opts.host ?? DEFAULTS.host,
+		port: opts.port ?? DEFAULTS.port,
+		timeout: opts.timeout ?? DEFAULTS.timeout,
+	};
+}</code></pre>
+	</div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>A2.4 ブランド型 — 同じ形を区別する</h1>
+
+<pre><code>declare const brand: unique symbol;
+type Brand&lt;T, B extends string&gt; = T &amp; { readonly [brand]: B };
+
+type UserId = Brand&lt;string, "UserId"&gt;;
+type OrderId = Brand&lt;string, "OrderId"&gt;;
+type Positive = Brand&lt;number, "Positive"&gt;;</code></pre>
+
+	<h3>生成関数とセットにする</h3>
+
+<pre><code>function toUserId(s: string): UserId {
+	if (!s.startsWith("user-")) throw new Error(`UserId の形式が不正です: ${s}`);
+	return s as UserId;
+}
+
+function toPositive(n: number): Positive {
+	if (!(n &gt; 0)) throw new Error(`正の数ではありません: ${n}`);
+	return n as Positive;
+}
+
+function getUser(id: UserId) { /* ... */ }
+
+getUser(toUserId("user-001"));      // OK
+getUser("user-001");                // エラー TS2345（as を通していない）</code></pre>
+
+	<div class="callout">
+		<p><strong>使いどころ:</strong> 取り違えると実害が出るもの。<strong>ID の種類・検証済みかどうか・単位の違う数値</strong>。</p>
+		<p><strong>落とし穴:</strong> すべての <code>string</code> に付けると変換だらけになります。<strong>実行時のコストはゼロ</strong>ですが、読みやすさのコストはあります（<a class="doclink doc05" href="05-構造的型付け.html">05.4</a>）。</p>
+	</div>
+
+	<h3>検証済みを型で表す</h3>
+
+<pre><code>type RawInput = Brand&lt;string, "RawInput"&gt;;
+type SafeHtml = Brand&lt;string, "SafeHtml"&gt;;
+
+function escapeHtml(s: RawInput): SafeHtml {
+	return s
+		.replace(/&amp;/g, "&amp;amp;")
+		.replace(/&lt;/g, "&amp;lt;")
+		.replace(/&gt;/g, "&amp;gt;") as SafeHtml;
+}
+
+function render(html: SafeHtml) { /* ... */ }
+// エスケープを通していない文字列は render に渡せない</code></pre>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="ch05" id="c5">
+	<h1>A2.5 部分更新と読み取り専用</h1>
+
+	<h3>更新用の型</h3>
+
+<pre><code>type User = { id: string; name: string; age: number };
+
+// id 以外を省略可能にした更新用の型
+type UserUpdate = Partial&lt;Omit&lt;User, "id"&gt;&gt;;
+
+function update(id: string, patch: UserUpdate): void { /* ... */ }
+
+update("1", { name: "Bob" });          // OK
+update("1", { id: "2" });              // エラー（id は変更できない）</code></pre>
+
+	<h3>再帰的に読み取り専用にする</h3>
+
+<pre><code>type DeepReadonly&lt;T&gt; = {
+	readonly [K in keyof T]: T[K] extends object ? DeepReadonly&lt;T[K]&gt; : T[K];
+};
+
+type Config = { db: { host: string; port: number } };
+const c: DeepReadonly&lt;Config&gt; = { db: { host: "localhost", port: 5432 } };
+
+c.db.port = 1;
+//   ~~~~
+// error TS2540: Cannot assign to 'port' because it is a read-only property.</code></pre>
+
+	<p><code>Readonly&lt;T&gt;</code> は<strong>1段階しか効きません。</strong>入れ子まで守りたいときはこの形を使います（<a class="doclink doc16" href="A4-型レベルプログラミング.html">A4.2</a>）。</p>
+
+	<h3>少なくとも1つは必須</h3>
+
+<pre><code>type AtLeastOne&lt;T&gt; = {
+	[K in keyof T]: Required&lt;Pick&lt;T, K&gt;&gt; &amp; Partial&lt;Omit&lt;T, K&gt;&gt;;
+}[keyof T];
+
+type Filter = AtLeastOne&lt;{ name: string; email: string; age: number }&gt;;
+
+const f1: Filter = { name: "Alice" };            // OK
+const f2: Filter = { name: "A", age: 30 };       // OK
+const f3: Filter = {};                           // エラー（何も指定していない）</code></pre>
+
+	<div class="callout">
+		<p><strong>この形は読みにくいので、使う前に検討してください。</strong></p>
+		<p>実行時の検証（「1つ以上指定してください」というエラー）で十分な場面が多くあります。<strong>型で禁止する価値があるか</strong>を判断してから使ってください。</p>
+	</div>
+
+	<h3>キーと値を対応させる</h3>
+
+<pre><code>type EventMap = {
+	click: { x: number; y: number };
+	key: { code: string };
+	close: undefined;
+};
+
+function emit&lt;K extends keyof EventMap&gt;(type: K, payload: EventMap[K]): void {
+	console.log(type, payload);
+}
+
+emit("click", { x: 1, y: 2 });      // OK
+emit("key", { x: 1, y: 2 });        // エラー（key の payload は { code: string }）</code></pre>
+
+	<p><strong>イベント名ごとにデータの形が違う</strong>場合に有効です（<a class="doclink doc09" href="09-ジェネリクス.html">09.2</a>）。</p>
+</section>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>

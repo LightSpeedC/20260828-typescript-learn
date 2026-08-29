@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A4. 型レベルプログラミング — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（4章 / 刻み 93.3） */
+.ch01 { --accent: hsl(280,78%,25%);   --accent2: hsl(280,58%,55%);   --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(186.7,78%,25%); --accent2: hsl(186.7,58%,55%); --soft: hsl(186.7,28%,95%); }
+.ch03 { --accent: hsl(93.3,78%,25%);  --accent2: hsl(93.3,58%,55%);  --soft: hsl(93.3,28%,95%); }
+.ch04 { --accent: hsl(0,78%,25%);     --accent2: hsl(0,58%,55%);     --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "A4." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "A4." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>A4. 型レベルプログラミング</h1>
+		<p class="lead">ライブラリの型定義を読むための道具立て</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この付録の位置づけ</h2>
+	<ul>
+		<li><strong>目標は「読めること」です。</strong>自分で書けるようになる必要はありません</li>
+		<li>ライブラリの型定義やエディタの表示に出てくる記法を、<strong>意味が分かる</strong>状態にします</li>
+		<li>実務で自分から書くのは、A4.1 のユーティリティ型と、A4.2 の簡単な Mapped Types までで足ります</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>この付録の内容</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">組み込みユーティリティ型</a></li>
+		<li class="ch02"><a href="#c2">Mapped Types — キーを回す</a></li>
+		<li class="ch03"><a href="#c3">Conditional Types と infer</a></li>
+		<li class="ch04"><a href="#c4">テンプレートリテラル型</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>A4.1 組み込みユーティリティ型</h1>
+
+	<p><strong>まずこれだけ覚えれば実務の大半は足ります。</strong></p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">型</th><th>意味</th><th>例</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>Partial&lt;T&gt;</code></td><td>すべてのプロパティを省略可能にする</td><td>更新用の型</td></tr>
+			<tr><td class="nowrap"><code>Required&lt;T&gt;</code></td><td>すべてを必須にする</td><td>既定値で埋めた後の型</td></tr>
+			<tr><td class="nowrap"><code>Readonly&lt;T&gt;</code></td><td>すべてを読み取り専用にする（<strong>1段階だけ</strong>）</td><td>設定オブジェクト</td></tr>
+			<tr><td class="nowrap"><code>Pick&lt;T, K&gt;</code></td><td>指定したキーだけ取り出す</td><td><code>Pick&lt;User, "id" | "name"&gt;</code></td></tr>
+			<tr><td class="nowrap"><code>Omit&lt;T, K&gt;</code></td><td>指定したキーを除く</td><td><code>Omit&lt;User, "password"&gt;</code></td></tr>
+			<tr><td class="nowrap"><code>Record&lt;K, V&gt;</code></td><td>キーと値の型を指定した辞書</td><td><code>Record&lt;string, number&gt;</code></td></tr>
+			<tr><td class="nowrap"><code>ReturnType&lt;F&gt;</code></td><td>関数の戻り値の型</td><td><code>ReturnType&lt;typeof f&gt;</code></td></tr>
+			<tr><td class="nowrap"><code>Parameters&lt;F&gt;</code></td><td>関数の引数の型（タプル）</td><td><code>Parameters&lt;typeof f&gt;[0]</code></td></tr>
+			<tr><td class="nowrap"><code>Awaited&lt;T&gt;</code></td><td><code>Promise</code> を剥がした型</td><td><code>Awaited&lt;ReturnType&lt;typeof load&gt;&gt;</code></td></tr>
+			<tr><td class="nowrap"><code>NonNullable&lt;T&gt;</code></td><td><code>null</code>・<code>undefined</code> を除く</td><td><code>NonNullable&lt;string \| null&gt;</code></td></tr>
+			<tr><td class="nowrap"><code>Exclude&lt;T, U&gt;</code></td><td>union から取り除く</td><td><code>Exclude&lt;Status, "closed"&gt;</code></td></tr>
+			<tr><td class="nowrap"><code>Extract&lt;T, U&gt;</code></td><td>union から取り出す</td><td><code>Extract&lt;Shape, { kind: "circle" }&gt;</code></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h3>組み合わせて使う</h3>
+
+<pre><code>type User = { id: string; name: string; password: string; age?: number };
+
+// 外部に返す形（password を除く）
+type PublicUser = Omit&lt;User, "password"&gt;;
+
+// 更新用（id 以外を省略可能に）
+type UserPatch = Partial&lt;Omit&lt;User, "id"&gt;&gt;;
+
+// 関数の戻り値から型を取る
+async function loadUser(): Promise&lt;PublicUser&gt; { /* ... */ }
+type Loaded = Awaited&lt;ReturnType&lt;typeof loadUser&gt;&gt;;     // PublicUser</code></pre>
+
+	<div class="callout">
+		<p><strong><code>Readonly&lt;T&gt;</code> は1段階しか効きません。</strong></p>
+<pre><code>type Config = Readonly&lt;{ db: { host: string } }&gt;;
+const c: Config = { db: { host: "localhost" } };
+
+c.db = { host: "x" };      // エラー（1段階目は守られる）
+c.db.host = "x";           // 通ってしまう（2段階目は守られない）</code></pre>
+		<p>入れ子まで守るには <code>DeepReadonly</code> を自分で書きます（<a class="doclink doc14" href="A2-型レシピ集.html">A2.5</a>）。</p>
+	</div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>A4.2 Mapped Types — キーを回す</h1>
+
+	<h2>基本の形</h2>
+
+<pre><code>type MyReadonly&lt;T&gt; = {
+	readonly [K in keyof T]: T[K];
+};</code></pre>
+
+	<p><strong><code>[K in keyof T]</code> は「<code>T</code> のキーをすべて回す」</strong>という意味です。<code>for...of</code> の型版だと考えてください。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">記法</th><th>意味</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>[K in keyof T]</code></td><td><code>T</code> のキーを回す。<code>K</code> が各キーの名前</td></tr>
+			<tr><td class="nowrap"><code>T[K]</code></td><td>キー <code>K</code> の値の型</td></tr>
+			<tr><td class="nowrap"><code>readonly</code> / <code>?</code></td><td>付けると全キーに適用される</td></tr>
+			<tr><td class="nowrap"><code>-readonly</code> / <code>-?</code></td><td><strong>外す</strong>（<code>Required&lt;T&gt;</code> の実装がこれ）</td></tr>
+			<tr><td class="nowrap"><code>as</code></td><td>キー名を変換する</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h3>標準のユーティリティ型はこれで書かれている</h3>
+
+<pre><code>type Partial&lt;T&gt;  = { [K in keyof T]?: T[K] };
+type Required&lt;T&gt; = { [K in keyof T]-?: T[K] };      // ? を外す
+type Readonly&lt;T&gt; = { readonly [K in keyof T]: T[K] };
+type Pick&lt;T, K extends keyof T&gt; = { [P in K]: T[P] };
+type Record&lt;K extends keyof any, V&gt; = { [P in K]: V };</code></pre>
+
+	<h3>キー名を変換する</h3>
+
+<pre><code>type Getters&lt;T&gt; = {
+	[K in keyof T as `get${Capitalize&lt;string &amp; K&gt;}`]: () =&gt; T[K];
+};
+
+type User = { name: string; age: number };
+type UserGetters = Getters&lt;User&gt;;
+// { getName: () =&gt; string; getAge: () =&gt; number }</code></pre>
+
+	<h3>値の型でキーを絞る</h3>
+
+<pre><code>// 関数のプロパティだけを抜き出す
+type FunctionKeys&lt;T&gt; = {
+	[K in keyof T]: T[K] extends (...args: never[]) =&gt; unknown ? K : never;
+}[keyof T];
+
+type Api = { load(): void; name: string; save(): void };
+type Methods = FunctionKeys&lt;Api&gt;;      // "load" | "save"</code></pre>
+
+	<div class="callout">
+		<p><strong><code>{ ... }[keyof T]</code> という形を覚えてください。</strong></p>
+		<p>「各キーに対して型を作り、最後に全部を union にする」という意味です。<code>never</code> は union の中で<strong>消える</strong>ため、条件に合わないキーが除かれます。<strong>この形はライブラリの型定義で頻出します。</strong></p>
+	</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>A4.3 Conditional Types と infer</h1>
+
+	<h2>型の if 文</h2>
+
+<pre><code>type IsString&lt;T&gt; = T extends string ? "はい" : "いいえ";
+
+type A = IsString&lt;"abc"&gt;;      // "はい"
+type B = IsString&lt;123&gt;;        // "いいえ"</code></pre>
+
+	<p><code>T extends U ? X : Y</code> は<strong>「<code>T</code> が <code>U</code> に代入できるなら <code>X</code>、できなければ <code>Y</code>」</strong>です。</p>
+
+	<h2>union は分配される</h2>
+
+<pre><code>type ToArray&lt;T&gt; = T extends unknown ? T[] : never;
+
+type R = ToArray&lt;string | number&gt;;
+// string[] | number[]   （(string | number)[] ではない）</code></pre>
+
+	<div class="callout">
+		<p><strong>型引数が裸の union だと、1つずつに分配されます。</strong></p>
+		<p>これが <code>Exclude</code> や <code>NonNullable</code> の仕組みです。</p>
+<pre><code>type Exclude&lt;T, U&gt; = T extends U ? never : T;
+
+type S = Exclude&lt;"a" | "b" | "c", "b"&gt;;
+// "a" | never | "c"  →  never は消えるので "a" | "c"</code></pre>
+		<p>分配してほしくないときは <code>[T] extends [U]</code> と角括弧で囲みます。</p>
+	</div>
+
+	<h2>infer — 型の一部を取り出す</h2>
+
+<pre><code>type ElementOf&lt;T&gt; = T extends (infer U)[] ? U : never;
+
+type E = ElementOf&lt;string[]&gt;;      // string</code></pre>
+
+	<p><strong><code>infer U</code> は「ここに当てはまる型を <code>U</code> という名前で捕まえる」</strong>という意味です。正規表現のキャプチャに似ています。</p>
+
+	<h3>標準の型もこれで書かれている</h3>
+
+<pre><code>type ReturnType&lt;T&gt; = T extends (...args: never[]) =&gt; infer R ? R : never;
+type Parameters&lt;T&gt; = T extends (...args: infer P) =&gt; unknown ? P : never;
+type Awaited&lt;T&gt; = T extends Promise&lt;infer U&gt; ? Awaited&lt;U&gt; : T;   // 再帰する</code></pre>
+
+	<h3>実務で書く例</h3>
+
+<pre><code>// 判別可能ユニオンから特定の1つを取り出す
+type Shape =
+	| { kind: "circle"; radius: number }
+	| { kind: "rect"; width: number; height: number };
+
+type ShapeOf&lt;K extends Shape["kind"]&gt; = Extract&lt;Shape, { kind: K }&gt;;
+
+type Circle = ShapeOf&lt;"circle"&gt;;      // { kind: "circle"; radius: number }
+
+function area(s: ShapeOf&lt;"circle"&gt;): number {
+	return Math.PI * s.radius ** 2;
+}</code></pre>
+
+	<div class="callout">
+		<p><strong>ここまでが実用の範囲です。</strong></p>
+		<p>これ以上（型レベルでの再帰・文字列の分解・算術）は、<strong>ライブラリを書く人の領域</strong>です。アプリケーションのコードで必要になることはほとんどありません。読めれば十分です。</p>
+	</div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>A4.4 テンプレートリテラル型</h1>
+
+	<h2>文字列を型として組み立てる</h2>
+
+<pre><code>type Prefixed = `user-${string}`;
+
+const a: Prefixed = "user-001";      // OK
+const b: Prefixed = "order-001";     // エラー TS2322</code></pre>
+
+	<h2>union と組み合わせると展開される</h2>
+
+<pre><code>type Lang = "ja" | "en";
+type Page = "home" | "about";
+
+type Path = `/${Lang}/${Page}`;
+// "/ja/home" | "/ja/about" | "/en/home" | "/en/about"</code></pre>
+
+	<h2>文字列操作の組み込み型</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">型</th><th>働き</th><th>例</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>Uppercase&lt;S&gt;</code></td><td>大文字に</td><td><code>"abc"</code> → <code>"ABC"</code></td></tr>
+			<tr><td class="nowrap"><code>Lowercase&lt;S&gt;</code></td><td>小文字に</td><td><code>"ABC"</code> → <code>"abc"</code></td></tr>
+			<tr><td class="nowrap"><code>Capitalize&lt;S&gt;</code></td><td>先頭だけ大文字に</td><td><code>"abc"</code> → <code>"Abc"</code></td></tr>
+			<tr><td class="nowrap"><code>Uncapitalize&lt;S&gt;</code></td><td>先頭だけ小文字に</td><td><code>"ABC"</code> → <code>"aBC"</code></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>実務で見かける例</h2>
+
+<pre><code>// イベント名の規約を型で表す
+type EventName = `on${Capitalize&lt;"click" | "focus"&gt;}`;
+// "onClick" | "onFocus"
+
+// 環境変数の接頭辞
+type PublicEnvKey = `PUBLIC_${Uppercase&lt;string&gt;}`;
+
+// CSS のプロパティ
+type Margin = `margin${"" | "Top" | "Right" | "Bottom" | "Left"}`;
+// "margin" | "marginTop" | "marginRight" | "marginBottom" | "marginLeft"</code></pre>
+
+	<div class="callout">
+		<p><strong>組み合わせの数に注意してください。</strong></p>
+		<p>union どうしを掛け合わせると<strong>組み合わせの数だけ型が生成されます。</strong>10 × 10 × 10 なら 1000 通りです。数が多すぎると <strong>TypeScript が「複雑すぎる」というエラーを出し、エディタも遅くなります。</strong></p>
+	</div>
+
+	<h2>infer と組み合わせて分解する</h2>
+
+<pre><code>type Split&lt;S extends string, D extends string&gt; =
+	S extends `${infer Head}${D}${infer Tail}`
+		? [Head, ...Split&lt;Tail, D&gt;]
+		: [S];
+
+type Parts = Split&lt;"a/b/c", "/"&gt;;      // ["a", "b", "c"]</code></pre>
+
+	<div class="callout">
+		<p><strong>これは「読めればよい」の代表例です。</strong></p>
+		<p>ルーティングライブラリの型定義（<code>"/users/:id"</code> からパラメータ名を取り出す等）で使われています。<strong>自分で書く機会はまずありません。</strong>「文字列を型のレベルで分解している」と分かれば十分です。</p>
+	</div>
+
+	<h2>まとめ — どこまで必要か</h2>
+
+	<figure>
+		<svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="型レベルプログラミングの4つの水準">
+			<defs>
+				<linearGradient id="g-a4-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-a4-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(100,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(100,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-a4-1c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-a4-1d" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="16" y="26" width="620" height="50" rx="8" fill="url(#g-a4-1a)"/>
+			<text x="36" y="47" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">水準1　組み込みユーティリティ型</text>
+			<text x="36" y="66" fill="#fff" font-size="12" font-family="sans-serif">Partial・Pick・Omit・Record・ReturnType・Awaited</text>
+			<text x="720" y="56" fill="#1d7a3c" font-size="13" font-family="sans-serif" font-weight="700">書ける必要がある</text>
+
+			<rect x="16" y="86" width="500" height="50" rx="8" fill="url(#g-a4-1b)"/>
+			<text x="36" y="107" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">水準2　簡単な Mapped Types</text>
+			<text x="36" y="126" fill="#fff" font-size="12" font-family="sans-serif">[K in keyof T]・キー名の変換</text>
+			<text x="720" y="116" fill="#1d7a3c" font-size="13" font-family="sans-serif" font-weight="700">必要になれば書く</text>
+
+			<rect x="16" y="146" width="380" height="50" rx="8" fill="url(#g-a4-1c)"/>
+			<text x="36" y="167" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">水準3　Conditional Types・infer</text>
+			<text x="36" y="186" fill="#fff" font-size="12" font-family="sans-serif">T extends U ? X : Y</text>
+			<text x="720" y="176" fill="#b8620a" font-size="13" font-family="sans-serif" font-weight="700">読めればよい</text>
+
+			<rect x="16" y="206" width="240" height="50" rx="8" fill="url(#g-a4-1d)"/>
+			<text x="36" y="227" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">水準4　文字列の型レベル分解</text>
+			<text x="36" y="246" fill="#fff" font-size="12" font-family="sans-serif">Split・再帰・算術</text>
+			<text x="720" y="236" fill="#a51f22" font-size="13" font-family="sans-serif" font-weight="700">読めなくてよい</text>
+
+			<text x="450" y="274" text-anchor="middle" fill="#4a5568" font-size="12.5" font-family="sans-serif">横幅は「実務で使う頻度」。下へ行くほど出番が減る</text>
+		</svg>
+		<figcaption>図 1 — 4つの水準。水準1・2 までが実務で書く範囲</figcaption>
+	</figure>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">水準</th><th>内容</th><th>目標</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">1</td><td>組み込みユーティリティ型（A4.1）</td><td><span class="badge b-ok">書ける</span> 実務で日常的に使う</td></tr>
+			<tr><td class="nowrap">2</td><td>簡単な Mapped Types（A4.2 前半）</td><td><span class="badge b-ok">書ける</span> 必要になれば書く</td></tr>
+			<tr><td class="nowrap">3</td><td>Conditional Types と <code>infer</code>（A4.3）</td><td><span class="badge b-warn">読める</span> 型定義を読むときに要る</td></tr>
+			<tr><td class="nowrap">4</td><td>テンプレートリテラル型の分解（A4.4 後半）</td><td><span class="badge b-none">読めなくてよい</span> ライブラリ作者の領域</td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>
