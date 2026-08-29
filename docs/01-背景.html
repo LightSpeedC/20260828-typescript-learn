@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>01. 背景 — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（4章 / 刻み 93.3） */
+.ch01 { --accent: hsl(280,78%,25%);   --accent2: hsl(280,58%,55%);   --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(186.7,78%,25%); --accent2: hsl(186.7,58%,55%); --soft: hsl(186.7,28%,95%); }
+.ch03 { --accent: hsl(93.3,78%,25%);  --accent2: hsl(93.3,58%,55%);  --soft: hsl(93.3,28%,95%); }
+.ch04 { --accent: hsl(0,78%,25%);     --accent2: hsl(0,58%,55%);     --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "01." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "01." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>01. 背景</h1>
+		<p class="lead">TypeScript は何を解決したのか ／ 型は実行時に消える</p>
+		<p class="date">📅 作成: 2026-08-28 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink doc02" href="02-実行環境.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>02. 実行環境</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この章の到達点</h2>
+	<ul>
+		<li>JavaScript の何が問題で TypeScript が生まれたのかを、自分の言葉で説明できる</li>
+		<li><code>tsc</code> が<strong>何をして、何をしないのか</strong>を説明できる</li>
+		<li>Java・C# のコンパイルと決定的に違う点を1つ挙げられる</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>この章の内容</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">JavaScript の何が問題だったか</a></li>
+		<li class="ch02"><a href="#c2">TypeScript は「検査して、型を消す」だけ</a></li>
+		<li class="ch03"><a href="#c3">Java・C# のコンパイルとの違い</a></li>
+		<li class="ch04"><a href="#c4">型を付ける他の選択肢</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>01.1 JavaScript の何が問題だったか</h1>
+
+	<h2>実行するまで壊れていることが分からない</h2>
+
+	<p>JavaScript には、書いた時点で間違いを教えてくれる仕組みがありません。次のコードは<strong>エラーを出さずに動きます</strong>。</p>
+
+<pre><code>// JavaScript
+function greet(user) {
+	return `Hello, ${user.name}`;
+}
+
+console.log(greet({ namae: "Alice" }));   // "Hello, undefined"</code></pre>
+
+	<p><code>namae</code> は <code>name</code> の打ち間違いですが、JavaScript は存在しないプロパティを読んでも <code>undefined</code> を返すだけです。<strong>例外も出ず、それらしい文字列が出力されます。</strong>この出力を誰かが見つけるまで、間違いは残り続けます。</p>
+
+	<p>同じコードに型を付けると、実行する前に止まります。</p>
+
+<pre><code>// TypeScript
+type User = { name: string };
+
+function greet(user: User) {
+	return `Hello, ${user.name}`;
+}
+
+console.log(greet({ namae: "Alice" }));
+//                  ~~~~
+// error TS2353: Object literal may only specify known properties,
+//               and 'namae' does not exist in type 'User'.
+//
+// 訳: オブジェクト リテラルは既知のプロパティのみ指定できます。
+//     'namae' は型 'User' に存在しません。</code></pre>
+
+	<div class="callout">
+		<p><strong>エラーメッセージは既定で英語です。</strong></p>
+		<p>この資料では<strong>実際に出力される英語をそのまま載せ、日本語訳を添えます。</strong>訳は <code>tsc --locale ja</code> の出力に合わせてあります。エラー番号（<code>TS2353</code> など）で検索する場合、<strong>英語のほうが情報が見つかります。</strong></p>
+	</div>
+
+	<h2>問題は「間違えること」ではなく「気づけないこと」</h2>
+
+	<p>どの言語でも打ち間違いはします。JavaScript に固有なのは、<strong>間違いが実行時まで表面化せず、しかも実行しても例外にならない場合がある</strong>ことです。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>ありがちな間違い</th><th>JavaScript での結果</th><th class="nowrap">気づけるか</th></tr>
+		</thead>
+		<tbody>
+			<tr><td>プロパティ名の打ち間違い</td><td><code>undefined</code> が返る</td><td class="nowrap"><span class="badge b-ng">気づけない</span></td></tr>
+			<tr><td>引数の数を間違える</td><td>足りない引数は <code>undefined</code></td><td class="nowrap"><span class="badge b-ng">気づけない</span></td></tr>
+			<tr><td>文字列と数値を取り違える</td><td><code>"1" + 1</code> が <code>"11"</code> になる</td><td class="nowrap"><span class="badge b-ng">気づけない</span></td></tr>
+			<tr><td><code>null</code> のプロパティを読む</td><td>実行時に例外</td><td class="nowrap"><span class="badge b-warn">実行時のみ</span></td></tr>
+			<tr><td>関数名の打ち間違い</td><td>実行時に例外</td><td class="nowrap"><span class="badge b-warn">実行時のみ</span></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p>上の3行は<strong>テストを書いても見逃す可能性があります</strong>。値が「それらしく」出てしまうためです。TypeScript が解決しようとしたのは、この「気づけなさ」です。</p>
+
+	<div class="callout">
+		<p><strong>Java・C# から来た人へ</strong></p>
+		<p>この章の内容は「型がないとこうなる」という当たり前の話に見えるはずです。<strong>読み飛ばして 01.2 へ進んで構いません。</strong>ただし、TypeScript の型が Java・C# の型と<strong>まったく別の仕組みで動いている</strong>ことは 01.2 と 01.3 で扱います。そこは飛ばさないでください。</p>
+	</div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>01.2 TypeScript は「検査して、型を消す」だけ</h1>
+
+	<h2>tsc がやっていること</h2>
+
+	<p>TypeScript のコンパイラ <code>tsc</code> がやることは、実質<strong>次の2つだけ</strong>です。</p>
+
+	<ol>
+		<li>型注釈をもとに<strong>コードを検査する</strong></li>
+		<li>型注釈を<strong>取り除いた JavaScript を出力する</strong></li>
+	</ol>
+
+	<figure>
+		<svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="tsc は型を検査し、型を消した JavaScript を出力する">
+			<defs>
+				<linearGradient id="g-01-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="var(--accent, #12224d)"/>
+					<stop offset="1" stop-color="var(--accent2, #2f5fbf)"/>
+				</linearGradient>
+				<linearGradient id="g-01-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(280,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(280,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-01-1c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-01-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="20" y="70" width="180" height="70" rx="8" fill="url(#g-01-1b)"/>
+			<text x="110" y="100" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">greet.ts</text>
+			<text x="110" y="122" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">型注釈あり</text>
+
+			<rect x="300" y="52" width="220" height="106" rx="8" fill="url(#g-01-1a)"/>
+			<text x="410" y="82" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">tsc</text>
+			<text x="410" y="106" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">① 型を検査する</text>
+			<text x="410" y="128" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">② 型を取り除く</text>
+
+			<rect x="620" y="70" width="180" height="70" rx="8" fill="url(#g-01-1c)"/>
+			<text x="710" y="100" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">greet.js</text>
+			<text x="710" y="122" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">型注釈なし</text>
+
+			<path d="M200,105 L292,105" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-01-1)"/>
+			<path d="M520,105 L612,105" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-01-1)"/>
+
+			<text x="410" y="188" text-anchor="middle" fill="#a51f22" font-size="13" font-family="sans-serif" font-weight="600">型はここで消える</text>
+			<text x="410" y="210" text-anchor="middle" fill="#4a5568" font-size="12.5" font-family="sans-serif">実行時に型情報は 1 バイトも残らない</text>
+			<path d="M410,160 L410,172" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#m-01-1)"/>
+
+			<text x="710" y="188" text-anchor="middle" fill="#4a5568" font-size="12.5" font-family="sans-serif">Node・ブラウザが実行するのはこちら</text>
+		</svg>
+		<figcaption>図 1 — <code>tsc</code> は型を検査し、型を取り除いた JavaScript を出力する</figcaption>
+	</figure>
+
+	<h2>出力を見ると分かる</h2>
+
+	<p>次の <code>.ts</code> をコンパイルすると、</p>
+
+<pre><code>// greet.ts
+type User = { name: string; age: number };
+
+export function greet(user: User): string {
+	return `Hello, ${user.name}`;
+}</code></pre>
+
+	<p>出力される <code>.js</code> はこれだけです。</p>
+
+<pre><code>// greet.js — 型に関する記述がすべて消えている
+export function greet(user) {
+	return `Hello, ${user.name}`;
+}</code></pre>
+
+	<p><code>type User</code> の定義も、引数の <code>: User</code> も、戻り値の <code>: string</code> も残りません。<strong>型は開発中にだけ存在する情報</strong>です。</p>
+
+	<div class="callout">
+		<p><strong>この一点が、以降のすべての章に効いてきます。</strong></p>
+		<p>型が実行時に消えるため、<strong>外から入ってくる値（JSON・環境変数・API のレスポンス）が型どおりである保証はどこにもありません。</strong>型を書いても、実行時の検証は別途必要です。この扱いは <a class="doclink doc11" href="11-非同期とエラー処理.html">11. 非同期とエラー処理</a> と <a class="doclink doc15" href="A3-実務パターン集.html">A3. 実務パターン集</a> で具体的に扱います。</p>
+	</div>
+
+	<h2>型エラーがあっても .js は出力される</h2>
+
+	<p>意外に思われる点ですが、<strong><code>tsc</code> は型エラーを報告しても JavaScript の出力は行います</strong>（既定の設定の場合）。型検査と出力は独立した処理だからです。</p>
+
+<pre><code>$ npx tsc greet.ts
+greet.ts:7:21 - error TS2353: Object literal may only specify known properties,
+                              and 'namae' does not exist in type 'User'.
+
+7 console.log(greet({ namae: "Alice" }));
+                      ~~~~
+
+Found 1 error in greet.ts:7
+
+$ ls
+greet.js  greet.ts     ← エラーがあっても .js は出力されている</code></pre>
+
+	<p>止めたい場合は <code>noEmitOnError</code> を有効にします。設定の詳細は <a class="doclink doc03" href="03-tsconfig.html">03. tsconfig</a> で扱います。</p>
+
+	<h2>動かしてみる</h2>
+
+	<p><code>tsx</code> を使うと、コンパイルの手順を意識せずに <code>.ts</code> をそのまま実行できます。</p>
+
+<pre><code>// hello.ts
+const name: string = "TypeScript";
+console.log(`Hello, ${name}!`);</code></pre>
+
+<pre><code>$ npx tsx hello.ts
+Hello, TypeScript!</code></pre>
+
+	<p><span class="badge b-strip">Node型ストリップ</span> 新しい Node であれば、<code>tsx</code> を使わずそのまま実行することもできます。Node が型注釈を取り除いてから実行するためです。</p>
+
+<pre><code>$ node hello.ts
+Hello, TypeScript!</code></pre>
+
+	<p>どちらの方法にも制約と使い分けがあります。詳細は <a class="doclink doc02" href="02-実行環境.html">02. 実行環境</a> で扱います。</p>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>01.3 Java・C# のコンパイルとの違い</h1>
+
+	<h2>「コンパイル」という同じ言葉が指すものが違う</h2>
+
+	<p>Java や C# の経験がある読者ほど、ここで誤解が起きます。<strong>どちらもコンパイルと呼びますが、出力されるものも、型情報の行き先も違います。</strong></p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">観点</th><th>Java ／ C#</th><th>TypeScript</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">出力</td><td>バイトコード ／ IL（人が読むものではない）</td><td><strong>JavaScript</strong>（人が読める。元のコードとほぼ同じ形）</td></tr>
+			<tr><td class="nowrap">型情報</td><td>実行時まで<strong>残る</strong></td><td>実行時には<strong>残らない</strong></td></tr>
+			<tr><td class="nowrap">型エラー時</td><td>ビルドが失敗し、成果物ができない</td><td>エラーを報告するが、<strong>出力はされる</strong>（既定）</td></tr>
+			<tr><td class="nowrap">型の判定基準</td><td>名前で判定する（名前的型付け）</td><td><strong>形で判定する</strong>（構造的型付け → <a class="doclink doc05" href="05-構造的型付け.html">05</a>）</td></tr>
+			<tr><td class="nowrap">実行するもの</td><td>JVM ／ CLR</td><td>JavaScript エンジン（Node・ブラウザ）</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>Java・C# から来た人へ</strong></p>
+		<p>Java の <code>instanceof</code> や C# の <code>is</code> にあたる判定を、<strong>TypeScript の <code>interface</code> に対しては書けません。</strong><code>interface</code> は実行時に存在しないためです。</p>
+<pre><code>interface User { name: string }
+
+// 書けない — User は実行時に存在しない
+// if (x instanceof User) { ... }
+//                ~~~~
+// error TS2693: 'User' only refers to a type, but is being used as a value here.
+//
+// 訳: 'User' は型のみを参照しますが、ここで値として使用されています。</code></pre>
+		<p>実行時に「これは <code>User</code> か」を判定するには、<strong>自分で判定コードを書きます</strong>。その方法は <a class="doclink doc08" href="08-型の絞り込み.html">08. 型の絞り込み</a> で扱います。</p>
+	</div>
+
+	<h2>リフレクションに相当するものがない</h2>
+
+	<p>Java の <code>getClass()</code>、C# の <code>typeof(T)</code> のように<strong>実行時に型情報を取り出す仕組みは TypeScript にありません</strong>。ジェネリクスの型引数も実行時には消えます（<a class="doclink doc09" href="09-ジェネリクス.html">09. ジェネリクス</a>）。</p>
+
+	<p>この制約は不便に見えますが、理由は単純です。<strong>TypeScript は JavaScript に何も足さない</strong>ためです。出力が普通の JavaScript である以上、JavaScript にない機能を実行時に持ち込むことはできません。</p>
+
+	<div class="callout">
+		<p><strong>「JavaScript に何も足さない」は設計方針です。</strong></p>
+		<p>TypeScript は、実行時の挙動を変える機能を原則として追加しません。これにより、<strong>既存の JavaScript をそのまま <code>.ts</code> にリネームしても動く</strong>という性質が保たれ、段階的な導入が可能になっています。<code>enum</code> のように、この方針の例外にあたる機能もあります（<a class="doclink doc04" href="04-型の基本.html">04. 型の基本</a>）。</p>
+	</div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>01.4 型を付ける他の選択肢</h1>
+
+	<h2>JavaScript に型を付ける方法は1つではない</h2>
+
+	<p>「JavaScript は実行するまで間違いに気づけない」という問題への答えは、TypeScript だけではありません。</p>
+
+	<figure>
+		<svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="型を付ける3つの選択肢の比較">
+			<defs>
+				<linearGradient id="g-01-2a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(280,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(280,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-01-2b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-01-2c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="20" y="30" width="270" height="60" rx="8" fill="url(#g-01-2a)"/>
+			<text x="155" y="56" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">TypeScript</text>
+			<text x="155" y="77" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">.ts に型を書く</text>
+
+			<text x="30" y="118" fill="#1c2330" font-size="12.5" font-family="sans-serif">検査: 強い</text>
+			<text x="30" y="140" fill="#1c2330" font-size="12.5" font-family="sans-serif">ビルド: 必要</text>
+			<text x="30" y="162" fill="#1c2330" font-size="12.5" font-family="sans-serif">エディタ支援: 最も厚い</text>
+			<text x="30" y="184" fill="#1c2330" font-size="12.5" font-family="sans-serif">情報量: 最も多い</text>
+
+			<rect x="315" y="30" width="270" height="60" rx="8" fill="url(#g-01-2b)"/>
+			<text x="450" y="56" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">JSDoc</text>
+			<text x="450" y="77" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">.js のコメントに型を書く</text>
+
+			<text x="325" y="118" fill="#1c2330" font-size="12.5" font-family="sans-serif">検査: 強い（tsc で検査できる）</text>
+			<text x="325" y="140" fill="#1c2330" font-size="12.5" font-family="sans-serif">ビルド: 不要</text>
+			<text x="325" y="162" fill="#1c2330" font-size="12.5" font-family="sans-serif">エディタ支援: 厚い</text>
+			<text x="325" y="184" fill="#1c2330" font-size="12.5" font-family="sans-serif">記述: 冗長になりやすい</text>
+
+			<rect x="610" y="30" width="270" height="60" rx="8" fill="url(#g-01-2c)"/>
+			<text x="745" y="56" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">型を付けない</text>
+			<text x="745" y="77" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">素の JavaScript</text>
+
+			<text x="620" y="118" fill="#1c2330" font-size="12.5" font-family="sans-serif">検査: なし</text>
+			<text x="620" y="140" fill="#1c2330" font-size="12.5" font-family="sans-serif">ビルド: 不要</text>
+			<text x="620" y="162" fill="#1c2330" font-size="12.5" font-family="sans-serif">エディタ支援: 推測に頼る</text>
+			<text x="620" y="184" fill="#1c2330" font-size="12.5" font-family="sans-serif">小規模なら十分なこともある</text>
+
+			<rect x="20" y="212" width="860" height="52" rx="8" fill="#f2f5fb" stroke="#d9dfe8"/>
+			<text x="40" y="234" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">共通点</text>
+			<text x="40" y="254" fill="#4a5568" font-size="12.5" font-family="sans-serif">どれも実行するのは JavaScript。型情報は実行時に残らない</text>
+		</svg>
+		<figcaption>図 2 — 型を付ける3つの選択肢。検査の強さとビルドの要否が主な違い</figcaption>
+	</figure>
+
+	<h2>JSDoc という選択肢</h2>
+
+	<p><code>.js</code> のままコメントで型を書き、<code>tsc</code> に検査だけさせる方法です。<strong>ビルドの手順が増えない</strong>のが利点です。</p>
+
+<pre><code>// greet.js — 拡張子は .js のまま
+/**
+ * @param {{ name: string }} user
+ * @returns {string}
+ */
+function greet(user) {
+	return `Hello, ${user.name}`;
+}</code></pre>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">選ぶ基準</th><th class="nowrap">向いている方</th><th>理由</th></tr>
+		</thead>
+		<tbody>
+			<tr><td>新規のプロジェクト</td><td class="nowrap"><strong>TypeScript</strong></td><td>記述量が少なく、型の表現力も高い</td></tr>
+			<tr><td>ビルド手順を増やせない</td><td class="nowrap"><strong>JSDoc</strong></td><td><code>.js</code> のまま検査できる</td></tr>
+			<tr><td>既存の大きな <code>.js</code> 資産がある</td><td class="nowrap"><strong>JSDoc</strong> から</td><td>ファイルを変換せず、1ファイルずつ型を足せる</td></tr>
+			<tr><td>使い捨てのスクリプト</td><td class="nowrap"><strong>型なし</strong></td><td>型を書く手間が見合わない場合がある</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>この資料は TypeScript（<code>.ts</code>）を前提に進めます。</strong></p>
+		<p>JSDoc で書く場合も、<strong>型の考え方は同じ</strong>です。書き方が違うだけなので、以降の章の内容はそのまま使えます。</p>
+	</div>
+
+	<h2>Flow について</h2>
+
+	<p>かつて TypeScript と競合した型システムに Flow があります。現在の新規プロジェクトで選ぶ理由はほとんどありませんが、<strong>古いコードで <code>// @flow</code> というコメントを見かけたら Flow のコード</strong>だと判断できれば十分です。</p>
+</section>
+
+<div class="next">
+	<p><strong>まとめ</strong></p>
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>この章の結論</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">解決したい問題</td><td>JavaScript は間違いに<strong>実行時まで気づけない</strong>。しかも例外にならず、それらしい値が出てしまう</td></tr>
+			<tr><td class="nowrap"><code>tsc</code> の仕事</td><td>型を検査することと、<strong>型を取り除いた JavaScript を出力すること</strong>の2つだけ</td></tr>
+			<tr><td class="nowrap">型の寿命</td><td>開発中のみ。<strong>実行時には残らない</strong></td></tr>
+			<tr><td class="nowrap">Java・C# との違い</td><td>出力が JavaScript であること、型情報が実行時に消えること、型エラーでも出力されること</td></tr>
+			<tr><td class="nowrap">他の選択肢</td><td>JSDoc なら <code>.js</code> のまま検査できる。型の考え方は同じ</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p><strong>次は <a class="doclink doc02" href="02-実行環境.html">02. 実行環境</a> です。</strong><code>tsc</code>・<code>tsx</code>・Node の型ストリップの違いを押さえ、<strong>手元で <code>.ts</code> が動く状態</strong>を作ります。</p>
+</div>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink doc02" href="02-実行環境.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>02. 実行環境</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>

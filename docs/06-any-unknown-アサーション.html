@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>06. any・unknown・型アサーション — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（4章 / 刻み 93.3） */
+.ch01 { --accent: hsl(280,78%,25%);   --accent2: hsl(280,58%,55%);   --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(186.7,78%,25%); --accent2: hsl(186.7,58%,55%); --soft: hsl(186.7,28%,95%); }
+.ch03 { --accent: hsl(93.3,78%,25%);  --accent2: hsl(93.3,58%,55%);  --soft: hsl(93.3,28%,95%); }
+.ch04 { --accent: hsl(0,78%,25%);     --accent2: hsl(0,58%,55%);     --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "06." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "06." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>06. any・unknown・型アサーション</h1>
+		<p class="lead">型検査から降りる3つの方法と、その代償</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink doc05" href="05-構造的型付け.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>05. 構造的型付け</a> <a class="doclink doc07" href="07-関数の型.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>07. 関数の型</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この章の到達点</h2>
+	<ul>
+		<li><code>any</code> が<strong>伝播する</strong>ことを説明でき、使わずに済ませる方法を持つ</li>
+		<li><code>unknown</code> を安全な受け口として使える</li>
+		<li><code>as</code> と <code>!</code> が<strong>何も検査していない</strong>ことを理解し、使う場所を限定できる</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>この章の内容</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">any — 伝播する</a></li>
+		<li class="ch02"><a href="#c2">unknown — 安全な受け口</a></li>
+		<li class="ch03"><a href="#c3">as — 検査を黙らせる</a></li>
+		<li class="ch04"><a href="#c4">! — 非 null アサーション</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>06.1 any — 伝播する</h1>
+
+	<h2>any は「何でも入る」ではなく「検査しない」</h2>
+
+	<p><code>any</code> を付けた値には、<strong>どんな操作をしてもエラーになりません。</strong></p>
+
+<pre><code>const x: any = "文字列";
+
+x.toFixed(2);          // エラーにならない（実行時に落ちる）
+x.foo.bar.baz;         // エラーにならない（実行時に落ちる）
+x();                   // エラーにならない（実行時に落ちる）</code></pre>
+
+	<h2>下流に広がる</h2>
+
+	<p>問題は、<strong><code>any</code> が伝染すること</strong>です。</p>
+
+<pre><code>function parse(json: string): any {
+	return JSON.parse(json);
+}
+
+const user = parse('{"name":"Alice"}');   // user は any
+const name = user.name;                   // name も any
+const upper = name.toUpperCase();          // upper も any
+const len = upper.lenght;                  // 打ち間違いも通る（実行時 undefined）</code></pre>
+
+	<div class="callout">
+		<p><strong>1か所の <code>any</code> が、その先すべての検査を無効化します。</strong></p>
+		<p>上の例では <code>lenght</code> という打ち間違いが検出されません。<strong><code>any</code> を返す関数を1つ書くと、それを使うコード全体が型のない世界になります。</strong></p>
+	</div>
+
+	<figure>
+		<svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="any は伝播し、unknown は壁になる">
+			<defs>
+				<linearGradient id="g-06-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-06-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-06-1c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-06-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<!-- any の経路 -->
+			<text x="20" y="30" fill="#a51f22" font-size="13.5" font-family="sans-serif" font-weight="700">any で受けた場合 — 下流すべてに広がる</text>
+
+			<rect x="20" y="44" width="140" height="52" rx="8" fill="url(#g-06-1c)"/>
+			<text x="90" y="66" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">JSON.parse</text>
+			<text x="90" y="85" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">外部データ</text>
+
+			<rect x="215" y="44" width="120" height="52" rx="8" fill="url(#g-06-1a)"/>
+			<text x="275" y="76" text-anchor="middle" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="700">any</text>
+
+			<rect x="390" y="44" width="120" height="52" rx="8" fill="url(#g-06-1a)"/>
+			<text x="450" y="70" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">user.name</text>
+			<text x="450" y="88" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">any</text>
+
+			<rect x="565" y="44" width="120" height="52" rx="8" fill="url(#g-06-1a)"/>
+			<text x="625" y="70" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">.lenght</text>
+			<text x="625" y="88" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">any</text>
+
+			<text x="790" y="64" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">打ち間違いも</text>
+			<text x="790" y="82" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">通ってしまう</text>
+
+			<path d="M160,70 L207,70" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-06-1)"/>
+			<path d="M335,70 L382,70" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-06-1)"/>
+			<path d="M510,70 L557,70" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-06-1)"/>
+			<path d="M685,70 L730,70" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-06-1)"/>
+
+			<!-- unknown の経路 -->
+			<text x="20" y="168" fill="#1d7a3c" font-size="13.5" font-family="sans-serif" font-weight="700">unknown で受けた場合 — 確かめるまで先へ進めない</text>
+
+			<rect x="20" y="182" width="140" height="52" rx="8" fill="url(#g-06-1c)"/>
+			<text x="90" y="204" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">JSON.parse</text>
+			<text x="90" y="223" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">外部データ</text>
+
+			<rect x="215" y="182" width="120" height="52" rx="8" fill="url(#g-06-1b)"/>
+			<text x="275" y="214" text-anchor="middle" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="700">unknown</text>
+
+			<rect x="380" y="170" width="10" height="76" rx="3" fill="#a51f22"/>
+			<text x="385" y="262" text-anchor="middle" fill="#a51f22" font-size="12" font-family="sans-serif" font-weight="600">壁</text>
+
+			<rect x="420" y="182" width="150" height="52" rx="8" fill="#fff" stroke="#7aa87a" stroke-width="2"/>
+			<text x="495" y="204" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">型ガードで確かめる</text>
+			<text x="495" y="223" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">isUser(v)</text>
+
+			<rect x="625" y="182" width="120" height="52" rx="8" fill="url(#g-06-1b)"/>
+			<text x="685" y="208" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">User</text>
+			<text x="685" y="226" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">型が付いた値</text>
+
+			<text x="820" y="212" text-anchor="middle" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">検査が効く</text>
+
+			<path d="M160,208 L207,208" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-06-1)"/>
+			<path d="M335,208 L372,208" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-06-1)"/>
+			<path d="M394,208 L412,208" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-06-1)"/>
+			<path d="M570,208 L617,208" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-06-1)"/>
+			<path d="M745,208 L775,208" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-06-1)"/>
+		</svg>
+		<figcaption>図 1 — <code>any</code> は下流すべてに広がり、<code>unknown</code> は絞り込みを強制する</figcaption>
+	</figure>
+
+	<h2>暗黙の any</h2>
+
+	<p><span class="badge b-strict">strict</span> 型を書き忘れた引数は、<strong>暗黙に <code>any</code></strong> になります。<code>strict</code> が有効ならエラーで教えてくれます。</p>
+
+<pre><code>function greet(name) {
+	//         ~~~~
+	// error TS7006: Parameter 'name' implicitly has an 'any' type.
+	//
+	// 訳: 引数 'name' は暗黙的に 'any' 型になっています。
+	return "Hello, " + name;
+}</code></pre>
+
+	<p><a class="doclink doc03" href="03-tsconfig.html">03. tsconfig</a> のとおり、<strong>TypeScript 7 では <code>strict</code> が既定で有効</strong>です。5 系から移行すると、このエラーが大量に出ることがあります。</p>
+
+	<h2>any が要る場面はほとんどない</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>やりたいこと</th><th>使うもの</th></tr>
+		</thead>
+		<tbody>
+			<tr><td>外部から来た値を受ける</td><td><strong><code>unknown</code></strong>（06.2）</td></tr>
+			<tr><td>どんな型でも受ける関数を書く</td><td><strong>ジェネリクス</strong>（<a class="doclink doc09" href="09-ジェネリクス.html">09</a>）</td></tr>
+			<tr><td>オブジェクトなら何でも受ける</td><td><code>Record&lt;string, unknown&gt;</code></td></tr>
+			<tr><td>型定義のないライブラリを使う</td><td>自分で <code>.d.ts</code> を書く（<a class="doclink doc10" href="10-モジュールと宣言ファイル.html">10</a>）</td></tr>
+			<tr><td>とりあえず動かしたい</td><td><code>any</code> でよい。<strong>ただし後で消す前提で、コメントを残す</strong></td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>06.2 unknown — 安全な受け口</h1>
+
+	<h2>「何でも入るが、確かめるまで何もできない」</h2>
+
+	<p><code>unknown</code> は <code>any</code> と同じく<strong>どんな値でも代入できます。</strong>違うのは<strong>使うときに絞り込みを強制される</strong>点です。</p>
+
+<pre><code>const x: unknown = "文字列";
+
+x.toUpperCase();
+// ~
+// error TS18046: 'x' is of type 'unknown'.
+//
+// 訳: 'x' は 'unknown' 型です。
+
+if (typeof x === "string") {
+	x.toUpperCase();      // ここでは string として扱える
+}</code></pre>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th class="nowrap"><code>any</code></th><th class="nowrap"><code>unknown</code></th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">どんな値でも代入できる</td><td class="nowrap"><span class="badge b-ok">できる</span></td><td class="nowrap"><span class="badge b-ok">できる</span></td></tr>
+			<tr><td class="nowrap">確かめずに使える</td><td class="nowrap"><span class="badge b-ng">使える（危険）</span></td><td class="nowrap"><span class="badge b-ok">使えない（安全）</span></td></tr>
+			<tr><td class="nowrap">他の型に代入できる</td><td class="nowrap"><span class="badge b-ng">できる（危険）</span></td><td class="nowrap"><span class="badge b-ok">できない</span></td></tr>
+			<tr><td class="nowrap">伝播する</td><td class="nowrap"><span class="badge b-ng">する</span></td><td class="nowrap"><span class="badge b-ok">しない</span></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>外部から来る値は unknown で受ける</h2>
+
+	<p><code>JSON.parse</code> の戻り値は <code>any</code> です。<strong>受け口で <code>unknown</code> に変えると、検証を強制できます。</strong></p>
+
+<pre><code>// unknown-parse.ts
+function parseJson(text: string): unknown {
+	return JSON.parse(text);
+}
+
+type User = { name: string; age: number };
+
+function isUser(v: unknown): v is User {
+	return (
+		typeof v === "object" &amp;&amp; v !== null &amp;&amp;
+		typeof (v as Record&lt;string, unknown&gt;).name === "string" &amp;&amp;
+		typeof (v as Record&lt;string, unknown&gt;).age === "number"
+	);
+}
+
+const data = parseJson('{"name":"Alice","age":30}');
+
+if (isUser(data)) {
+	console.log(`${data.name} は ${data.age} 歳`);
+} else {
+	console.log("User の形ではありません");
+}
+
+console.log(isUser(parseJson('{"name":"Bob"}')));</code></pre>
+
+<pre><code>$ npx tsx unknown-parse.ts
+Alice は 30 歳
+false</code></pre>
+
+	<p><code>v is User</code> という書き方は<strong>型ガード関数</strong>です。詳細は <a class="doclink doc08" href="08-型の絞り込み.html">08. 型の絞り込み</a> で扱います。</p>
+
+	<div class="callout">
+		<p><strong>実務ではライブラリを使ってください。</strong></p>
+		<p>上のような検証を手で書くと、プロパティが増えるたびに書き足すことになります。<strong>zod・valibot のようなスキーマ検証ライブラリ</strong>を使うと、検証と型定義を1か所で書けます。この資料では仕組みを理解するために手書きしています。実務での書き方は <a class="doclink doc15" href="A3-実務パターン集.html">A3. 実務パターン集</a> に置いています。</p>
+	</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>06.3 as — 検査を黙らせる</h1>
+
+	<h2>as は変換ではない</h2>
+
+	<p><code>as</code> は<strong>型アサーション</strong>です。「この値はこの型だと思って扱え」と<strong>コンパイラに指示する</strong>だけで、<strong>値は何も変わりません。</strong></p>
+
+<pre><code>const x: unknown = "文字列";
+const n = x as number;        // 通る。何も起きない
+
+console.log(n.toFixed(2));    // 実行時エラー: n.toFixed is not a function</code></pre>
+
+	<div class="callout">
+		<p><strong>Java・C# から来た人へ</strong></p>
+		<p>Java の <code>(Integer) obj</code> や C# の <code>(int)obj</code> は<strong>実行時に検査され、失敗すれば例外</strong>になります。TypeScript の <code>as</code> は<strong>実行時に何もしません。</strong>型が消えている以上、検査するものがないためです（<a class="doclink doc01" href="01-背景.html">01. 背景</a>）。</p>
+		<p>C# の <code>as</code> 演算子（失敗時に <code>null</code>）とも違います。<strong>TypeScript の <code>as</code> は、検査を黙らせるだけです。</strong></p>
+	</div>
+
+	<h2>as が嘘をつく瞬間</h2>
+
+<pre><code>type User = { name: string; age: number };
+
+const data = JSON.parse('{"name":"Alice"}') as User;
+
+console.log(data.age.toFixed(0));
+// 型の上では number なので通る
+// 実行時: TypeError: Cannot read properties of undefined (reading 'toFixed')</code></pre>
+
+	<p><strong>外部から来た値に <code>as</code> を使うのが最も危険です。</strong>実際のデータが型と違っていても、誰も教えてくれません。</p>
+
+	<figure>
+		<svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="as は型の世界だけを書き換える">
+			<defs>
+				<linearGradient id="g-06-2a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-06-2b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-06-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<line x1="20" y1="128" x2="880" y2="128" stroke="#c8cedb" stroke-width="1.5" stroke-dasharray="6 4"/>
+			<text x="30" y="34" fill="#4a5568" font-size="12.5" font-family="sans-serif" font-weight="600">型の世界（開発中だけ存在する）</text>
+			<text x="30" y="250" fill="#4a5568" font-size="12.5" font-family="sans-serif" font-weight="600">値の世界（実行時に存在する）</text>
+
+			<!-- 型の世界 -->
+			<rect x="140" y="46" width="200" height="52" rx="8" fill="url(#g-06-2a)"/>
+			<text x="240" y="78" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">unknown</text>
+
+			<rect x="470" y="46" width="200" height="52" rx="8" fill="url(#g-06-2b)"/>
+			<text x="570" y="70" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">User</text>
+			<text x="570" y="89" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">「User だと思え」</text>
+
+			<path d="M340,72 L462,72" stroke="#a51f22" stroke-width="2.5" fill="none" marker-end="url(#m-06-2)"/>
+			<text x="401" y="62" text-anchor="middle" fill="#a51f22" font-size="13" font-family="sans-serif" font-weight="700">as User</text>
+
+			<text x="740" y="66" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">検査が黙る</text>
+			<text x="740" y="86" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">data.age が number に見える</text>
+
+			<!-- 値の世界 -->
+			<rect x="140" y="160" width="200" height="52" rx="8" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="240" y="184" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">&#123; name: "Alice" &#125;</text>
+			<text x="240" y="203" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">age は存在しない</text>
+
+			<rect x="470" y="160" width="200" height="52" rx="8" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="570" y="184" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">&#123; name: "Alice" &#125;</text>
+			<text x="570" y="203" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">何も変わっていない</text>
+
+			<path d="M340,186 L462,186" stroke="#8a94a4" stroke-width="2" fill="none" stroke-dasharray="5 4" marker-end="url(#m-06-2)"/>
+			<text x="401" y="176" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">値は素通り</text>
+
+			<text x="740" y="180" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">実行時に落ちる</text>
+			<text x="740" y="200" fill="#a51f22" font-size="12" font-family="sans-serif">Cannot read properties of undefined</text>
+		</svg>
+		<figcaption>図 2 — <code>as</code> は型の世界だけを書き換える。値は何も変わらない</figcaption>
+	</figure>
+
+	<h2>as を使ってよい場面</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">判定</th><th>場面</th><th>理由</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><span class="badge b-ok">よい</span></td><td>検証を済ませた直後（ブランド型の生成関数など）</td><td>人間が保証した直後で、範囲が狭い</td></tr>
+			<tr><td class="nowrap"><span class="badge b-ok">よい</span></td><td><code>as const</code></td><td>これは別物。リテラル型として固定する指示（<a class="doclink doc04" href="04-型の基本.html">04</a>）</td></tr>
+			<tr><td class="nowrap"><span class="badge b-warn">条件付き</span></td><td>DOM の要素取得（<code>as HTMLInputElement</code>）</td><td>型定義側が絞れないだけ。実物と一致するか確認する</td></tr>
+			<tr><td class="nowrap"><span class="badge b-ng">避ける</span></td><td>外部から来たデータ（JSON・API・環境変数）</td><td><strong>検証していない。<code>unknown</code> と型ガードを使う</strong></td></tr>
+			<tr><td class="nowrap"><span class="badge b-ng">避ける</span></td><td>エラーを消すため</td><td>エラーの原因が残ったままになる</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>二段階の as は危険信号</h2>
+
+<pre><code>const s = "文字列";
+const n = s as unknown as number;      // 無関係な型にも変換できてしまう</code></pre>
+
+	<p><code>as</code> は<strong>近い型どうし</strong>でしか使えませんが、<code>as unknown as</code> を挟むと<strong>何にでも変換できます。</strong>この書き方が出てきたら、設計を見直す合図です。</p>
+
+	<h2>satisfies — 型を確かめるが、型は変えない</h2>
+
+	<p><code>as</code> の代わりに使える演算子です。<strong>「この型を満たしているか確かめるが、推論された型はそのまま残す」</strong>という意味です。</p>
+
+<pre><code>type Config = Record&lt;string, string | number&gt;;
+
+// as だと、推論された具体的な型が失われる
+const a = { host: "localhost", port: 3000 } as Config;
+// a.port の型は string | number
+
+// satisfies なら、検査もされるし具体的な型も残る
+const b = { host: "localhost", port: 3000 } satisfies Config;
+// b.port の型は number</code></pre>
+
+	<p><strong>設定オブジェクトを書くときは <code>satisfies</code> が適しています。</strong>誤った値を検出しつつ、使う側では具体的な型を保てます。</p>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>06.4 ! — 非 null アサーション</h1>
+
+	<h2>「null ではない」と言い切る</h2>
+
+<pre><code>function find(id: string): User | undefined { /* ... */ }
+
+const user = find("1");
+console.log(user.name);
+//          ~~~~
+// error TS18048: 'user' is possibly 'undefined'.
+
+console.log(user!.name);     // ! を付けると通る（検査されない）</code></pre>
+
+	<p><code>!</code> は <code>as</code> の <code>null</code> 版です。<strong>実行時には何も起きません。</strong>間違っていれば <code>TypeError</code> になります。</p>
+
+	<h2>使ってよい場面・いけない場面</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">判定</th><th>例</th><th>代わりに使うもの</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><span class="badge b-ng">避ける</span></td><td>検索結果が見つかる前提のとき</td><td><code>if (!user) throw new Error(...)</code> で明示的に落とす</td></tr>
+			<tr><td class="nowrap"><span class="badge b-ng">避ける</span></td><td>環境変数（<code>process.env.PORT!</code>）</td><td>読み込み時に検証する（<a class="doclink doc15" href="A3-実務パターン集.html">A3</a>）</td></tr>
+			<tr><td class="nowrap"><span class="badge b-warn">条件付き</span></td><td>直前に存在を確認済みだが、型が追従しないとき</td><td>できれば絞り込みで解決する（<a class="doclink doc08" href="08-型の絞り込み.html">08</a>）</td></tr>
+			<tr><td class="nowrap"><span class="badge b-ok">よい</span></td><td>クラスのプロパティ定義（<code>name!: string</code>）</td><td>初期化が別の場所で確実に行われる場合のみ</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>! の代わりに例外を投げる</h2>
+
+<pre><code>// assert.ts
+function findUser(id: string): { name: string } | undefined {
+	const db: Record&lt;string, { name: string }&gt; = { "1": { name: "Alice" } };
+	return db[id];
+}
+
+// ! を使わず、見つからないことを明示的に扱う
+function getUserOrThrow(id: string): { name: string } {
+	const user = findUser(id);
+	if (!user) {
+		throw new Error(`ユーザーが見つかりません: ${id}`);
+	}
+	return user;      // ここでは undefined でないことが型でも分かる
+}
+
+console.log(getUserOrThrow("1").name);
+
+try {
+	getUserOrThrow("999");
+} catch (e) {
+	console.log((e as Error).message);
+}</code></pre>
+
+<pre><code>$ npx tsx assert.ts
+Alice
+ユーザーが見つかりません: 999</code></pre>
+
+	<div class="callout">
+		<p><strong>どちらも実行時に落ちますが、落ち方が違います。</strong></p>
+		<p><code>!</code> を使うと <code>TypeError: Cannot read properties of undefined</code> という<strong>原因の分からないエラー</strong>になります。明示的に投げれば<strong>「何が見つからなかったか」が分かります。</strong>デバッグにかかる時間が変わります。</p>
+	</div>
+</section>
+
+<div class="next">
+	<p><strong>まとめ</strong></p>
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">道具</th><th>性質</th><th>使いどころ</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>any</code></td><td><strong>検査しない。伝播する</strong></td><td>ほぼ不要。使うなら消す前提でコメントを残す</td></tr>
+			<tr><td class="nowrap"><code>unknown</code></td><td>代入はできるが、使う前に絞り込みが要る</td><td><strong>外部から来る値の受け口</strong></td></tr>
+			<tr><td class="nowrap"><code>as</code></td><td>検査を黙らせる。<strong>値は変わらない</strong></td><td>検証済みの直後だけ。外部データには使わない</td></tr>
+			<tr><td class="nowrap"><code>satisfies</code></td><td>検査するが、推論された型は残す</td><td>設定オブジェクトの定義</td></tr>
+			<tr><td class="nowrap"><code>!</code></td><td><code>null</code> 版の <code>as</code>。実行時に何もしない</td><td>避ける。明示的に例外を投げるほうが調べやすい</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p><strong>次は <a class="doclink doc07" href="07-関数の型.html">07. 関数の型</a> です。</strong>引数・戻り値・オーバーロード・コールバックの型を扱います。</p>
+</div>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink doc05" href="05-構造的型付け.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>05. 構造的型付け</a> <a class="doclink doc07" href="07-関数の型.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>07. 関数の型</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05. 構造的型付け — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（4章 / 刻み 93.3） */
+.ch01 { --accent: hsl(280,78%,25%);   --accent2: hsl(280,58%,55%);   --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(186.7,78%,25%); --accent2: hsl(186.7,58%,55%); --soft: hsl(186.7,28%,95%); }
+.ch03 { --accent: hsl(93.3,78%,25%);  --accent2: hsl(93.3,58%,55%);  --soft: hsl(93.3,28%,95%); }
+.ch04 { --accent: hsl(0,78%,25%);     --accent2: hsl(0,58%,55%);     --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "05." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "05." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>05. 構造的型付け</h1>
+		<p class="lead">名前ではなく「形」で互換を判定する ／ この資料の山場①</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink doc04" href="04-型の基本.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>04. 型の基本</a> <a class="doclink doc06" href="06-any-unknown-アサーション.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>06. any・unknown・型アサーション</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この章の到達点</h2>
+	<ul>
+		<li>ある値が別の型に代入できるかどうかを、<strong>形を見て</strong>判断できる</li>
+		<li>オブジェクトリテラルのときだけ厳しくなる理由（余剰プロパティチェック）を説明できる</li>
+		<li>形が同じでも<strong>意図的に区別したい</strong>ときの手段を持つ</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>この章の内容</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">形が同じなら同じ型として通る</a></li>
+		<li class="ch02"><a href="#c2">余剰プロパティチェック</a></li>
+		<li class="ch03"><a href="#c3">クラスも形で判定される</a></li>
+		<li class="ch04"><a href="#c4">意図的に区別する — ブランド型</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>05.1 形が同じなら同じ型として通る</h1>
+
+	<h2>名前は見ていない</h2>
+
+	<p>TypeScript は<strong>型の名前を見ません。</strong>持っているプロパティの形だけを見ます。</p>
+
+<pre><code>type User = { name: string };
+type Animal = { name: string };
+
+const a: User = { name: "Alice" };
+const b: Animal = a;              // 通る。形が同じだから</code></pre>
+
+	<p><code>User</code> と <code>Animal</code> はまったく別の意図で作った型ですが、<strong>形が同じなので互換</strong>です。</p>
+
+	<figure>
+		<svg viewBox="0 0 900 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="名前的型付けと構造的型付けの違い">
+			<defs>
+				<linearGradient id="g-05-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-05-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(120,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(120,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-05-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+				<marker id="m-05-1x" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#a51f22"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<!-- 名前的型付け -->
+			<rect x="20" y="20" width="410" height="52" rx="8" fill="url(#g-05-1a)"/>
+			<text x="225" y="42" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">名前的型付け（Java・C#）</text>
+			<text x="225" y="62" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">型の名前が一致しないと互換にならない</text>
+
+			<rect x="40" y="100" width="150" height="74" rx="6" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="115" y="124" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">class User</text>
+			<text x="115" y="146" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">name: String</text>
+
+			<rect x="260" y="100" width="150" height="74" rx="6" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="335" y="124" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">class Animal</text>
+			<text x="335" y="146" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">name: String</text>
+
+			<path d="M195,137 L250,137" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#m-05-1x)"/>
+			<text x="222" y="128" text-anchor="middle" fill="#a51f22" font-size="17" font-family="sans-serif" font-weight="700">×</text>
+
+			<text x="225" y="202" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">形が同じでも代入できない</text>
+			<text x="225" y="222" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">互換にするには implements や extends が要る</text>
+
+			<!-- 構造的型付け -->
+			<rect x="470" y="20" width="410" height="52" rx="8" fill="url(#g-05-1b)"/>
+			<text x="675" y="42" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">構造的型付け（TypeScript）</text>
+			<text x="675" y="62" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">形が一致すれば互換になる</text>
+
+			<rect x="490" y="100" width="150" height="74" rx="6" fill="#fff" stroke="#7aa87a" stroke-width="2"/>
+			<text x="565" y="124" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">type User</text>
+			<text x="565" y="146" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">name: string</text>
+
+			<rect x="710" y="100" width="150" height="74" rx="6" fill="#fff" stroke="#7aa87a" stroke-width="2"/>
+			<text x="785" y="124" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">type Animal</text>
+			<text x="785" y="146" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">name: string</text>
+
+			<path d="M645,137 L700,137" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#m-05-1)"/>
+			<text x="672" y="128" text-anchor="middle" fill="#1d7a3c" font-size="15" font-family="sans-serif" font-weight="700">OK</text>
+
+			<text x="675" y="202" text-anchor="middle" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">宣言なしで代入できる</text>
+			<text x="675" y="222" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">互いを知らなくても、形が合えば通る</text>
+
+			<rect x="20" y="250" width="860" height="60" rx="8" fill="#f2f5fb" stroke="#d9dfe8"/>
+			<text x="40" y="274" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">判定の基準</text>
+			<text x="40" y="295" fill="#4a5568" font-size="12.5" font-family="sans-serif">「受け取る側が要求するプロパティを、渡す側がすべて持っているか」だけを見る</text>
+		</svg>
+		<figcaption>図 1 — 名前で判定するか、形で判定するか</figcaption>
+	</figure>
+
+	<h2>多い分には構わない</h2>
+
+	<p>判定の基準は<strong>「受け取る側が要求するものを、渡す側が持っているか」</strong>です。余分に持っていても通ります。</p>
+
+<pre><code>type Named = { name: string };
+
+const user = { name: "Alice", age: 30, email: "a@example.com" };
+const n: Named = user;            // 通る。name を持っているから</code></pre>
+
+	<div class="callout">
+		<p><strong>Java・C# から来た人へ</strong></p>
+		<p>これは Java・C# の<strong>名前的型付け（nominal typing）</strong>と根本的に違います。Java では、形が同じでも <code>implements</code> を書かなければ互換になりません。</p>
+		<p>TypeScript が構造的型付けを採用しているのは、<strong>JavaScript のコードに後から型を付けるため</strong>です。既存の JavaScript は「この型を実装します」とは宣言していません。形だけを見る方式なら、宣言を足さずに型を付けられます。</p>
+	</div>
+
+	<h2>関数も形で判定される</h2>
+
+<pre><code>type Handler = (x: number) => void;
+
+const f: Handler = (x) => console.log(x);          // OK
+const g: Handler = () => console.log("hi");        // OK — 引数を使わなくてよい
+const h: Handler = (x: number, y: number) => {};   // エラー — 引数が多い</code></pre>
+
+	<p><strong>引数は少ない分には構いません。</strong>JavaScript では、渡された引数を使わない関数は普通に書けるためです（<code>[1,2,3].map(x =&gt; x * 2)</code> のように、<code>map</code> が渡す2つ目・3つ目の引数を無視できます）。この扱いは <a class="doclink doc07" href="07-関数の型.html">07. 関数の型</a> で詳しく見ます。</p>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>05.2 余剰プロパティチェック</h1>
+
+	<h2>直接書いたときだけ厳しくなる</h2>
+
+	<p>前の節で「余分に持っていても通る」と書きましたが、<strong>例外があります。</strong></p>
+
+<pre><code>type User = { name: string };
+
+// ① 変数を経由する → 通る
+const obj = { name: "Alice", age: 30 };
+const a: User = obj;
+
+// ② オブジェクトリテラルを直接書く → エラー
+const b: User = { name: "Alice", age: 30 };
+//                               ~~~~~~~
+// error TS2353: Object literal may only specify known properties,
+//               and 'age' does not exist in type 'User'.
+//
+// 訳: オブジェクト リテラルは既知のプロパティのみ指定できます。
+//     'age' は型 'User' に存在しません。</code></pre>
+
+	<p>同じ形なのに、<strong>①は通り、②はエラー</strong>になります。これが<strong>余剰プロパティチェック</strong>です。</p>
+
+	<figure>
+		<svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="余剰プロパティチェックは直接書いたときだけ働く">
+			<defs>
+				<linearGradient id="g-05-2a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-05-2b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-05-2c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-05-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<!-- 変数を経由する -->
+			<text x="20" y="28" fill="#1d7a3c" font-size="13.5" font-family="sans-serif" font-weight="700">① 変数を経由する — 通る</text>
+
+			<rect x="20" y="42" width="230" height="56" rx="8" fill="url(#g-05-2c)"/>
+			<text x="135" y="66" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">const obj = &#123; name, age &#125;</text>
+			<text x="135" y="86" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">いったん変数に入れる</text>
+
+			<rect x="330" y="42" width="180" height="56" rx="8" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="420" y="66" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">形の判定だけ</text>
+			<text x="420" y="86" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">name を持っているか</text>
+
+			<rect x="590" y="42" width="230" height="56" rx="8" fill="url(#g-05-2a)"/>
+			<text x="705" y="66" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">const a: User = obj;</text>
+			<text x="705" y="86" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">age が余っていても通る</text>
+
+			<path d="M250,70 L322,70" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-05-2)"/>
+			<path d="M510,70 L582,70" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#m-05-2)"/>
+
+			<!-- リテラルを直接書く -->
+			<text x="20" y="158" fill="#a51f22" font-size="13.5" font-family="sans-serif" font-weight="700">② オブジェクトリテラルを直接書く — エラー</text>
+
+			<rect x="20" y="172" width="230" height="56" rx="8" fill="url(#g-05-2c)"/>
+			<text x="135" y="196" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">&#123; name, age &#125; をその場で</text>
+			<text x="135" y="216" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">変数を経由しない</text>
+
+			<rect x="330" y="172" width="180" height="56" rx="8" fill="#fff" stroke="#e0a0a0" stroke-width="2"/>
+			<text x="420" y="196" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">余剰プロパティ</text>
+			<text x="420" y="216" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">チェックが働く</text>
+
+			<rect x="590" y="172" width="230" height="56" rx="8" fill="url(#g-05-2b)"/>
+			<text x="705" y="196" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">error TS2353</text>
+			<text x="705" y="216" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">age は User に存在しない</text>
+
+			<path d="M250,200 L322,200" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-05-2)"/>
+			<path d="M510,200 L582,200" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#m-05-2)"/>
+
+			<text x="450" y="264" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">同じ形なのに結果が違う。②を厳しくしているのは打ち間違いを見つけるため</text>
+		</svg>
+		<figcaption>図 2 — 余剰プロパティチェックは、その場で書いたリテラルにだけ働く</figcaption>
+	</figure>
+
+	<h2>なぜこの仕様があるか</h2>
+
+	<div class="callout">
+		<p><strong>打ち間違いを検出するためです。</strong></p>
+		<p>構造的型付けでは「多い分には構わない」ため、<strong><code>{ namae: "Alice" }</code> のような打ち間違いも「余分なプロパティ」として通ってしまいます。</strong>それでは型を書く意味がありません。</p>
+		<p>そこで<strong>「その場で書いたオブジェクトリテラル」に限って</strong>、余分なプロパティをエラーにします。変数を経由する場合は、書き手が意図して渡していると見なして通します。</p>
+	</div>
+
+	<h2>意図的に余分な値を渡したいとき</h2>
+
+<pre><code>type User = { name: string };
+
+// ① 変数に入れてから渡す（最も素直）
+const payload = { name: "Alice", age: 30 };
+const a: User = payload;
+
+// ② 型を union にする
+type UserWithExtra = User &amp; { age?: number };
+
+// ③ インデックスシグネチャを足す
+type Loose = { name: string; [key: string]: unknown };</code></pre>
+
+	<p><code>as User</code> で黙らせることもできますが、<strong>打ち間違いも一緒に通してしまいます</strong>（<a class="doclink doc06" href="06-any-unknown-アサーション.html">06</a>）。</p>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>05.3 クラスも形で判定される</h1>
+
+	<h2>implements を書かなくても互換</h2>
+
+<pre><code>interface Logger {
+	log(message: string): void;
+}
+
+// implements を書いていない
+class ConsoleLogger {
+	log(message: string) {
+		console.log(message);
+	}
+}
+
+const l: Logger = new ConsoleLogger();     // 通る</code></pre>
+
+	<div class="callout">
+		<p><strong>Java・C# から来た人へ</strong></p>
+		<p>Java なら <code>class ConsoleLogger implements Logger</code> と書かなければコンパイルが通りません。TypeScript では<strong>書かなくても通ります。</strong></p>
+		<p>ただし <code>implements</code> を書く意味はあります。<strong>書いておくと、クラス側の実装が要件を満たさなくなったときに、クラスの定義位置でエラーになります。</strong>書かない場合、エラーが出るのは「代入しようとした場所」で、原因から離れた位置になります。</p>
+<pre><code>class ConsoleLogger implements Logger {   // 書いておくと、ここで守られる
+	log(message: string) { console.log(message); }
+}</code></pre>
+	</div>
+
+	<h2>private があると形が変わる</h2>
+
+	<p>クラスに <code>private</code> なメンバーがあると、<strong>同じ形でも互換になりません。</strong></p>
+
+<pre><code>class A { private secret = 1; }
+class B { private secret = 1; }
+
+let a: A = new A();
+let b: B = new B();
+a = b;
+//  ~
+// error TS2322: Type 'B' is not assignable to type 'A'.
+//   Types have separate declarations of a private property 'secret'.
+//
+// 訳: 型 'B' を型 'A' に割り当てることはできません。
+//     プライベート プロパティ 'secret' の宣言が別々です。</code></pre>
+
+	<p><code>private</code> なメンバーは<strong>「そのクラスで宣言されたもの」として区別</strong>されます。これが、TypeScript で<strong>名前的な区別に最も近い挙動</strong>です。</p>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>05.4 意図的に区別する — ブランド型</h1>
+
+	<h2>形が同じだと混ざる</h2>
+
+	<p>構造的型付けの弱点は、<strong>意味が違うのに形が同じ値を取り違えられる</strong>ことです。</p>
+
+<pre><code>type UserId = string;
+type OrderId = string;
+
+function getUser(id: UserId) { /* ... */ }
+
+const orderId: OrderId = "order-123";
+getUser(orderId);            // 通ってしまう。どちらも string だから</code></pre>
+
+	<h2>ブランド型で区別する</h2>
+
+	<p><strong>実体のないプロパティを足して、形を意図的にずらします。</strong></p>
+
+<pre><code>type UserId = string &amp; { readonly __brand: "UserId" };
+type OrderId = string &amp; { readonly __brand: "OrderId" };
+
+function getUser(id: UserId) { /* ... */ }
+
+const orderId = "order-123" as OrderId;
+getUser(orderId);
+//      ~~~~~~~
+// error TS2345: Argument of type 'OrderId' is not assignable to parameter of type 'UserId'.
+//
+// 訳: 型 'OrderId' の引数を型 'UserId' のパラメーターに割り当てることはできません。</code></pre>
+
+	<div class="callout">
+		<p><strong><code>__brand</code> は実行時には存在しません。</strong></p>
+		<p>型の上でだけ存在する目印です。実際の値はただの文字列なので、<strong>実行時のコストはゼロ</strong>です。<code>as</code> を使わないと作れないため、<strong>「ここで意図的に変換した」という箇所が検索できる</strong>という副次的な利点もあります。</p>
+	</div>
+
+	<h2>生成関数と組み合わせる</h2>
+
+	<p><code>as</code> を書く場所を1か所に閉じ込めると、検証も一緒に行えます。</p>
+
+<pre><code>// branded.ts
+type UserId = string &amp; { readonly __brand: "UserId" };
+
+function toUserId(s: string): UserId {
+	if (!s.startsWith("user-")) {
+		throw new Error(`UserId の形式が不正です: ${s}`);
+	}
+	return s as UserId;
+}
+
+const id = toUserId("user-001");
+console.log(id);
+
+try {
+	toUserId("order-123");
+} catch (e) {
+	console.log((e as Error).message);
+}</code></pre>
+
+<pre><code>$ npx tsx branded.ts
+user-001
+UserId の形式が不正です: order-123</code></pre>
+
+	<p>この形は <a class="doclink doc14" href="A2-型レシピ集.html">A2. 型レシピ集</a> にも収めています。</p>
+
+	<div class="callout">
+		<p><strong>使いどころを絞ってください。</strong></p>
+		<p>すべての <code>string</code> をブランド型にすると、変換だらけで読みにくくなります。<strong>取り違えると実害が出るもの</strong>（ID の種類、検証済み／未検証の文字列、単位の違う数値）に限って使います。</p>
+	</div>
+</section>
+
+<div class="next">
+	<p><strong>まとめ</strong></p>
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>この章の結論</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">判定の基準</td><td><strong>名前ではなく形。</strong>受け取る側が要求するものを持っていれば通る</td></tr>
+			<tr><td class="nowrap">余分なプロパティ</td><td>基本は通る。ただし<strong>オブジェクトリテラルを直接書いたときだけ</strong>エラー（打ち間違い対策）</td></tr>
+			<tr><td class="nowrap">クラス</td><td><code>implements</code> なしでも互換。ただし<strong>書いておくとクラス側でエラーになる</strong></td></tr>
+			<tr><td class="nowrap"><code>private</code></td><td>あると形が変わり、同じ構造でも互換にならない</td></tr>
+			<tr><td class="nowrap">意図的な区別</td><td><strong>ブランド型。</strong>実行時のコストはゼロ。使いどころは絞る</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p><strong>次は <a class="doclink doc06" href="06-any-unknown-アサーション.html">06. any・unknown・型アサーション</a> です。</strong>型検査から降りる3つの方法と、その代償を扱います。<strong>実務で型が壊れる原因のほとんどがここ</strong>です。</p>
+</div>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink doc04" href="04-型の基本.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>04. 型の基本</a> <a class="doclink doc06" href="06-any-unknown-アサーション.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>06. any・unknown・型アサーション</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>

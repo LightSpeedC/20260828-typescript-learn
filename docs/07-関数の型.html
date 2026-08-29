@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07. 関数の型 — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（4章 / 刻み 93.3） */
+.ch01 { --accent: hsl(280,78%,25%);   --accent2: hsl(280,58%,55%);   --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(186.7,78%,25%); --accent2: hsl(186.7,58%,55%); --soft: hsl(186.7,28%,95%); }
+.ch03 { --accent: hsl(93.3,78%,25%);  --accent2: hsl(93.3,58%,55%);  --soft: hsl(93.3,28%,95%); }
+.ch04 { --accent: hsl(0,78%,25%);     --accent2: hsl(0,58%,55%);     --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "07." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "07." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>07. 関数の型</h1>
+		<p class="lead">引数・戻り値・オーバーロード・コールバック</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink doc06" href="06-any-unknown-アサーション.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>06. any・unknown・型アサーション</a> <a class="doclink doc08" href="08-型の絞り込み.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>08. 型の絞り込み</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この章の到達点</h2>
+	<ul>
+		<li>戻り値の型を<strong>書くべき場所と省く場所</strong>を判断できる</li>
+		<li>コールバックの引数が少なくても通る理由を説明できる</li>
+		<li>オーバーロードが Java・C# とは別の仕組みであることを理解する</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>この章の内容</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">引数と戻り値</a></li>
+		<li class="ch02"><a href="#c2">省略可能引数とデフォルト値</a></li>
+		<li class="ch03"><a href="#c3">オーバーロード</a></li>
+		<li class="ch04"><a href="#c4">コールバックの型</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>07.1 引数と戻り値</h1>
+
+	<h2>書き方</h2>
+
+<pre><code>// 関数宣言
+function add(a: number, b: number): number {
+	return a + b;
+}
+
+// アロー関数
+const sub = (a: number, b: number): number =&gt; a - b;
+
+// 型だけを定義する
+type BinaryOp = (a: number, b: number) =&gt; number;
+const mul: BinaryOp = (a, b) =&gt; a * b;      // 引数の型は推論される</code></pre>
+
+	<div class="callout">
+		<p><strong>型の位置で使う矢印は <code>=&gt;</code>、値としてのアロー関数も <code>=&gt;</code> です。</strong></p>
+		<p>紛らわしいですが、<strong>型の文脈では戻り値の型を書き、値の文脈では処理を書きます。</strong><code>type BinaryOp = (a: number, b: number) =&gt; number;</code> の <code>number</code> は「戻り値の型」です。</p>
+	</div>
+
+	<h2>戻り値の型は書くべきか</h2>
+
+	<p>推論に任せられますが、<strong>公開する関数には書くことを勧めます。</strong></p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">判定</th><th>場面</th><th>理由</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><span class="badge b-ok">書く</span></td><td>他のファイルから使われる関数</td><td><strong>実装を変えたとき、変更の影響がその関数の中で止まる</strong></td></tr>
+			<tr><td class="nowrap"><span class="badge b-ok">書く</span></td><td>再帰する関数</td><td>推論できない場合がある</td></tr>
+			<tr><td class="nowrap"><span class="badge b-none">省く</span></td><td>その場で使う短いコールバック</td><td>書くとかえって読みにくい</td></tr>
+			<tr><td class="nowrap"><span class="badge b-none">省く</span></td><td>1行で値を返すだけの関数</td><td>推論で十分</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+<pre><code>// 書いておくと、実装ミスがこの関数の中で捕まる
+function findName(id: string): string {
+	const users: Record&lt;string, string&gt; = { "1": "Alice" };
+	return users[id];
+	//     ~~~~~~~~~~
+	// strict では error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+	//
+	// 訳: 型 'string | undefined' を型 'string' に割り当てることはできません。
+}</code></pre>
+
+	<p>戻り値の型を書かなければ、この関数の型は <code>string | undefined</code> と推論され、<strong>問題は呼び出し側で表面化します。</strong>原因から離れた場所でエラーになります。</p>
+
+	<h2>void と undefined</h2>
+
+<pre><code>function log(msg: string): void {
+	console.log(msg);
+}</code></pre>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">型</th><th>意味</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>void</code></td><td><strong>戻り値を使わない。</strong>何を返してもよいが、呼び出し側は使ってはいけない</td></tr>
+			<tr><td class="nowrap"><code>undefined</code></td><td><code>undefined</code> を返す。<code>return;</code> または <code>return undefined;</code> が必要</td></tr>
+			<tr><td class="nowrap"><code>never</code></td><td><strong>戻ってこない。</strong>必ず例外を投げるか、無限ループする</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+<pre><code>function fail(message: string): never {
+	throw new Error(message);
+}</code></pre>
+
+	<p><code>never</code> は <a class="doclink doc08" href="08-型の絞り込み.html">08. 型の絞り込み</a> の網羅性チェックでも使います。</p>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>07.2 省略可能引数とデフォルト値</h1>
+
+	<h2>3つの書き方</h2>
+
+<pre><code>// ① 省略可能（undefined になりうる）
+function greet1(name: string, title?: string) {
+	return title ? `${title} ${name}` : name;
+}
+
+// ② デフォルト値（省略すると既定値が入る）
+function greet2(name: string, title = "様") {
+	return `${title} ${name}`;
+}
+
+// ③ 可変長引数
+function join(sep: string, ...parts: string[]) {
+	return parts.join(sep);
+}</code></pre>
+
+	<div class="callout">
+		<p><strong>省略可能引数は末尾にしか置けません。</strong></p>
+		<p><code>function f(a?: string, b: number)</code> はエラーです。JavaScript の引数は位置で決まるため、<strong>途中を飛ばして渡せない</strong>ためです。引数が増えてきたら<strong>オブジェクトで受け取る</strong>形に変えてください。</p>
+<pre><code>function createUser(opts: { name: string; age?: number; email?: string }) { /* ... */ }
+
+createUser({ name: "Alice", email: "a@example.com" });   // 順序に縛られない</code></pre>
+	</div>
+
+	<h2>デフォルト値があると型が変わる</h2>
+
+<pre><code>function f(title = "様") {
+	// title の型は string（string | undefined ではない）
+	return title.length;
+}
+
+f();              // OK
+f(undefined);     // OK — undefined を渡すと既定値が使われる</code></pre>
+
+	<h2>動かしてみる</h2>
+
+<pre><code>// args.ts
+function greet(name: string, title = "様"): string {
+	return `${title} ${name}`;
+}
+
+function join(sep: string, ...parts: string[]): string {
+	return parts.join(sep);
+}
+
+console.log(greet("田中"));
+console.log(greet("Alice", "Ms."));
+console.log(join(" / ", "a", "b", "c"));</code></pre>
+
+<pre><code>$ npx tsx args.ts
+様 田中
+Ms. Alice
+a / b / c</code></pre>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>07.3 オーバーロード</h1>
+
+	<h2>実装は1つだけ</h2>
+
+	<p>TypeScript のオーバーロードは<strong>「シグネチャを複数書き、実装は1つ」</strong>という形です。</p>
+
+<pre><code>// シグネチャ（呼び出し側から見える形）
+function parse(input: string): string[];
+function parse(input: number): number[];
+
+// 実装（呼び出し側からは見えない）
+function parse(input: string | number): string[] | number[] {
+	if (typeof input === "string") {
+		return input.split(",");
+	}
+	return [input];
+}
+
+const a = parse("x,y");    // string[]
+const b = parse(5);        // number[]</code></pre>
+
+	<div class="callout">
+		<p><strong>Java・C# から来た人へ</strong></p>
+		<p>Java・C# のオーバーロードは<strong>別々のメソッドが複数存在し、コンパイラが呼び分けます。</strong>TypeScript では<strong>関数は1つだけ</strong>で、型の上で複数の見え方を提供しているにすぎません。</p>
+		<p><strong>実装側で自分で分岐を書く必要があります。</strong>シグネチャと実装が食い違っていても、実装側の型が緩ければエラーになりません。書くときは注意してください。</p>
+	</div>
+
+	<h2>多くの場合は union で足りる</h2>
+
+	<p>オーバーロードは<strong>引数と戻り値の組み合わせが連動するとき</strong>にだけ必要です。</p>
+
+<pre><code>// オーバーロードは不要 — union で書ける
+function double(x: number | string): string {
+	return typeof x === "number" ? String(x * 2) : x + x;
+}</code></pre>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>状況</th><th>書き方</th></tr>
+		</thead>
+		<tbody>
+			<tr><td>戻り値の型が引数によって変わる</td><td><strong>オーバーロード</strong>、またはジェネリクス（<a class="doclink doc09" href="09-ジェネリクス.html">09</a>）</td></tr>
+			<tr><td>戻り値の型は同じ</td><td>union で受ける</td></tr>
+			<tr><td>引数の数が違うだけ</td><td>省略可能引数・デフォルト値</td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>07.4 コールバックの型</h1>
+
+	<h2>引数は少なくてよい</h2>
+
+	<p><a class="doclink doc05" href="05-構造的型付け.html">05. 構造的型付け</a>で触れたとおり、<strong>要求より引数が少ない関数は渡せます。</strong></p>
+
+<pre><code>const nums = [1, 2, 3];
+
+nums.map((x) =&gt; x * 2);              // OK
+nums.map((x, i) =&gt; x * i);           // OK — 2つ目も受け取れる
+nums.map((x, i, arr) =&gt; arr.length); // OK — 3つ目まである</code></pre>
+
+	<figure>
+		<svg viewBox="0 0 900 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="コールバックは引数が少なくても渡せる">
+			<defs>
+				<linearGradient id="g-07-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-07-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-07-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="20" y="20" width="230" height="90" rx="8" fill="url(#g-07-1a)"/>
+			<text x="135" y="46" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">map が渡すもの</text>
+			<text x="135" y="68" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">① 要素　② 添字　③ 配列全体</text>
+			<text x="135" y="90" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">常に3つ渡される</text>
+
+			<rect x="380" y="14" width="380" height="42" rx="8" fill="url(#g-07-1b)"/>
+			<text x="570" y="41" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">(x) =&gt; ...　　1つだけ受け取る</text>
+
+			<rect x="380" y="66" width="380" height="42" rx="8" fill="url(#g-07-1b)"/>
+			<text x="570" y="93" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">(x, i) =&gt; ...　　2つ受け取る</text>
+
+			<rect x="380" y="118" width="380" height="42" rx="8" fill="url(#g-07-1b)"/>
+			<text x="570" y="145" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">(x, i, arr) =&gt; ...　　3つ受け取る</text>
+
+			<rect x="380" y="170" width="380" height="42" rx="8" fill="#fff" stroke="#a51f22" stroke-width="2"/>
+			<text x="570" y="197" text-anchor="middle" fill="#a51f22" font-size="13" font-family="sans-serif" font-weight="600">(x, i, arr, extra) =&gt; ...　　4つ目はエラー</text>
+
+			<path d="M250,60 L372,35" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#m-07-1)"/>
+			<path d="M250,68 L372,87" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#m-07-1)"/>
+			<path d="M250,80 L372,139" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#m-07-1)"/>
+			<path d="M250,92 L372,191" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#m-07-1)"/>
+
+			<text x="810" y="42" text-anchor="middle" fill="#1d7a3c" font-size="13" font-family="sans-serif" font-weight="700">OK</text>
+			<text x="810" y="94" text-anchor="middle" fill="#1d7a3c" font-size="13" font-family="sans-serif" font-weight="700">OK</text>
+			<text x="810" y="146" text-anchor="middle" fill="#1d7a3c" font-size="13" font-family="sans-serif" font-weight="700">OK</text>
+			<text x="810" y="198" text-anchor="middle" fill="#a51f22" font-size="13" font-family="sans-serif" font-weight="700">×</text>
+
+			<text x="450" y="248" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">少ない分には通る。多い分は「渡されない値」を要求するのでエラーになる</text>
+		</svg>
+		<figcaption>図 1 — 引数は少ない分には通る。渡される数より多くは受け取れない</figcaption>
+	</figure>
+
+	<div class="callout">
+		<p><strong>これは JavaScript の性質に合わせた仕様です。</strong></p>
+		<p>JavaScript では、渡された引数を無視できます。<code>map</code> は常に3つの引数を渡しますが、<strong>受け取る側は必要な数だけ書けばよい</strong>という書き方が普通です。逆に多すぎるとエラーになります（受け取れない値を要求しているため）。</p>
+	</div>
+
+	<h2>コールバックの戻り値が void のとき</h2>
+
+<pre><code>type Handler = (x: number) =&gt; void;
+
+const h: Handler = (x) =&gt; x * 2;     // OK。数値を返しているが通る</code></pre>
+
+	<p><code>void</code> は<strong>「戻り値を使わない」</strong>という意味なので、何を返しても構いません。<strong>ただし呼び出し側は戻り値を使えません。</strong></p>
+
+	<div class="callout">
+		<p><strong>この性質が事故になることがあります。</strong></p>
+<pre><code>const ids: string[] = [];
+const users = [{ id: "1" }, { id: "2" }];
+
+// forEach のコールバックは void を返す想定
+users.forEach((u) =&gt; ids.push(u.id));   // push は number を返すが、無視される（OK）</code></pre>
+		<p>これは問題ありません。しかし<strong><code>async</code> なコールバックを <code>forEach</code> に渡すと、待たれずに進みます。</strong>この扱いは <a class="doclink doc11" href="11-非同期とエラー処理.html">11. 非同期とエラー処理</a> で扱います。</p>
+	</div>
+
+	<h2>関数を引数に取る関数を書く</h2>
+
+<pre><code>// callback.ts
+type Mapper&lt;T, U&gt; = (item: T, index: number) =&gt; U;
+
+function mapAll&lt;T, U&gt;(items: T[], fn: Mapper&lt;T, U&gt;): U[] {
+	const out: U[] = [];
+	for (let i = 0; i &lt; items.length; i++) {
+		out.push(fn(items[i], i));
+	}
+	return out;
+}
+
+console.log(mapAll([1, 2, 3], (n) =&gt; n * 10));
+console.log(mapAll(["a", "b"], (s, i) =&gt; `${i}:${s}`));</code></pre>
+
+<pre><code>$ npx tsx callback.ts
+[ 10, 20, 30 ]
+[ '0:a', '1:b' ]</code></pre>
+
+	<p><code>&lt;T, U&gt;</code> の記法は<strong>ジェネリクス</strong>です。<a class="doclink doc09" href="09-ジェネリクス.html">09. ジェネリクス</a> で扱います。</p>
+
+	<h2>this の型</h2>
+
+	<p>コールバック内の <code>this</code> が問題になる場合、<strong>第1引数として <code>this</code> の型を宣言できます。</strong></p>
+
+<pre><code>function handler(this: HTMLElement, event: Event) {
+	console.log(this.tagName);      // this の型が分かる
+}</code></pre>
+
+	<p>この <code>this</code> は<strong>引数ではありません。</strong>型検査のためだけの宣言で、呼び出し側は渡しません。<strong>アロー関数を使えば <code>this</code> の問題自体が起きない</strong>ため、必要になる場面は限られます。</p>
+</section>
+
+<div class="next">
+	<p><strong>まとめ</strong></p>
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>この章の結論</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">戻り値の型</td><td><strong>公開する関数には書く。</strong>実装ミスをその関数の中で止められる</td></tr>
+			<tr><td class="nowrap">省略可能引数</td><td>末尾にしか置けない。増えたら<strong>オブジェクトで受け取る</strong></td></tr>
+			<tr><td class="nowrap">オーバーロード</td><td><strong>実装は1つだけ。</strong>Java・C# とは別の仕組み。多くは union で足りる</td></tr>
+			<tr><td class="nowrap">コールバック</td><td>引数は<strong>少ない分には通る</strong>。<code>void</code> は「戻り値を使わない」の意味</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p><strong>次は <a class="doclink doc08" href="08-型の絞り込み.html">08. 型の絞り込み</a> です。</strong>この資料の<strong>山場のもうひとつ</strong>で、TypeScript を「書ける」から「使える」に変える章です。</p>
+</div>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink doc06" href="06-any-unknown-アサーション.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>06. any・unknown・型アサーション</a> <a class="doclink doc08" href="08-型の絞り込み.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>08. 型の絞り込み</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>

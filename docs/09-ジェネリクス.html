@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>09. ジェネリクス — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（4章 / 刻み 93.3） */
+.ch01 { --accent: hsl(280,78%,25%);   --accent2: hsl(280,58%,55%);   --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(186.7,78%,25%); --accent2: hsl(186.7,58%,55%); --soft: hsl(186.7,28%,95%); }
+.ch03 { --accent: hsl(93.3,78%,25%);  --accent2: hsl(93.3,58%,55%);  --soft: hsl(93.3,28%,95%); }
+.ch04 { --accent: hsl(0,78%,25%);     --accent2: hsl(0,58%,55%);     --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "09." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "09." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>09. ジェネリクス</h1>
+		<p class="lead">型を引数として受け取る ／ Java・C# との違い</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink doc08" href="08-型の絞り込み.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>08. 型の絞り込み</a> <a class="doclink doc10" href="10-モジュールと宣言ファイル.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>10. モジュールと宣言ファイル</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この章の到達点</h2>
+	<ul>
+		<li>型引数を使って、<strong>型を保ったまま</strong>汎用の関数を書ける</li>
+		<li><code>extends</code> による制約を書ける</li>
+		<li>実行時に型引数の情報が<strong>残らない</strong>ことを理解し、それを前提に設計できる</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>この章の内容</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">型引数の基本</a></li>
+		<li class="ch02"><a href="#c2">extends による制約</a></li>
+		<li class="ch03"><a href="#c3">推論が効く場面・効かない場面</a></li>
+		<li class="ch04"><a href="#c4">Java・C# のジェネリクスとの違い</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>09.1 型引数の基本</h1>
+
+	<h2>any との違い</h2>
+
+	<p>「どんな型でも受け取る関数」を <code>any</code> で書くと、<strong>戻り値の型情報も失われます。</strong></p>
+
+<pre><code>// any で書く — 型が消える
+function firstAny(items: any[]): any {
+	return items[0];
+}
+const a = firstAny(["x", "y"]);      // a は any（string ではない）
+
+// ジェネリクスで書く — 型が保たれる
+function first&lt;T&gt;(items: T[]): T {
+	return items[0];
+}
+const b = first(["x", "y"]);         // b は string</code></pre>
+
+	<div class="callout">
+		<p><strong>ジェネリクスは「型の引数」です。</strong></p>
+		<p><code>&lt;T&gt;</code> は「呼び出し時に決まる型」を表す入れ物です。<strong>渡された値から自動で決まる</strong>ため、通常は明示しません。<code>first&lt;string&gt;(["x"])</code> と書くこともできますが、推論できるなら不要です。</p>
+	</div>
+
+	<figure>
+		<svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="any とジェネリクスの違い">
+			<defs>
+				<linearGradient id="g-09-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-09-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-09-1c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-09-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<text x="20" y="28" fill="#a51f22" font-size="13.5" font-family="sans-serif" font-weight="700">any[] で受けた場合 — 入れた型が出口で失われる</text>
+
+			<rect x="20" y="42" width="180" height="52" rx="8" fill="url(#g-09-1a)"/>
+			<text x="110" y="74" text-anchor="middle" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">string[]</text>
+
+			<rect x="270" y="42" width="240" height="52" rx="8" fill="url(#g-09-1b)"/>
+			<text x="390" y="66" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">firstAny(items: any[]): any</text>
+			<text x="390" y="85" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">型の情報がここで消える</text>
+
+			<rect x="580" y="42" width="180" height="52" rx="8" fill="url(#g-09-1b)"/>
+			<text x="670" y="74" text-anchor="middle" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">any</text>
+
+			<path d="M200,68 L262,68" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-09-1)"/>
+			<path d="M510,68 L572,68" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-09-1)"/>
+			<text x="800" y="72" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">検査が効かない</text>
+
+			<text x="20" y="158" fill="#1d7a3c" font-size="13.5" font-family="sans-serif" font-weight="700">&lt;T&gt; で受けた場合 — 入れた型がそのまま出口に届く</text>
+
+			<rect x="20" y="172" width="180" height="52" rx="8" fill="url(#g-09-1a)"/>
+			<text x="110" y="204" text-anchor="middle" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">string[]</text>
+
+			<rect x="270" y="172" width="240" height="52" rx="8" fill="url(#g-09-1c)"/>
+			<text x="390" y="196" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">first&lt;T&gt;(items: T[]): T</text>
+			<text x="390" y="215" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">T = string と決まる</text>
+
+			<rect x="580" y="172" width="180" height="52" rx="8" fill="url(#g-09-1a)"/>
+			<text x="670" y="204" text-anchor="middle" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">string</text>
+
+			<path d="M200,198 L262,198" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#m-09-1)"/>
+			<path d="M510,198 L572,198" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#m-09-1)"/>
+			<text x="800" y="202" text-anchor="middle" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">検査が効く</text>
+
+			<text x="450" y="262" text-anchor="middle" fill="#4a5568" font-size="12.5" font-family="sans-serif">T は「呼び出し時に決まる型」の入れ物。渡した値から自動で決まる</text>
+		</svg>
+		<figcaption>図 1 — <code>any</code> は型を捨てる。ジェネリクスは呼び出しごとに型を運ぶ</figcaption>
+	</figure>
+
+	<h2>複数の型引数</h2>
+
+<pre><code>function pair&lt;A, B&gt;(a: A, b: B): [A, B] {
+	return [a, b];
+}
+
+const p = pair("x", 1);      // [string, number]</code></pre>
+
+	<h2>型にも使える</h2>
+
+<pre><code>type Box&lt;T&gt; = { value: T };
+
+const b1: Box&lt;string&gt; = { value: "x" };
+const b2: Box&lt;number&gt; = { value: 1 };
+
+// 実務でよく使う形
+type Result&lt;T, E = Error&gt; =
+	| { ok: true; value: T }
+	| { ok: false; error: E };</code></pre>
+
+	<p><code>E = Error</code> は<strong>既定の型引数</strong>です。省略すると <code>Error</code> になります。</p>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>09.2 extends による制約</h1>
+
+	<h2>「こういう性質を持つ型だけ」</h2>
+
+	<p>型引数のままでは、<strong>その値に対して何もできません。</strong>どんな型が来るか分からないためです。</p>
+
+<pre><code>function showLength&lt;T&gt;(x: T) {
+	console.log(x.length);
+	//            ~~~~~~
+	// error TS2339: Property 'length' does not exist on type 'T'.
+}</code></pre>
+
+	<p><code>extends</code> で<strong>「少なくともこれを持っている」</strong>と制約します。</p>
+
+<pre><code>function showLength&lt;T extends { length: number }&gt;(x: T) {
+	console.log(x.length);      // OK
+}
+
+showLength("abc");            // OK（string は length を持つ）
+showLength([1, 2, 3]);        // OK
+showLength(42);               // エラー TS2345</code></pre>
+
+	<h2>keyof と組み合わせる</h2>
+
+	<p>オブジェクトのキーを型として扱えます。<strong>実務で最もよく使うジェネリクスの形</strong>です。</p>
+
+<pre><code>function getProp&lt;T, K extends keyof T&gt;(obj: T, key: K): T[K] {
+	return obj[key];
+}
+
+const user = { name: "Alice", age: 30 };
+
+const n = getProp(user, "name");     // string
+const a = getProp(user, "age");      // number
+const x = getProp(user, "email");
+//                      ~~~~~~~
+// error TS2345: Argument of type '"email"' is not assignable to
+//               parameter of type '"name" | "age"'.
+//
+// 訳: 型 '"email"' の引数を型 '"name" | "age"' のパラメーターに割り当てることはできません。</code></pre>
+
+	<div class="callout">
+		<p><strong>存在しないキーを弾き、キーごとに戻り値の型が変わります。</strong></p>
+		<p><code>keyof T</code> は「<code>T</code> のキーの union」（ここでは <code>"name" | "age"</code>）、<code>T[K]</code> は「<code>K</code> というキーの値の型」です。この2つで<strong>キーと値の対応を型として表現できます。</strong></p>
+	</div>
+
+	<h2>動かしてみる</h2>
+
+<pre><code>// generics.ts
+function getProp&lt;T, K extends keyof T&gt;(obj: T, key: K): T[K] {
+	return obj[key];
+}
+
+function groupBy&lt;T, K extends string&gt;(items: T[], toKey: (item: T) =&gt; K): Record&lt;K, T[]&gt; {
+	const out = {} as Record&lt;K, T[]&gt;;
+	for (const item of items) {
+		const k = toKey(item);
+		(out[k] ??= []).push(item);
+	}
+	return out;
+}
+
+const user = { name: "Alice", age: 30 };
+console.log(getProp(user, "name"));
+
+const words = ["apple", "avocado", "banana"];
+console.log(groupBy(words, (w) =&gt; w[0]));</code></pre>
+
+<pre><code>$ npx tsx generics.ts
+Alice
+{ a: [ 'apple', 'avocado' ], b: [ 'banana' ] }</code></pre>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>09.3 推論が効く場面・効かない場面</h1>
+
+	<h2>引数から決まるなら書かなくてよい</h2>
+
+<pre><code>function first&lt;T&gt;(items: T[]): T { return items[0]; }
+
+first([1, 2, 3]);            // T は number と推論される
+first&lt;number&gt;([1, 2, 3]);    // 書いてもよいが冗長</code></pre>
+
+	<h2>引数に現れない型引数は推論できない</h2>
+
+<pre><code>function parse&lt;T&gt;(json: string): T {
+	return JSON.parse(json);
+}
+
+const user = parse('{"name":"Alice"}');    // T は unknown になる
+const u2 = parse&lt;User&gt;('{"name":"Alice"}'); // 明示すれば通る</code></pre>
+
+	<div class="callout">
+		<p><strong>この形は避けてください。</strong></p>
+		<p><code>parse&lt;User&gt;(...)</code> は <strong><code>as User</code> と同じで、何も検証していません。</strong>「型引数で指定した型が返ってくる」という保証はどこにもありません。<strong>外部から来る値は <code>unknown</code> で受け、型ガードで確かめてください</strong>（<a class="doclink doc06" href="06-any-unknown-アサーション.html">06</a>・<a class="doclink doc08" href="08-型の絞り込み.html">08</a>）。</p>
+	</div>
+
+	<h2>推論を助ける書き方</h2>
+
+<pre><code>// 引数の位置に型引数を出すと推論できる
+function fill&lt;T&gt;(length: number, value: T): T[] {
+	return Array.from({ length }, () =&gt; value);
+}
+
+fill(3, "x");        // string[] と推論される</code></pre>
+
+	<h2>const 型引数</h2>
+
+	<p>リテラル型として推論させたいときに使います。</p>
+
+<pre><code>function toList&lt;const T&gt;(items: readonly T[]): readonly T[] {
+	return items;
+}
+
+const a = toList(["x", "y"]);        // readonly ("x" | "y")[]
+// const 修飾がなければ readonly string[] になる</code></pre>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>09.4 Java・C# のジェネリクスとの違い</h1>
+
+	<h2>実行時に型引数は残らない</h2>
+
+	<div class="callout">
+		<p><strong>Java・C# から来た人へ</strong></p>
+		<p>C# のジェネリクスは<strong>実行時にも型引数が残ります</strong>（<code>typeof(T)</code> が使えます）。Java は型消去のため残りませんが、<code>Class&lt;T&gt;</code> を引数で渡す回避策があります。</p>
+		<p><strong>TypeScript では型引数は完全に消えます。</strong>次のようなことはできません。</p>
+<pre><code>function create&lt;T&gt;(): T {
+	return new T();      // 書けない。T は実行時に存在しない
+	//         ~
+	// error TS2693: 'T' only refers to a type, but is being used as a value here.
+}</code></pre>
+		<p>型ではなく<strong>コンストラクタそのものを引数で渡します。</strong></p>
+<pre><code>function create&lt;T&gt;(ctor: new () =&gt; T): T {
+	return new ctor();
+}
+
+class User { name = ""; }
+const u = create(User);      // User</code></pre>
+	</div>
+
+	<h2>変性 — 引数の型は逆向きに働く</h2>
+
+	<p>この節は<strong>読んで意味が分かれば十分</strong>です。自分で書く必要はほとんどありません。</p>
+
+<pre><code>type Animal = { name: string };
+type Dog = { name: string; bark(): void };
+
+// 戻り値は「狭い型」を返す関数を渡せる（共変）
+type GetAnimal = () =&gt; Animal;
+const g: GetAnimal = (): Dog =&gt; ({ name: "ポチ", bark() {} });   // OK
+
+// 引数は「広い型」を受け取る関数を渡せる（反変）
+type HandleDog = (d: Dog) =&gt; void;
+const h: HandleDog = (a: Animal) =&gt; console.log(a.name);         // OK</code></pre>
+
+	<figure>
+		<svg viewBox="0 0 900 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="戻り値と引数で代入できる向きが逆になる">
+			<defs>
+				<linearGradient id="g-09-2a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-09-2b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-09-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#1d7a3c"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="330" y="14" width="240" height="30" rx="6" fill="#f2f5fb" stroke="#d9dfe8"/>
+			<text x="450" y="34" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">Dog は Animal より狭い型</text>
+
+			<!-- 戻り値 -->
+			<text x="20" y="80" fill="#1c2330" font-size="13.5" font-family="sans-serif" font-weight="700">戻り値 — 狭い型を返す関数を渡せる（共変）</text>
+
+			<rect x="60" y="94" width="220" height="52" rx="8" fill="url(#g-09-2a)"/>
+			<text x="170" y="118" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">要求: () =&gt; Animal</text>
+			<text x="170" y="137" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">Animal が返ればよい</text>
+
+			<rect x="480" y="94" width="220" height="52" rx="8" fill="url(#g-09-2b)"/>
+			<text x="590" y="118" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">渡す: () =&gt; Dog</text>
+			<text x="590" y="137" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">Dog は Animal でもある</text>
+
+			<path d="M470,120 L292,120" stroke="#1d7a3c" stroke-width="2.5" fill="none" marker-end="url(#m-09-2)"/>
+			<text x="740" y="124" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">狭い → 広い ならOK</text>
+
+			<!-- 引数 -->
+			<text x="20" y="192" fill="#a51f22" font-size="13.5" font-family="sans-serif" font-weight="700">引数 — 広い型を受け取る関数を渡せる（反変・向きが逆）</text>
+
+			<rect x="60" y="206" width="220" height="52" rx="8" fill="url(#g-09-2a)"/>
+			<text x="170" y="230" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">要求: (d: Dog) =&gt; void</text>
+			<text x="170" y="249" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">Dog を渡して呼ぶ</text>
+
+			<rect x="480" y="206" width="220" height="52" rx="8" fill="url(#g-09-2b)"/>
+			<text x="590" y="230" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">渡す: (a: Animal) =&gt; void</text>
+			<text x="590" y="249" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">Animal なら何でも扱える</text>
+
+			<path d="M470,232 L292,232" stroke="#1d7a3c" stroke-width="2.5" fill="none" marker-end="url(#m-09-2)"/>
+			<text x="740" y="228" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">広い → 狭い でOK</text>
+			<text x="740" y="248" fill="#4a5568" font-size="12" font-family="sans-serif">戻り値と逆向き</text>
+		</svg>
+		<figcaption>図 2 — 戻り値は狭い型を、引数は広い型を渡せる。向きが逆になる</figcaption>
+	</figure>
+
+	<div class="callout">
+		<p><strong>直感に反するのは引数のほうです。</strong></p>
+		<p><code>Dog</code> を受け取る関数が要求されている場所に、<strong><code>Animal</code>（より広い型）を受け取る関数</strong>を渡せます。<code>Animal</code> を扱える関数なら、<code>Dog</code> が来ても困らないためです。逆に「<code>Dog</code> しか扱えない関数」は、<code>Animal</code> を受け取る場所には渡せません。</p>
+		<p><span class="badge b-strict">strict</span> この検査は <code>strictFunctionTypes</code> が有効なときだけ行われます（<a class="doclink doc03" href="03-tsconfig.html">03. tsconfig</a>）。</p>
+	</div>
+
+	<h2>まとめて比較する</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>Java</th><th>C#</th><th>TypeScript</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">実行時の型情報</td><td>消える（型消去）</td><td><strong>残る</strong></td><td>消える</td></tr>
+			<tr><td class="nowrap"><code>new T()</code></td><td>書けない</td><td>書ける（<code>where T : new()</code>）</td><td>書けない</td></tr>
+			<tr><td class="nowrap">制約の書き方</td><td><code>&lt;T extends X&gt;</code></td><td><code>where T : X</code></td><td><code>&lt;T extends X&gt;</code></td></tr>
+			<tr><td class="nowrap">制約の対象</td><td>クラス・インターフェース</td><td>同左</td><td><strong>任意の型</strong>（union やリテラルも可）</td></tr>
+			<tr><td class="nowrap">変性の指定</td><td>ワイルドカード（<code>? extends</code>）</td><td><code>in</code> / <code>out</code></td><td><strong>指定しない</strong>（構造から自動で決まる）</td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+<div class="next">
+	<p><strong>まとめ</strong></p>
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>この章の結論</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">目的</td><td><code>any</code> と違い、<strong>型を保ったまま</strong>汎用の関数を書く</td></tr>
+			<tr><td class="nowrap">制約</td><td><code>extends</code> で「少なくともこれを持つ」を表す。<code>keyof</code> との組み合わせが実用的</td></tr>
+			<tr><td class="nowrap">推論</td><td>引数から決まるなら書かない。<strong>引数に現れない型引数は <code>as</code> と同じで危険</strong></td></tr>
+			<tr><td class="nowrap">実行時</td><td><strong>型引数は残らない。</strong><code>new T()</code> は書けない。コンストラクタを渡す</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p><strong>次は <a class="doclink doc10" href="10-モジュールと宣言ファイル.html">10. モジュールと宣言ファイル</a> です。</strong>ESM と CJS の相互運用など、<strong>実務で最も事故が多い領域</strong>を扱います。</p>
+</div>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink doc08" href="08-型の絞り込み.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>08. 型の絞り込み</a> <a class="doclink doc10" href="10-モジュールと宣言ファイル.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>10. モジュールと宣言ファイル</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>

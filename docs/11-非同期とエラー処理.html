@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>11. 非同期とエラー処理 — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（4章 / 刻み 93.3） */
+.ch01 { --accent: hsl(280,78%,25%);   --accent2: hsl(280,58%,55%);   --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(186.7,78%,25%); --accent2: hsl(186.7,58%,55%); --soft: hsl(186.7,28%,95%); }
+.ch03 { --accent: hsl(93.3,78%,25%);  --accent2: hsl(93.3,58%,55%);  --soft: hsl(93.3,28%,95%); }
+.ch04 { --accent: hsl(0,78%,25%);     --accent2: hsl(0,58%,55%);     --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "11." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "11." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>11. 非同期とエラー処理</h1>
+		<p class="lead"><code>Promise</code> の型 ／ <code>catch</code> が <code>unknown</code> である理由</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink doc10" href="10-モジュールと宣言ファイル.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>10. モジュールと宣言ファイル</a> <a class="doclink doc12" href="12-ハンズオン.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>12. ハンズオン</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この章の到達点</h2>
+	<ul>
+		<li><code>Promise&lt;T&gt;</code> と <code>async</code> 関数の型を読める</li>
+		<li><code>catch (e)</code> の <code>e</code> を安全に扱える</li>
+		<li>例外で投げるか、戻り値で返すかを<strong>判断基準を持って</strong>選べる</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>この章の内容</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">Promise の型</a></li>
+		<li class="ch02"><a href="#c2">async と await</a></li>
+		<li class="ch03"><a href="#c3">catch が unknown である理由</a></li>
+		<li class="ch04"><a href="#c4">例外か、戻り値か</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>11.1 Promise の型</h1>
+
+	<h2>Promise&lt;T&gt; の T は「成功したときの値」</h2>
+
+<pre><code>const p1: Promise&lt;string&gt; = Promise.resolve("ok");
+const p2: Promise&lt;void&gt; = Promise.resolve();
+
+async function load(): Promise&lt;string&gt; {
+	return "ok";           // Promise で包まなくてよい
+}</code></pre>
+
+	<div class="callout">
+		<p><strong>失敗したときの型は指定できません。</strong></p>
+		<p><code>Promise&lt;T&gt;</code> に「エラーの型」を書く場所はありません。<strong>JavaScript では何でも <code>throw</code> できる</strong>ためです。この制約が <code>catch</code> の扱い（11.3）に効いてきます。</p>
+		<p>Java の <code>throws IOException</code>、C# のドキュメントコメントに相当するものは<strong>型としては存在しません。</strong></p>
+	</div>
+
+	<h2>async 関数の戻り値は必ず Promise</h2>
+
+<pre><code>async function f(): string {
+	//              ~~~~~~
+	// error TS1064: The return type of an async function must be
+	//               the global Promise&lt;T&gt; type.
+	//
+	// 訳: async 関数の戻り値の型は、グローバルな Promise<T> 型である必要があります。
+	return "x";
+}
+
+async function g(): Promise&lt;string&gt; {    // 正しい
+	return "x";
+}</code></pre>
+
+	<h2>並行実行と型</h2>
+
+<pre><code>// Promise.all はタプルとして推論される
+const [a, b] = await Promise.all([
+	Promise.resolve("文字列"),
+	Promise.resolve(42),
+]);
+// a は string、b は number
+
+// allSettled は結果の union を返す
+const results = await Promise.allSettled([Promise.resolve(1)]);
+for (const r of results) {
+	if (r.status === "fulfilled") {
+		console.log(r.value);       // 判別可能ユニオン（08）
+	} else {
+		console.log(r.reason);
+	}
+}</code></pre>
+
+	<p><code>Promise.allSettled</code> の戻り値は<strong>判別可能ユニオン</strong>です（<a class="doclink doc08" href="08-型の絞り込み.html">08</a>）。標準ライブラリでもこの設計が使われています。</p>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>11.2 async と await</h1>
+
+	<h2>await し忘れを検出する</h2>
+
+<pre><code>async function load(): Promise&lt;string&gt; {
+	return "data";
+}
+
+async function main() {
+	const s = load();               // await を忘れた
+	console.log(s.toUpperCase());
+	//            ~~~~~~~~~~~
+	// error TS2339: Property 'toUpperCase' does not exist on type 'Promise&lt;string&gt;'.
+}</code></pre>
+
+	<p><strong>型があると <code>await</code> の忘れが分かります。</strong>JavaScript では <code>[object Promise]</code> という文字列が出力されるまで気づけません。</p>
+
+	<h2>forEach の中では待たれない</h2>
+
+	<div class="callout">
+		<p><strong>これは型では防げない事故です。</strong></p>
+<pre><code>const ids = ["1", "2"];
+
+// 待たれない — forEach は Promise を無視する
+ids.forEach(async (id) =&gt; {
+	await save(id);
+});
+console.log("完了");     // save が終わる前に表示される</code></pre>
+		<p><a class="doclink doc07" href="07-関数の型.html">07. 関数の型</a>で見たとおり、<strong><code>void</code> を返すコールバックには何を返してもよい</strong>ためエラーになりません。<code>for...of</code> か <code>Promise.all</code> を使ってください。</p>
+<pre><code>// 順番に待つ
+for (const id of ids) {
+	await save(id);
+}
+
+// まとめて待つ
+await Promise.all(ids.map((id) =&gt; save(id)));</code></pre>
+	</div>
+
+	<figure>
+		<svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="順次実行と並行実行のタイムライン">
+			<defs>
+				<linearGradient id="g-11-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-11-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<!-- 時間軸 -->
+			<line x1="150" y1="220" x2="820" y2="220" stroke="#8a94a4" stroke-width="1.5"/>
+			<line x1="150" y1="214" x2="150" y2="226" stroke="#8a94a4" stroke-width="1.5"/>
+			<line x1="373" y1="214" x2="373" y2="226" stroke="#8a94a4" stroke-width="1.5"/>
+			<line x1="596" y1="214" x2="596" y2="226" stroke="#8a94a4" stroke-width="1.5"/>
+			<line x1="819" y1="214" x2="819" y2="226" stroke="#8a94a4" stroke-width="1.5"/>
+			<text x="150" y="242" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">0ms</text>
+			<text x="373" y="242" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">100ms</text>
+			<text x="596" y="242" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">200ms</text>
+			<text x="819" y="242" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">300ms</text>
+
+			<!-- 順次 -->
+			<text x="20" y="52" fill="#a51f22" font-size="13" font-family="sans-serif" font-weight="700">順次: await を2回</text>
+			<rect x="150" y="30" width="446" height="34" rx="6" fill="url(#g-11-1a)"/>
+			<text x="373" y="53" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">wait(200, "A")</text>
+			<rect x="596" y="30" width="223" height="34" rx="6" fill="url(#g-11-1a)"/>
+			<text x="707" y="53" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">wait(100, "B")</text>
+			<text x="840" y="52" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="700">300ms</text>
+
+			<!-- 並行 -->
+			<text x="20" y="120" fill="#1d7a3c" font-size="13" font-family="sans-serif" font-weight="700">並行: Promise.all</text>
+			<rect x="150" y="98" width="446" height="34" rx="6" fill="url(#g-11-1b)"/>
+			<text x="373" y="121" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">wait(200, "C")</text>
+			<rect x="150" y="140" width="223" height="34" rx="6" fill="url(#g-11-1b)"/>
+			<text x="261" y="163" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">wait(100, "D")</text>
+			<text x="620" y="120" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="700">200ms</text>
+
+			<line x1="596" y1="24" x2="596" y2="200" stroke="#c8cedb" stroke-width="1" stroke-dasharray="4 4"/>
+
+			<text x="150" y="196" fill="#4a5568" font-size="12.5" font-family="sans-serif">互いに依存しない処理は Promise.all でまとめる。依存があるなら順次にする</text>
+		</svg>
+		<figcaption>図 1 — 順次と並行の所要時間の違い。待ち時間が重なるかどうかで決まる</figcaption>
+	</figure>
+
+	<h2>動かしてみる</h2>
+
+<pre><code>// async-order.ts
+function wait(ms: number, label: string): Promise&lt;string&gt; {
+	return new Promise((resolve) =&gt; setTimeout(() =&gt; resolve(label), ms));
+}
+
+async function main() {
+	// 順番に待つ — 合計 300ms
+	const a = await wait(200, "A");
+	const b = await wait(100, "B");
+	console.log("順次:", a, b);
+
+	// まとめて待つ — 合計 200ms
+	const [c, d] = await Promise.all([wait(200, "C"), wait(100, "D")]);
+	console.log("並行:", c, d);
+}
+
+main();</code></pre>
+
+<pre><code>$ npx tsx async-order.ts
+順次: A B
+並行: C D</code></pre>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>11.3 catch が unknown である理由</h1>
+
+	<h2>何でも throw できる</h2>
+
+	<p>JavaScript では <code>Error</code> 以外も投げられます。</p>
+
+<pre><code>throw "文字列";
+throw 42;
+throw { code: "E001" };</code></pre>
+
+	<p>そのため、<strong><code>catch</code> で受け取る値の型を <code>Error</code> と決めつけられません。</strong></p>
+
+<pre><code>try {
+	risky();
+} catch (e) {
+	// e の型は unknown（strict のとき）
+	console.log(e.message);
+	//          ~
+	// error TS18046: 'e' is of type 'unknown'.
+}</code></pre>
+
+	<div class="callout">
+		<p><strong>Java・C# から来た人へ</strong></p>
+		<p>Java の <code>catch (IOException e)</code>、C# の <code>catch (IOException e)</code> のように<strong>型で捕まえ分けることはできません。</strong>TypeScript の <code>catch</code> は常に1つで、<strong>中で自分で判定します。</strong></p>
+		<p><span class="badge b-strict">strict</span> この <code>unknown</code> は <code>useUnknownInCatchVariables</code>（<code>strict</code> に含まれる）の効果です。無効にすると <code>any</code> になり、<strong>何でも書けてしまいます</strong>（<a class="doclink doc03" href="03-tsconfig.html">03. tsconfig</a>）。</p>
+	</div>
+
+	<figure>
+		<svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="catch は何でも受け取るため unknown になる">
+			<defs>
+				<linearGradient id="g-11-2a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-11-2b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-11-2c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-11-2d" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-11-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<text x="20" y="28" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">JavaScript では何でも throw できる</text>
+
+			<rect x="20" y="42" width="160" height="34" rx="6" fill="url(#g-11-2a)"/>
+			<text x="100" y="65" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">new Error(...)</text>
+
+			<rect x="20" y="84" width="160" height="34" rx="6" fill="url(#g-11-2b)"/>
+			<text x="100" y="107" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">"文字列"</text>
+
+			<rect x="20" y="126" width="160" height="34" rx="6" fill="url(#g-11-2c)"/>
+			<text x="100" y="149" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">42</text>
+
+			<rect x="20" y="168" width="160" height="34" rx="6" fill="url(#g-11-2d)"/>
+			<text x="100" y="191" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">&#123; code: "E001" &#125;</text>
+
+			<rect x="330" y="90" width="180" height="64" rx="8" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="420" y="116" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">catch (e)</text>
+			<text x="420" y="138" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">e は unknown</text>
+
+			<path d="M180,59 L322,110" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-11-2)"/>
+			<path d="M180,101 L322,118" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-11-2)"/>
+			<path d="M180,143 L322,128" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-11-2)"/>
+			<path d="M180,185 L322,138" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-11-2)"/>
+
+			<rect x="600" y="60" width="270" height="44" rx="8" fill="url(#g-11-2d)"/>
+			<text x="735" y="88" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">e instanceof Error → Error として扱う</text>
+
+			<rect x="600" y="116" width="270" height="44" rx="8" fill="url(#g-11-2b)"/>
+			<text x="735" y="144" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">それ以外 → String(e) でログに残す</text>
+
+			<path d="M510,110 L592,84" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-11-2)"/>
+			<path d="M510,130 L592,138" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-11-2)"/>
+
+			<text x="450" y="236" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">型で捕まえ分けられないため、catch の中で自分で判定する</text>
+		</svg>
+		<figcaption>図 2 — <code>throw</code> できる値に制限がないため、<code>catch</code> の変数は <code>unknown</code> になる</figcaption>
+	</figure>
+
+	<h2>安全に扱う型</h2>
+
+<pre><code>try {
+	risky();
+} catch (e) {
+	if (e instanceof Error) {
+		console.error(e.message, e.stack);
+	} else {
+		console.error("Error ではない値が投げられました:", String(e));
+	}
+}</code></pre>
+
+	<h2>独自のエラークラス</h2>
+
+<pre><code>// custom-error.ts
+class ApiError extends Error {
+	constructor(
+		public readonly status: number,
+		message: string,
+	) {
+		super(message);
+		this.name = "ApiError";
+	}
+}
+
+function fetchUser(id: string): string {
+	if (id === "") throw new ApiError(400, "id が空です");
+	if (id === "999") throw new ApiError(404, "見つかりません");
+	return `user-${id}`;
+}
+
+for (const id of ["1", "", "999"]) {
+	try {
+		console.log(fetchUser(id));
+	} catch (e) {
+		if (e instanceof ApiError) {
+			console.log(`[${e.status}] ${e.message}`);
+		} else if (e instanceof Error) {
+			console.log(`想定外: ${e.message}`);
+		} else {
+			console.log(`Error ではない値: ${String(e)}`);
+		}
+	}
+}</code></pre>
+
+<pre><code>$ npx tsx custom-error.ts
+user-1
+[400] id が空です
+[404] 見つかりません</code></pre>
+
+	<div class="callout">
+		<p><strong><code>Error</code> を継承したら <code>this.name</code> を設定してください。</strong></p>
+		<p>設定しないと、ログに <code>Error: 見つかりません</code> と出て<strong>どのエラーか分かりません。</strong>また、<code>instanceof</code> はクラスに対してのみ働くので、<a class="doclink doc05" href="05-構造的型付け.html">構造的型付け</a>とは無関係に<strong>名前で区別されます。</strong></p>
+	</div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>11.4 例外か、戻り値か</h1>
+
+	<h2>2つの方針</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">方式</th><th>書き方</th><th>長所</th><th>短所</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">例外</td><td><code>throw new Error(...)</code></td><td>正常系のコードが読みやすい</td><td><strong>型に現れない。</strong>呼ぶ側が気づけない</td></tr>
+			<tr><td class="nowrap">戻り値</td><td><code>Result&lt;T, E&gt;</code> を返す</td><td><strong>型に現れる。</strong>処理を強制できる</td><td>毎回分岐が要る</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>Result 型</h2>
+
+<pre><code>// result.ts
+type Result&lt;T, E = Error&gt; =
+	| { ok: true; value: T }
+	| { ok: false; error: E };
+
+function parsePort(s: string): Result&lt;number&gt; {
+	const n = Number(s);
+	if (!Number.isInteger(n)) {
+		return { ok: false, error: new Error(`整数ではありません: ${s}`) };
+	}
+	if (n &lt; 1 || n &gt; 65535) {
+		return { ok: false, error: new Error(`範囲外です: ${n}`) };
+	}
+	return { ok: true, value: n };
+}
+
+for (const s of ["3000", "abc", "99999"]) {
+	const r = parsePort(s);
+	if (r.ok) {
+		console.log(`OK: ${r.value}`);
+	} else {
+		console.log(`NG: ${r.error.message}`);
+	}
+}</code></pre>
+
+<pre><code>$ npx tsx result.ts
+OK: 3000
+NG: 整数ではありません: abc
+NG: 範囲外です: 99999</code></pre>
+
+	<p><code>Result</code> は<strong>判別可能ユニオン</strong>です（<a class="doclink doc08" href="08-型の絞り込み.html">08</a>）。<code>r.ok</code> を確かめると、<code>value</code> と <code>error</code> のどちらがあるかが確定します。</p>
+
+	<h2>使い分けの基準</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">状況</th><th>方式</th><th>理由</th></tr>
+		</thead>
+		<tbody>
+			<tr><td>入力の検証（想定内の失敗）</td><td><strong>戻り値</strong></td><td>失敗が普通に起きる。呼ぶ側に対処を強制したい</td></tr>
+			<tr><td>設定の不備・プログラムの誤り</td><td><strong>例外</strong></td><td>回復できない。落として気づかせるべき</td></tr>
+			<tr><td>ライブラリの境界</td><td><strong>戻り値</strong></td><td>使う側が例外の存在に気づけない</td></tr>
+			<tr><td>アプリの奥深く</td><td><strong>例外</strong></td><td>すべての層で分岐すると読めなくなる</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>全体を <code>Result</code> にする必要はありません。</strong></p>
+		<p><code>Result</code> は<strong>境界（外部入力・API・ファイル）で使い、内側は例外</strong>という組み合わせが実務的です。すべてを <code>Result</code> にすると、分岐が積み重なって読みにくくなります。</p>
+		<p>この型は <a class="doclink doc14" href="A2-型レシピ集.html">A2. 型レシピ集</a> にも収めています。</p>
+	</div>
+</section>
+
+<div class="next">
+	<p><strong>まとめ</strong></p>
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>この章の結論</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>Promise&lt;T&gt;</code></td><td><code>T</code> は成功時の値。<strong>失敗の型は指定できない</strong></td></tr>
+			<tr><td class="nowrap"><code>await</code> 忘れ</td><td>型で検出できる。ただし <code>forEach</code> の中は<strong>型では防げない</strong></td></tr>
+			<tr><td class="nowrap"><code>catch (e)</code></td><td><strong><code>unknown</code>。</strong>何でも投げられるため。<code>instanceof Error</code> で確かめる</td></tr>
+			<tr><td class="nowrap">独自エラー</td><td><code>Error</code> を継承し、<strong><code>this.name</code> を設定する</strong></td></tr>
+			<tr><td class="nowrap">例外 / 戻り値</td><td><strong>境界では <code>Result</code>、内側は例外。</strong>全部を <code>Result</code> にしない</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p><strong>次は <a class="doclink doc12" href="12-ハンズオン.html">12. ハンズオン</a> です。</strong>ここまでの内容を使い、1本の実用スクリプトを段階的に完成させます。</p>
+</div>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink doc10" href="10-モジュールと宣言ファイル.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>10. モジュールと宣言ファイル</a> <a class="doclink doc12" href="12-ハンズオン.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>12. ハンズオン</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>

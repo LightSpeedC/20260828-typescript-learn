@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10. モジュールと宣言ファイル — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（4章 / 刻み 93.3） */
+.ch01 { --accent: hsl(280,78%,25%);   --accent2: hsl(280,58%,55%);   --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(186.7,78%,25%); --accent2: hsl(186.7,58%,55%); --soft: hsl(186.7,28%,95%); }
+.ch03 { --accent: hsl(93.3,78%,25%);  --accent2: hsl(93.3,58%,55%);  --soft: hsl(93.3,28%,95%); }
+.ch04 { --accent: hsl(0,78%,25%);     --accent2: hsl(0,58%,55%);     --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "10." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "10." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>10. モジュールと宣言ファイル</h1>
+		<p class="lead">ESM と CJS の相互運用 ／ 実務で最も事故が多い領域</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink doc09" href="09-ジェネリクス.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>09. ジェネリクス</a> <a class="doclink doc11" href="11-非同期とエラー処理.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>11. 非同期とエラー処理</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この章の到達点</h2>
+	<ul>
+		<li><code>import type</code> を使い分けられる</li>
+		<li><strong>ESM と CJS のどちらで動いているか</strong>を判断でき、エラーの原因を切り分けられる</li>
+		<li>型定義がないライブラリに対処できる</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>この章の内容</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">import と export</a></li>
+		<li class="ch02"><a href="#c2">ESM と CJS</a></li>
+		<li class="ch03"><a href="#c3">.d.ts と @types</a></li>
+		<li class="ch04"><a href="#c4">型定義がないライブラリ</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>10.1 import と export</h1>
+
+	<h2>基本形</h2>
+
+<pre><code>// lib.ts
+export const greet = (name: string) =&gt; `Hello, ${name}`;
+export type User = { name: string };
+
+// main.ts
+import { greet, type User } from "./lib.ts";</code></pre>
+
+	<h2>import type — 型だけを取り込む</h2>
+
+	<p>型は実行時に消えるため、<strong>型だけを import している場合、その行ごと消えます。</strong>明示すると意図が伝わり、消えることも保証されます。</p>
+
+<pre><code>import type { User } from "./types.ts";        // 型だけ。実行時には消える
+import { greet, type User } from "./lib.ts";   // 値と型を混ぜる書き方</code></pre>
+
+	<div class="callout">
+		<p><strong><code>import type</code> を使う理由は、循環参照と副作用の回避です。</strong></p>
+		<p>型だけが必要なのに通常の <code>import</code> を書くと、<strong>そのモジュールが実行時に読み込まれます。</strong>読み込むだけで副作用があるモジュールや、循環参照しているモジュールでは問題になります。<strong>型だけを使うなら <code>import type</code> と書いてください。</strong></p>
+	</div>
+
+	<h2>default export は避ける</h2>
+
+<pre><code>// 名前付き export（推奨）
+export const greet = () =&gt; {};
+import { greet } from "./lib.ts";
+
+// default export
+export default function () {}
+import whateverName from "./lib.ts";     // 名前を自由に付けられてしまう</code></pre>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>名前付き</th><th>default</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">名前の統一</td><td><span class="badge b-ok">強制される</span></td><td><span class="badge b-ng">自由に付けられる</span></td></tr>
+			<tr><td class="nowrap">リネームの追従</td><td><span class="badge b-ok">エディタが追える</span></td><td><span class="badge b-ng">追えない</span></td></tr>
+			<tr><td class="nowrap">CJS との相互運用</td><td><span class="badge b-ok">問題が少ない</span></td><td><span class="badge b-ng">食い違いが起きる</span>（10.2）</td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>10.2 ESM と CJS</h1>
+
+	<h2>2つのモジュール方式がある</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">方式</th><th class="nowrap">読み込み</th><th class="nowrap">公開</th><th>由来</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><span class="badge b-esm">ESM</span></td><td class="nowrap"><code>import</code></td><td class="nowrap"><code>export</code></td><td>JavaScript の標準。現在の主流</td></tr>
+			<tr><td class="nowrap"><span class="badge b-cjs">CJS</span></td><td class="nowrap"><code>require()</code></td><td class="nowrap"><code>module.exports</code></td><td>Node.js が独自に導入したもの</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>どちらで動くかは package.json が決める</h2>
+
+<pre><code>{
+	"type": "module"      // ← ESM。省略すると CJS
+}</code></pre>
+
+	<figure>
+		<svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="package.json の type が ESM と CJS を決める">
+			<defs>
+				<linearGradient id="g-10-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-10-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(160,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(160,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-10-1c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(30,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(30,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-10-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="330" y="16" width="240" height="52" rx="8" fill="url(#g-10-1a)"/>
+			<text x="450" y="40" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">package.json</text>
+			<text x="450" y="59" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">"type" の値を見る</text>
+
+			<rect x="40" y="118" width="360" height="150" rx="8" fill="#f2f9f7" stroke="#7aa89e" stroke-width="2"/>
+			<rect x="40" y="118" width="360" height="42" rx="8" fill="url(#g-10-1b)"/>
+			<text x="220" y="145" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">ESM　"type": "module"</text>
+
+			<text x="60" y="186" fill="#1c2330" font-size="12.5" font-family="sans-serif">import / export を使う</text>
+			<text x="60" y="208" fill="#1c2330" font-size="12.5" font-family="sans-serif">拡張子の省略ができない</text>
+			<text x="60" y="230" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">__dirname が使えない</text>
+			<text x="60" y="252" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">require が使えない</text>
+
+			<rect x="500" y="118" width="360" height="150" rx="8" fill="#fbf6f0" stroke="#c0a487" stroke-width="2"/>
+			<rect x="500" y="118" width="360" height="42" rx="8" fill="url(#g-10-1c)"/>
+			<text x="680" y="145" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">CJS　"type" なし（既定）</text>
+
+			<text x="520" y="186" fill="#1c2330" font-size="12.5" font-family="sans-serif">require / module.exports を使う</text>
+			<text x="520" y="208" fill="#1c2330" font-size="12.5" font-family="sans-serif">拡張子を省略できる</text>
+			<text x="520" y="230" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">__dirname が使える</text>
+			<text x="520" y="252" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">require が使える</text>
+
+			<path d="M400,70 L240,110" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-10-1)"/>
+			<path d="M500,70 L660,110" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-10-1)"/>
+
+			<text x="450" y="290" text-anchor="middle" fill="#4a5568" font-size="12.5" font-family="sans-serif">同じ .ts でも、この設定で使える機能が変わる</text>
+		</svg>
+		<figcaption>図 1 — <code>package.json</code> の <code>"type"</code> が ESM と CJS を切り替える</figcaption>
+	</figure>
+
+	<h3>実際の違い</h3>
+
+<pre><code>// main-dirname.ts
+console.log(typeof __dirname === "undefined" ? "__dirname は使えない" : "__dirname は使える");
+console.log(typeof require === "undefined" ? "require は使えない" : "require は使える");</code></pre>
+
+<pre><code>$ node main-dirname.ts               # package.json に type がない場合
+__dirname は使える
+require は使える
+
+$ node main-dirname.ts               # "type": "module" の場合
+__dirname は使えない
+require は使えない</code></pre>
+
+	<div class="callout">
+		<p><strong>ESM では <code>__dirname</code>・<code>__filename</code>・<code>require</code> が存在しません。</strong></p>
+		<p>代わりに <code>import.meta.dirname</code>（Node 20.11 以降）を使います。</p>
+<pre><code>const dir = import.meta.dirname;      // ESM でのファイルの場所</code></pre>
+	</div>
+
+	<h2>よく出るエラーと原因</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>エラー</th><th>原因</th><th>対処</th></tr>
+		</thead>
+		<tbody>
+			<tr><td><code>ERR_REQUIRE_ESM</code></td><td>CJS から ESM を <code>require</code> した</td><td>呼ぶ側を ESM にする（<code>"type": "module"</code>）</td></tr>
+			<tr><td><code>Cannot use import statement outside a module</code></td><td>CJS のファイルで <code>import</code> を書いた</td><td>同上</td></tr>
+			<tr><td><code>ERR_MODULE_NOT_FOUND</code></td><td><span class="badge b-esm">ESM</span> <strong>拡張子を省略した</strong></td><td><code>"./lib.js"</code> のように拡張子を書く</td></tr>
+			<tr><td><code>__dirname is not defined</code></td><td>ESM で <code>__dirname</code> を使った</td><td><code>import.meta.dirname</code> にする</td></tr>
+			<tr><td><code>x is not a function</code>（実行時）</td><td><strong>default export の食い違い</strong></td><td>下記参照</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>拡張子の扱い</h2>
+
+	<p><span class="badge b-esm">ESM</span> <strong>ESM では拡張子の省略ができません。</strong>しかも書くのは<strong>出力後の拡張子</strong>です。</p>
+
+<pre><code>import { greet } from "./lib";        // ESM では動かない
+import { greet } from "./lib.js";     // ← .ts を書いても .js と書く（出力後の名前）
+import { greet } from "./lib.ts";     // Node で直接 .ts を実行する場合はこちら</code></pre>
+
+	<div class="callout">
+		<p><strong>ここが混乱の元です。</strong></p>
+		<p><code>tsc</code> でコンパイルして実行する場合、<code>lib.ts</code> は <code>lib.js</code> になります。<strong><code>import</code> のパスは書き換えられない</strong>ため、最初から <code>.js</code> と書く必要があります。</p>
+		<p>一方、<a class="doclink doc02" href="02-実行環境.html">Node の型ストリップ</a>や <code>tsx</code> で <code>.ts</code> を直接実行する場合は <code>.ts</code> と書きます。<strong>どちらの運用にするかを最初に決めてください。</strong>混ぜると必ず事故ります。</p>
+	</div>
+
+	<h2>default export の食い違い</h2>
+
+<pre><code>// CJS のライブラリ
+module.exports = function foo() {};
+
+// ESM から使う
+import foo from "some-cjs-lib";       // 動く場合と動かない場合がある
+import * as foo from "some-cjs-lib";  // foo.default になることがある</code></pre>
+
+	<p><span class="badge b-esm">ESM</span><span class="badge b-cjs">CJS</span> <code>module.exports</code> と <code>export default</code> は<strong>別の仕組み</strong>です。Node とバンドラで解釈が異なることもあります。</p>
+
+<pre><code>{
+	"compilerOptions": {
+		"esModuleInterop": true        // 相互運用を助ける（既定で有効なことが多い）
+	}
+}</code></pre>
+
+	<p><strong>「型は通るのに実行時に <code>x is not a function</code> になる」</strong>ときは、まずこの食い違いを疑ってください。</p>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>10.3 .d.ts と @types</h1>
+
+	<h2>.d.ts は型だけを書くファイル</h2>
+
+<pre><code>// lib.d.ts — 実装はなく、形だけを宣言する
+export declare function greet(name: string): string;
+export declare const VERSION: string;</code></pre>
+
+	<p><code>tsc</code> は <code>.ts</code> をコンパイルするとき、<code>declaration: true</code> を指定すると <code>.d.ts</code> も出力します。<strong>ライブラリを配布するときは、<code>.js</code> と <code>.d.ts</code> をセットで配ります。</strong></p>
+
+	<h2>型定義がどこから来るか</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">場所</th><th>確認方法</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">ライブラリ同梱</td><td><code>package.json</code> の <code>"types"</code> または <code>"typings"</code> フィールド</td></tr>
+			<tr><td class="nowrap"><code>@types/*</code></td><td><code>node_modules/@types/</code> 配下</td></tr>
+			<tr><td class="nowrap">自分で書いた</td><td>プロジェクト内の <code>.d.ts</code></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>TypeScript 7 では types への明示が必要</h2>
+
+	<p><span class="badge b-ts7">TS7</span> <a class="doclink doc02" href="02-実行環境.html">02. 実行環境</a>で触れたとおり、<strong><code>@types/*</code> を入れるだけでは読み込まれません。</strong></p>
+
+<pre><code>{
+	"compilerOptions": {
+		"types": ["node"]        // ← 使うものを列挙する
+	}
+}</code></pre>
+
+	<div class="callout">
+		<p><strong><code>types</code> を書くと、書いたものだけが読まれます。</strong></p>
+		<p><code>@types/node</code> と <code>@types/jest</code> の両方を使うなら <code>["node", "jest"]</code> と書きます。<strong>1つだけ書くと、もう一方が読まれなくなります。</strong></p>
+	</div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>10.4 型定義がないライブラリ</h1>
+
+	<h2>まず @types を探す</h2>
+
+<pre><code>$ npm i -D @types/ライブラリ名</code></pre>
+
+	<p>見つからなければ、次の3つから選びます。</p>
+
+	<h2>① 最小限の .d.ts を自分で書く</h2>
+
+<pre><code>// types/legacy-lib.d.ts
+declare module "legacy-lib" {
+	export function doSomething(input: string): number;
+}</code></pre>
+
+<pre><code>{
+	"compilerOptions": {
+		"typeRoots": ["./node_modules/@types", "./types"]
+	},
+	"include": ["src/**/*.ts", "types/**/*.d.ts"]
+}</code></pre>
+
+	<p><strong>使う関数だけ書けば十分です。</strong>全体を網羅する必要はありません。</p>
+
+	<h2>② any として受け入れる（暫定）</h2>
+
+<pre><code>// types/legacy-lib.d.ts
+declare module "legacy-lib";      // すべて any になる</code></pre>
+
+	<div class="callout">
+		<p><strong>これは <code>any</code> の伝播を招きます。</strong></p>
+		<p>そのライブラリから来る値がすべて <code>any</code> になり、<strong>下流の検査が無効化されます</strong>（<a class="doclink doc06" href="06-any-unknown-アサーション.html">06</a>）。使うなら<strong>受け口で <code>unknown</code> に変換</strong>してください。</p>
+<pre><code>import { doSomething } from "legacy-lib";
+
+// any のまま使わず、受け口で unknown にする
+const result: unknown = doSomething("x");
+if (typeof result === "number") {
+	console.log(result.toFixed(2));
+}</code></pre>
+	</div>
+
+	<h2>③ ラッパーを1枚かぶせる</h2>
+
+	<p><strong>実務で最も勧められる形です。</strong>型のない世界を1ファイルに閉じ込めます。</p>
+
+<pre><code>// src/legacy-wrapper.ts — ここだけが型のない世界に触れる
+import * as legacy from "legacy-lib";
+
+export function doSomething(input: string): number {
+	const r: unknown = (legacy as { doSomething(s: string): unknown }).doSomething(input);
+	if (typeof r !== "number") {
+		throw new Error(`legacy-lib が想定外の値を返しました: ${String(r)}`);
+	}
+	return r;
+}</code></pre>
+
+	<figure>
+		<svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ラッパーで型のない世界を1ファイルに閉じ込める">
+			<defs>
+				<linearGradient id="g-10-2a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-10-2b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-10-2c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-10-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<!-- ラッパーなし -->
+			<text x="20" y="28" fill="#a51f22" font-size="13.5" font-family="sans-serif" font-weight="700">ラッパーなし — any が全体に広がる</text>
+
+			<rect x="20" y="42" width="170" height="52" rx="8" fill="url(#g-10-2a)"/>
+			<text x="105" y="66" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">型のないライブラリ</text>
+			<text x="105" y="85" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">any</text>
+
+			<rect x="250" y="42" width="140" height="52" rx="8" fill="url(#g-10-2a)"/>
+			<text x="320" y="74" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">service.ts</text>
+
+			<rect x="450" y="42" width="140" height="52" rx="8" fill="url(#g-10-2a)"/>
+			<text x="520" y="74" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">handler.ts</text>
+
+			<rect x="650" y="42" width="140" height="52" rx="8" fill="url(#g-10-2a)"/>
+			<text x="720" y="74" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">main.ts</text>
+
+			<path d="M190,68 L242,68" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#m-10-2)"/>
+			<path d="M390,68 L442,68" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#m-10-2)"/>
+			<path d="M590,68 L642,68" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#m-10-2)"/>
+			<text x="820" y="72" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">全部 any</text>
+
+			<!-- ラッパーあり -->
+			<text x="20" y="158" fill="#1d7a3c" font-size="13.5" font-family="sans-serif" font-weight="700">ラッパーあり — 型のない世界が1ファイルで止まる</text>
+
+			<rect x="20" y="172" width="170" height="52" rx="8" fill="url(#g-10-2a)"/>
+			<text x="105" y="196" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">型のないライブラリ</text>
+			<text x="105" y="215" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">any</text>
+
+			<rect x="250" y="164" width="140" height="68" rx="8" fill="url(#g-10-2b)"/>
+			<text x="320" y="188" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">wrapper.ts</text>
+			<text x="320" y="206" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">unknown で受けて</text>
+			<text x="320" y="222" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">検証して返す</text>
+
+			<rect x="450" y="172" width="140" height="52" rx="8" fill="url(#g-10-2c)"/>
+			<text x="520" y="204" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">handler.ts</text>
+
+			<rect x="650" y="172" width="140" height="52" rx="8" fill="url(#g-10-2c)"/>
+			<text x="720" y="204" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">main.ts</text>
+
+			<path d="M190,198 L242,198" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#m-10-2)"/>
+			<path d="M390,198 L442,198" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#m-10-2)"/>
+			<path d="M590,198 L642,198" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#m-10-2)"/>
+			<text x="820" y="202" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">型が付く</text>
+
+			<text x="450" y="264" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">ライブラリを差し替えるときも、直すのは wrapper.ts だけで済む</text>
+		</svg>
+		<figcaption>図 2 — ラッパーを1枚かぶせると、型のない世界がそこで止まる</figcaption>
+	</figure>
+
+	<p>他のファイルは <code>legacy-wrapper.ts</code> だけを使います。<strong>ライブラリを差し替えるときも、直すのはこのファイルだけです。</strong></p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">手段</th><th>手間</th><th>安全性</th><th>使いどころ</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>@types</code> を入れる</td><td class="nowrap"><span class="badge b-ok">小</span></td><td class="nowrap"><span class="badge b-ok">高</span></td><td>あるなら必ずこれ</td></tr>
+			<tr><td class="nowrap">最小の <code>.d.ts</code></td><td class="nowrap"><span class="badge b-warn">中</span></td><td class="nowrap"><span class="badge b-warn">中</span></td><td>使う範囲が狭いとき</td></tr>
+			<tr><td class="nowrap"><code>declare module</code> だけ</td><td class="nowrap"><span class="badge b-ok">小</span></td><td class="nowrap"><span class="badge b-ng">低</span></td><td>暫定。受け口で <code>unknown</code> にする</td></tr>
+			<tr><td class="nowrap"><strong>ラッパー</strong></td><td class="nowrap"><span class="badge b-warn">中</span></td><td class="nowrap"><span class="badge b-ok">高</span></td><td><strong>実務で最も勧められる</strong></td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+<div class="next">
+	<p><strong>まとめ</strong></p>
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>この章の結論</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>import type</code></td><td>型だけなら明示する。循環参照と副作用を避けられる</td></tr>
+			<tr><td class="nowrap">ESM / CJS</td><td><code>package.json</code> の <code>"type"</code> が決める。<strong>ESM では <code>__dirname</code>・<code>require</code> が使えない</strong></td></tr>
+			<tr><td class="nowrap">拡張子</td><td>ESM は省略できない。<strong><code>tsc</code> 経由なら <code>.js</code>、直接実行なら <code>.ts</code></strong>。運用を先に決める</td></tr>
+			<tr><td class="nowrap"><code>@types</code></td><td>TypeScript 7 では <code>types</code> に列挙する。<strong>書いたものだけが読まれる</strong></td></tr>
+			<tr><td class="nowrap">型のないライブラリ</td><td><strong>ラッパーを1枚かぶせる。</strong>型のない世界を1ファイルに閉じ込める</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p><strong>次は <a class="doclink doc11" href="11-非同期とエラー処理.html">11. 非同期とエラー処理</a> です。</strong><code>Promise</code> の型と、<code>catch</code> が <code>unknown</code> である理由を扱います。</p>
+</div>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink doc09" href="09-ジェネリクス.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>09. ジェネリクス</a> <a class="doclink doc11" href="11-非同期とエラー処理.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>11. 非同期とエラー処理</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>

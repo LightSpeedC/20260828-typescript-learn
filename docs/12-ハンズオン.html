@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>12. ハンズオン — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（3章 / 刻み 140） */
+.ch01 { --accent: hsl(280,78%,25%); --accent2: hsl(280,58%,55%); --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(140,78%,25%); --accent2: hsl(140,58%,55%); --soft: hsl(140,28%,95%); }
+.ch03 { --accent: hsl(0,78%,25%);   --accent2: hsl(0,58%,55%);   --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "12." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "12." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>12. ハンズオン</h1>
+		<p class="lead">JSON を読んで集計する ／ <code>any</code> から始めて型を付けていく</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink doc11" href="11-非同期とエラー処理.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>11. 非同期とエラー処理</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この章の到達点</h2>
+	<ul>
+		<li>既存の JavaScript に<strong>後から型を足す</strong>手順を体験する</li>
+		<li>外部から来るデータを検証してから使う形を、自分で書ける</li>
+		<li>ここまでの内容（型・絞り込み・<code>Result</code>）を組み合わせられる</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>この章の内容</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">課題と準備</a></li>
+		<li class="ch02"><a href="#c2">4段階で型を付けていく</a></li>
+		<li class="ch03"><a href="#c3">解答例と詰まりやすい箇所</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>12.1 課題と準備</h1>
+
+	<h2>作るもの</h2>
+
+	<p>売上データの JSON を読み込み、<strong>商品ごとの売上合計を降順で出力する</strong>スクリプトを作ります。</p>
+
+	<h2>準備</h2>
+
+<pre><code>$ mkdir handson &amp;&amp; cd handson
+$ npm init -y
+$ npm i -D typescript tsx @types/node</code></pre>
+
+	<p><code>sales.json</code> を用意します。</p>
+
+<pre><code>[
+	{ "date": "2026-01-15", "product": "ノート", "amount": 1200, "qty": 3 },
+	{ "date": "2026-01-16", "product": "ペン", "amount": 300, "qty": 10 },
+	{ "date": "2026-02-01", "product": "ノート", "amount": 800, "qty": 2 },
+	{ "date": "2026-02-03", "product": "消しゴム", "amount": 150, "qty": 5 },
+	{ "date": "2026-02-20", "product": "ペン", "amount": 450, "qty": 15 }
+]</code></pre>
+
+	<div class="callout">
+		<p><strong>手を動かさずに答えだけ見たい場合</strong></p>
+		<p>この課題の解答は <code>docs/samples/handson/</code> に置いてあります（<code>step1.ts</code> と <code>step4.ts</code>、<code>sales.json</code>）。<a class="doclink doc02" href="02-実行環境.html">02. 実行環境</a>で触れたとおり、<code>npm i</code> のあと <code>npx tsx step4.ts</code> で動きます。</p>
+		<p><strong>ただし、まず自分で書いてみてください。</strong>この章の目的は完成品を読むことではなく、<strong><code>any</code> を潰していく過程を体験すること</strong>です。</p>
+	</div>
+
+	<h2>目指す出力</h2>
+
+<pre><code>$ npx tsx step4.ts
+ノート: 2000 円
+ペン: 750 円
+消しゴム: 150 円</code></pre>
+
+	<div class="callout">
+		<p><strong>いきなり完成形を書こうとしないでください。</strong></p>
+		<p>実務で TypeScript を導入する場面は、<strong>既存の JavaScript に型を足す</strong>形が大半です。この課題も同じ順序で進めます。<strong>まず動かし、次に型を付け、最後に検証とエラー処理を足します。</strong></p>
+	</div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>12.2 4段階で型を付けていく</h1>
+
+	<figure>
+		<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="4段階で検出できる範囲が広がる">
+			<defs>
+				<linearGradient id="g-12-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-12-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-12-1c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(100,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(100,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-12-1d" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(160,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(160,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-12-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="16" y="40" width="196" height="76" rx="8" fill="url(#g-12-1a)"/>
+			<text x="114" y="66" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">段階1</text>
+			<text x="114" y="88" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">any のまま動かす</text>
+			<text x="114" y="106" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">JSON.parse の戻り値</text>
+
+			<rect x="238" y="40" width="196" height="76" rx="8" fill="url(#g-12-1b)"/>
+			<text x="336" y="66" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">段階2</text>
+			<text x="336" y="88" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">型を付ける</text>
+			<text x="336" y="106" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">as Sale[] で仮に通す</text>
+
+			<rect x="460" y="40" width="196" height="76" rx="8" fill="url(#g-12-1c)"/>
+			<text x="558" y="66" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">段階3</text>
+			<text x="558" y="88" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">検証を入れる</text>
+			<text x="558" y="106" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">unknown ＋ 型ガード</text>
+
+			<rect x="682" y="40" width="196" height="76" rx="8" fill="url(#g-12-1d)"/>
+			<text x="780" y="66" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">段階4</text>
+			<text x="780" y="88" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">エラー処理を整える</text>
+			<text x="780" y="106" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">Result で返す</text>
+
+			<path d="M212,78 L230,78" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-12-1)"/>
+			<path d="M434,78 L452,78" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-12-1)"/>
+			<path d="M656,78 L674,78" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-12-1)"/>
+
+			<text x="20" y="158" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">検出できる範囲</text>
+
+			<rect x="16" y="172" width="196" height="30" rx="5" fill="#fdf0f0" stroke="#e0a0a0"/>
+			<text x="114" y="192" text-anchor="middle" fill="#a51f22" font-size="12" font-family="sans-serif" font-weight="600">何も検出できない</text>
+
+			<rect x="238" y="172" width="418" height="30" rx="5" fill="#fdf6ec" stroke="#e0bd8a"/>
+			<text x="447" y="192" text-anchor="middle" fill="#b8620a" font-size="12" font-family="sans-serif" font-weight="600">打ち間違い（プロパティ名）</text>
+
+			<rect x="460" y="210" width="418" height="30" rx="5" fill="#eef8f0" stroke="#8ac0a0"/>
+			<text x="669" y="230" text-anchor="middle" fill="#1d7a3c" font-size="12" font-family="sans-serif" font-weight="600">データの不備（型・件数）</text>
+
+			<rect x="682" y="248" width="196" height="30" rx="5" fill="#eef8f0" stroke="#8ac0a0"/>
+			<text x="780" y="268" text-anchor="middle" fill="#1d7a3c" font-size="12" font-family="sans-serif" font-weight="600">対処の強制</text>
+		</svg>
+		<figcaption>図 1 — 段階が進むほど、検出できる問題の範囲が広がる</figcaption>
+	</figure>
+
+	<h2>段階1 — まず動かす</h2>
+
+	<p>型を気にせず、JavaScript を書く要領で動かします。</p>
+
+<pre><code>// step1.ts
+import { readFileSync } from "node:fs";
+
+const text = readFileSync("sales.json", "utf8");
+const sales = JSON.parse(text);
+
+const totals: any = {};
+for (const s of sales) {
+	totals[s.product] = (totals[s.product] ?? 0) + s.amount;
+}
+
+console.log(totals);</code></pre>
+
+<pre><code>$ npx tsx step1.ts
+{ 'ノート': 2000, 'ペン': 750, '消しゴム': 150 }</code></pre>
+
+	<div class="callout">
+		<p><strong>動きますが、検査は何も働いていません。</strong></p>
+		<p><code>JSON.parse</code> の戻り値は <code>any</code> なので、<code>s.product</code> も <code>s.amount</code> も <code>any</code> です（<a class="doclink doc06" href="06-any-unknown-アサーション.html">06</a>）。<strong><code>s.prodcut</code> と打ち間違えても、実行するまで気づけません。</strong></p>
+	</div>
+
+	<h3>やってみること</h3>
+
+	<ul>
+		<li><code>s.product</code> を <code>s.prodcut</code> に変えて実行し、<strong>エラーにならないこと</strong>を確かめる</li>
+		<li><code>npx tsc --noEmit step1.ts</code> を実行し、<strong>それでも通ること</strong>を確かめる</li>
+	</ul>
+
+	<h2>段階2 — 型を付ける</h2>
+
+	<p>データの形を <code>type</code> で書き、集計結果を <code>Map</code> に変えます。</p>
+
+<pre><code>// step2.ts
+import { readFileSync } from "node:fs";
+
+type Sale = { date: string; product: string; amount: number; qty: number };
+
+const text = readFileSync("sales.json", "utf8");
+const sales = JSON.parse(text) as Sale[];      // ← まだ嘘をついている
+
+function sumByProduct(sales: Sale[]): Map&lt;string, number&gt; {
+	const out = new Map&lt;string, number&gt;();
+	for (const s of sales) {
+		out.set(s.product, (out.get(s.product) ?? 0) + s.amount);
+	}
+	return out;
+}
+
+for (const [product, total] of sumByProduct(sales)) {
+	console.log(`${product}: ${total} 円`);
+}</code></pre>
+
+	<div class="callout">
+		<p><strong>打ち間違いは検出できるようになりましたが、<code>as Sale[]</code> が残っています。</strong></p>
+		<p><a class="doclink doc06" href="06-any-unknown-アサーション.html">06</a> で見たとおり、<strong><code>as</code> は何も検証していません。</strong>JSON の中身が違っていても通ってしまいます。段階3で外します。</p>
+	</div>
+
+	<h3>やってみること</h3>
+
+	<ul>
+		<li><code>sales.json</code> の <code>amount</code> を <code>"1200"</code>（文字列）に書き換えて実行する</li>
+		<li>型エラーは出ず、<strong>集計結果がおかしくなる</strong>ことを確かめる</li>
+	</ul>
+
+	<h2>段階3 — 検証を入れる</h2>
+
+	<p><code>as</code> をやめ、<code>unknown</code> で受けて<strong>型ガードで確かめます</strong>（<a class="doclink doc08" href="08-型の絞り込み.html">08</a>）。</p>
+
+<pre><code>// step3.ts（抜粋）
+function isSale(v: unknown): v is Sale {
+	if (typeof v !== "object" || v === null) return false;
+	const o = v as Record&lt;string, unknown&gt;;
+	return (
+		typeof o.date === "string" &amp;&amp;
+		typeof o.product === "string" &amp;&amp;
+		typeof o.amount === "number" &amp;&amp;
+		typeof o.qty === "number"
+	);
+}
+
+const parsed: unknown = JSON.parse(text);
+
+if (!Array.isArray(parsed)) {
+	throw new Error("配列ではありません");
+}
+
+const sales: Sale[] = [];
+for (let i = 0; i &lt; parsed.length; i++) {
+	const row: unknown = parsed[i];
+	if (!isSale(row)) {
+		throw new Error(`${i} 件目の形式が不正です`);
+	}
+	sales.push(row);
+}</code></pre>
+
+	<h3>やってみること</h3>
+
+	<ul>
+		<li>再び <code>amount</code> を文字列に変えて実行し、<strong>件数付きのエラーで止まること</strong>を確かめる</li>
+	</ul>
+
+	<h2>段階4 — エラー処理を整える</h2>
+
+	<p>例外を投げる代わりに <code>Result</code> を返し、<strong>呼ぶ側に対処を強制します</strong>（<a class="doclink doc11" href="11-非同期とエラー処理.html">11</a>）。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">段階</th><th>状態</th><th>検出できるもの</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">1</td><td><code>any</code> のまま</td><td><span class="badge b-ng">何も検出できない</span></td></tr>
+			<tr><td class="nowrap">2</td><td>型を付けたが <code>as</code> で嘘</td><td><span class="badge b-warn">打ち間違いだけ</span></td></tr>
+			<tr><td class="nowrap">3</td><td>検証を入れた</td><td><span class="badge b-ok">データの不備も検出</span></td></tr>
+			<tr><td class="nowrap">4</td><td><code>Result</code> で返す</td><td><span class="badge b-ok">呼ぶ側に対処を強制</span></td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>12.3 解答例と詰まりやすい箇所</h1>
+
+	<h2>解答例（段階4）</h2>
+
+<pre><code>// step4.ts
+import { readFileSync } from "node:fs";
+
+type Sale = { date: string; product: string; amount: number; qty: number };
+
+type Result&lt;T, E = Error&gt; =
+	| { ok: true; value: T }
+	| { ok: false; error: E };
+
+function isSale(v: unknown): v is Sale {
+	if (typeof v !== "object" || v === null) return false;
+	const o = v as Record&lt;string, unknown&gt;;
+	return (
+		typeof o.date === "string" &amp;&amp;
+		typeof o.product === "string" &amp;&amp;
+		typeof o.amount === "number" &amp;&amp;
+		typeof o.qty === "number"
+	);
+}
+
+function loadSales(path: string): Result&lt;Sale[]&gt; {
+	let text: string;
+	try {
+		text = readFileSync(path, "utf8");
+	} catch {
+		return { ok: false, error: new Error(`ファイルを読めません: ${path}`) };
+	}
+
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(text);
+	} catch {
+		return { ok: false, error: new Error(`JSON として読めません: ${path}`) };
+	}
+
+	if (!Array.isArray(parsed)) {
+		return { ok: false, error: new Error("配列ではありません") };
+	}
+
+	const sales: Sale[] = [];
+	for (let i = 0; i &lt; parsed.length; i++) {
+		const row: unknown = parsed[i];
+		if (!isSale(row)) {
+			return { ok: false, error: new Error(`${i} 件目の形式が不正です`) };
+		}
+		sales.push(row);
+	}
+	return { ok: true, value: sales };
+}
+
+function sumByProduct(sales: Sale[]): Map&lt;string, number&gt; {
+	const out = new Map&lt;string, number&gt;();
+	for (const s of sales) {
+		out.set(s.product, (out.get(s.product) ?? 0) + s.amount);
+	}
+	return out;
+}
+
+const r = loadSales("sales.json");
+if (!r.ok) {
+	console.error(`エラー: ${r.error.message}`);
+	process.exit(1);
+}
+
+for (const [product, total] of [...sumByProduct(r.value)].sort((a, b) =&gt; b[1] - a[1])) {
+	console.log(`${product}: ${total} 円`);
+}
+
+const missing = loadSales("nothing.json");
+console.log(missing.ok ? "読めた" : `想定どおり失敗: ${missing.error.message}`);</code></pre>
+
+<pre><code>$ npx tsx step4.ts
+ノート: 2000 円
+ペン: 750 円
+消しゴム: 150 円
+想定どおり失敗: ファイルを読めません: nothing.json</code></pre>
+
+	<p>配列でない JSON を渡すと、次のように止まります。</p>
+
+<pre><code>$ npx tsx step4.ts          # sales.json が { "not": "an array" } の場合
+エラー: 配列ではありません</code></pre>
+
+	<h2>詰まりやすい箇所</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>症状</th><th>原因</th><th>対処</th></tr>
+		</thead>
+		<tbody>
+			<tr><td><code>TS2591: Cannot find name 'node:fs'</code></td><td><span class="badge b-ts7">TS7</span> <code>types</code> の指定漏れ</td><td><code>tsconfig.json</code> に <code>"types": ["node"]</code>（<a class="doclink doc02" href="02-実行環境.html">02</a>）</td></tr>
+			<tr><td><code>parsed[i]</code> が <code>any</code> になる</td><td><code>Array.isArray</code> の後は <code>any[]</code> になる</td><td><code>const row: unknown = parsed[i];</code> と明示する</td></tr>
+			<tr><td><code>out.get(...)</code> が <code>undefined</code> かもしれない</td><td><span class="badge b-strict">strict</span> <code>Map.get</code> は <code>T | undefined</code> を返す</td><td><code>?? 0</code> で既定値を与える（<a class="doclink doc04" href="04-型の基本.html">04</a>）</td></tr>
+			<tr><td><code>process.exit</code> の後もエラーになる</td><td>型の上では処理が続く扱い</td><td><code>process.exit</code> は <code>never</code> を返すので通常は不要。出なければ <code>return</code> を足す</td></tr>
+			<tr><td>ソートの結果が変わらない</td><td><code>Map</code> を直接 <code>sort</code> できない</td><td><code>[...map]</code> で配列にしてから <code>sort</code> する</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>発展課題</h2>
+
+	<ul>
+		<li><strong>月別に集計する</strong> — <code>date</code> の先頭7文字（<code>"2026-01"</code>）でまとめる</li>
+		<li><strong>単価を出す</strong> — <code>amount / qty</code>。<code>qty</code> が 0 のときの扱いを決める</li>
+		<li><strong>検証を厳しくする</strong> — <code>date</code> が <code>YYYY-MM-DD</code> の形式か、<code>amount</code> が 0 以上かを確かめる</li>
+		<li><strong>ブランド型を使う</strong> — 検証済みの日付を <code>ISODate</code> 型にする（<a class="doclink doc05" href="05-構造的型付け.html">05</a>）</li>
+		<li><strong>スキーマ検証ライブラリに置き換える</strong> — <code>isSale</code> を zod などで書き直し、<strong>手書きとの差</strong>を比べる</li>
+	</ul>
+
+	<div class="callout">
+		<p><strong>ここまでで本編は終わりです。</strong></p>
+		<p>実務で必要になったときは、付録から引いてください。<strong>エラーの意味が分からないときは <a class="doclink doc13" href="A1-逆引き.html">A1. 逆引き</a>、書きたい型が決まっているときは <a class="doclink doc14" href="A2-型レシピ集.html">A2. 型レシピ集</a>、処理ごとまとめて欲しいときは <a class="doclink doc15" href="A3-実務パターン集.html">A3. 実務パターン集</a></strong>です。</p>
+	</div>
+</section>
+
+<div class="next">
+	<p><strong>まとめ</strong></p>
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">段階</th><th>やったこと</th><th>使った知識</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">1</td><td>まず動かす</td><td><code>any</code> の危険性（<a class="doclink doc06" href="06-any-unknown-アサーション.html">06</a>）</td></tr>
+			<tr><td class="nowrap">2</td><td>型を付ける</td><td>オブジェクト型（<a class="doclink doc04" href="04-型の基本.html">04</a>）、<code>as</code> の限界（<a class="doclink doc06" href="06-any-unknown-アサーション.html">06</a>）</td></tr>
+			<tr><td class="nowrap">3</td><td>検証を入れる</td><td><code>unknown</code> と型ガード（<a class="doclink doc08" href="08-型の絞り込み.html">08</a>）</td></tr>
+			<tr><td class="nowrap">4</td><td>エラー処理を整える</td><td>判別可能ユニオンと <code>Result</code>（<a class="doclink doc11" href="11-非同期とエラー処理.html">11</a>）</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p><strong>付録は必要になったときに引いてください。</strong>順番に読む必要はありません。</p>
+</div>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink doc11" href="11-非同期とエラー処理.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>11. 非同期とエラー処理</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>

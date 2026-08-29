@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04. 型の基本 — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（5章 / 刻み 70） */
+.ch01 { --accent: hsl(280,78%,25%); --accent2: hsl(280,58%,55%); --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(210,78%,25%); --accent2: hsl(210,58%,55%); --soft: hsl(210,28%,95%); }
+.ch03 { --accent: hsl(140,78%,25%); --accent2: hsl(140,58%,55%); --soft: hsl(140,28%,95%); }
+.ch04 { --accent: hsl(70,78%,25%);  --accent2: hsl(70,58%,55%);  --soft: hsl(70,28%,95%); }
+.ch05 { --accent: hsl(0,78%,25%);   --accent2: hsl(0,58%,55%);   --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "04." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "04." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>04. 型の基本</h1>
+		<p class="lead">プリミティブ・配列・オブジェクト・union ／ <code>type</code> と <code>interface</code> の使い分け</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink doc03" href="03-tsconfig.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>03. tsconfig</a> <a class="doclink doc05" href="05-構造的型付け.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>05. 構造的型付け</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この章の到達点</h2>
+	<ul>
+		<li>変数・引数・戻り値に型を書ける</li>
+		<li><strong>union 型とリテラル型</strong>で「取りうる値」を表現できる</li>
+		<li><code>type</code> と <code>interface</code> のどちらを使うか判断できる</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>この章の内容</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">プリミティブと配列</a></li>
+		<li class="ch02"><a href="#c2">オブジェクトの型</a></li>
+		<li class="ch03"><a href="#c3">union 型とリテラル型</a></li>
+		<li class="ch04"><a href="#c4">type と interface</a></li>
+		<li class="ch05"><a href="#c5">null と undefined</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>04.1 プリミティブと配列</h1>
+
+	<h2>書き方は「変数名のうしろにコロン」</h2>
+
+<pre><code>// JavaScript
+let name = "Alice";
+let age = 30;
+
+// TypeScript
+let name: string = "Alice";
+let age: number = 30;</code></pre>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">型</th><th>値の例</th><th>Java / C# との違い</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>string</code></td><td><code>"Alice"</code>、<code>`Hello, ${name}`</code></td><td><code>char</code> はない。1文字も <code>string</code></td></tr>
+			<tr><td class="nowrap"><code>number</code></td><td><code>30</code>、<code>3.14</code>、<code>-1</code></td><td><strong><code>int</code> と <code>double</code> の区別がない。</strong>すべて64ビット浮動小数点</td></tr>
+			<tr><td class="nowrap"><code>boolean</code></td><td><code>true</code>、<code>false</code></td><td>同じ</td></tr>
+			<tr><td class="nowrap"><code>bigint</code></td><td><code>10n</code></td><td>Java の <code>BigInteger</code> に近い。リテラルに <code>n</code> が付く</td></tr>
+			<tr><td class="nowrap"><code>symbol</code></td><td><code>Symbol("id")</code></td><td>相当するものがない。一意なキーを作る</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>型を書かなくても型は付きます。</strong></p>
+		<p><code>let name = "Alice";</code> と書けば、TypeScript は <code>name</code> を <code>string</code> と<strong>推論</strong>します。冗長に書く必要はありません。<strong>書くべきなのは、推論に任せると意図と違う型になる場所</strong>です。</p>
+	</div>
+
+	<h2>配列</h2>
+
+<pre><code>const names: string[] = ["Alice", "Bob"];
+const ages: Array&lt;number&gt; = [30, 25];      // 同じ意味。string[] のほうが一般的
+
+const pairs: [string, number] = ["Alice", 30];   // タプル（要素数と型が固定）</code></pre>
+
+	<div class="callout">
+		<p><strong>Java・C# から来た人へ</strong></p>
+		<p>TypeScript の配列は<strong>長さが可変</strong>で、Java の <code>ArrayList</code>、C# の <code>List&lt;T&gt;</code> に相当します。<code>string[]</code> という記法は Java・C# の配列と同じ見た目ですが、<strong>固定長ではありません。</strong></p>
+		<p>要素数を固定したいときは<strong>タプル</strong>を使います。<code>[string, number]</code> は「1つ目が <code>string</code>、2つ目が <code>number</code> の2要素」を意味します。</p>
+	</div>
+
+	<h2>読み取り専用にする</h2>
+
+<pre><code>const names: readonly string[] = ["Alice", "Bob"];
+names.push("Carol");
+//    ~~~~
+// error TS2339: Property 'push' does not exist on type 'readonly string[]'.
+//
+// 訳: プロパティ 'push' は型 'readonly string[]' に存在しません。</code></pre>
+
+	<p><code>const</code> は<strong>再代入</strong>を防ぐだけで、中身の変更は防ぎません。<strong>中身を変えられたくないときは <code>readonly</code></strong> を使います。</p>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>04.2 オブジェクトの型</h1>
+
+	<h2>形をそのまま書く</h2>
+
+<pre><code>// JavaScript
+const user = { name: "Alice", age: 30 };
+
+// TypeScript — 型を別に定義する
+type User = {
+	name: string;
+	age: number;
+};
+
+const user: User = { name: "Alice", age: 30 };</code></pre>
+
+	<h2>省略可能なプロパティ</h2>
+
+<pre><code>type User = {
+	name: string;
+	age?: number;        // あってもなくてもよい
+};
+
+const a: User = { name: "Alice" };              // OK
+const b: User = { name: "Bob", age: 25 };       // OK</code></pre>
+
+	<p><code>age?: number</code> は <code>age: number | undefined</code> とほぼ同じですが、<strong><code>?</code> は「キー自体がなくてもよい」</strong>点が違います。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">書き方</th><th class="nowrap">キーを省略</th><th class="nowrap">undefined を代入</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>age?: number</code></td><td class="nowrap"><span class="badge b-ok">できる</span></td><td class="nowrap"><span class="badge b-ok">できる</span></td></tr>
+			<tr><td class="nowrap"><code>age: number | undefined</code></td><td class="nowrap"><span class="badge b-ng">できない</span></td><td class="nowrap"><span class="badge b-ok">できる</span></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>readonly なプロパティ</h2>
+
+<pre><code>type Config = {
+	readonly host: string;
+	readonly port: number;
+};
+
+const c: Config = { host: "localhost", port: 3000 };
+c.port = 8080;
+// ~~~~~~
+// error TS2540: Cannot assign to 'port' because it is a read-only property.
+//
+// 訳: 'port' は読み取り専用プロパティのため、代入できません。</code></pre>
+
+	<h2>インデックスシグネチャ</h2>
+
+	<p>キーが決まっていないオブジェクトを表します。</p>
+
+<pre><code>type Counts = { [key: string]: number };
+
+const c: Counts = { apple: 3, banana: 5 };
+c.orange = 2;                     // 任意のキーを足せる</code></pre>
+
+	<div class="callout">
+		<p><strong>インデックスシグネチャは検査を弱めます。</strong></p>
+		<p>どんなキーでも許されるため、<strong>打ち間違いを検出できません。</strong>キーが決まっているなら列挙し、決まっていないなら <code>Map</code> を使うか、<code>Record&lt;string, number&gt;</code>（<a class="doclink doc16" href="A4-型レベルプログラミング.html">A4</a>）を検討してください。</p>
+	</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>04.3 union 型とリテラル型</h1>
+
+	<h2>TypeScript で最もよく使う道具</h2>
+
+	<p><strong>union 型</strong>は「いずれか」を表します。縦棒で並べます。</p>
+
+<pre><code>let id: string | number;
+id = "abc";     // OK
+id = 123;       // OK
+id = true;      // エラー TS2322</code></pre>
+
+	<h2>リテラル型 — 「この値だけ」</h2>
+
+	<p>型の位置に<strong>値そのもの</strong>を書けます。union と組み合わせると強力です。</p>
+
+<pre><code>type Status = "pending" | "active" | "closed";
+
+let s: Status = "active";      // OK
+s = "activ";                   // エラー（打ち間違いを検出できる）
+//  ~
+// error TS2322: Type '"activ"' is not assignable to type 'Status'.
+//
+// 訳: 型 '"activ"' を型 'Status' に割り当てることはできません。</code></pre>
+
+	<div class="callout">
+		<p><strong>Java・C# から来た人へ — これが <code>enum</code> の代わりです</strong></p>
+		<p>Java の <code>enum</code>、C# の <code>enum</code> に相当する用途は、TypeScript では<strong>文字列リテラルの union</strong> で書くのが主流です。</p>
+<pre><code>// TypeScript にも enum はあるが、使わないことが多い
+enum Status { Pending, Active, Closed }
+
+// こちらが推奨
+type Status = "pending" | "active" | "closed";</code></pre>
+		<p>理由は3つあります。<strong>①実行時のコードを生成しない</strong>（型だけで完結する）、<strong>②値がそのまま文字列なのでログや JSON でそのまま読める</strong>、<strong>③<a class="doclink doc02" href="02-実行環境.html">Node の型ストリップ</a>で <code>enum</code> は使えない</strong>。</p>
+	</div>
+
+	<h2>as const — リテラル型として固定する</h2>
+
+<pre><code>let s1 = "active";                    // 型は string（後で別の文字列を入れられる）
+const s2 = "active";                  // 型は "active"（const なので変わらない）
+
+const arr1 = ["a", "b"];              // 型は string[]
+const arr2 = ["a", "b"] as const;     // 型は readonly ["a", "b"]</code></pre>
+
+	<p><code>as const</code> は<strong>「この値のまま固定する」</strong>指示です。設定オブジェクトを定義するときによく使います。</p>
+
+<pre><code>const CONFIG = {
+	host: "localhost",
+	port: 3000,
+} as const;
+
+// CONFIG.host の型は "localhost"（string ではない）
+// CONFIG.port = 8080;   ← エラー。readonly になる</code></pre>
+
+	<h2>union は「絞り込んで」使う</h2>
+
+	<p>union のままでは、共通して持つ操作しかできません。</p>
+
+<pre><code>function show(id: string | number) {
+	console.log(id.toUpperCase());
+	//             ~~~~~~~~~~~
+	// error TS2339: Property 'toUpperCase' does not exist on type 'string | number'.
+	//
+	// 訳: プロパティ 'toUpperCase' は型 'string | number' に存在しません。
+}</code></pre>
+
+	<figure>
+		<svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="union は絞り込んでから使う">
+			<defs>
+				<linearGradient id="g-04-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-04-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(280,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(280,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-04-1c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-04-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="20" y="98" width="210" height="64" rx="8" fill="url(#g-04-1a)"/>
+			<text x="125" y="124" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">string | number</text>
+			<text x="125" y="146" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">共通の操作しかできない</text>
+
+			<rect x="300" y="106" width="180" height="48" rx="8" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="390" y="136" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">typeof x === "string"</text>
+
+			<rect x="560" y="34" width="230" height="64" rx="8" fill="url(#g-04-1b)"/>
+			<text x="675" y="60" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">string</text>
+			<text x="675" y="82" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">toUpperCase() が使える</text>
+
+			<rect x="560" y="162" width="230" height="64" rx="8" fill="url(#g-04-1c)"/>
+			<text x="675" y="188" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">number</text>
+			<text x="675" y="210" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">toFixed() が使える</text>
+
+			<path d="M230,130 L292,130" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-04-1)"/>
+			<path d="M480,120 L552,80" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#m-04-1)"/>
+			<path d="M480,142 L552,186" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-04-1)"/>
+
+			<text x="516" y="88" fill="#1d7a3c" font-size="12" font-family="sans-serif" font-weight="600">true</text>
+			<text x="512" y="178" fill="#4a5568" font-size="12" font-family="sans-serif">false</text>
+
+			<text x="125" y="192" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">この位置では</text>
+			<text x="125" y="210" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">toUpperCase() は呼べない</text>
+		</svg>
+		<figcaption>図 1 — union はそのままでは使えない。確かめると、その分岐の中では確定した型になる</figcaption>
+	</figure>
+
+	<p><strong>どちらなのかを確かめてから使います。</strong>この操作を<strong>絞り込み（narrowing）</strong>と呼び、<a class="doclink doc08" href="08-型の絞り込み.html">08. 型の絞り込み</a>で詳しく扱います。</p>
+
+<pre><code>function show(id: string | number) {
+	if (typeof id === "string") {
+		console.log(id.toUpperCase());   // ここでは string として扱える
+	} else {
+		console.log(id.toFixed(2));      // ここでは number
+	}
+}</code></pre>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>04.4 type と interface</h1>
+
+	<h2>どちらでもオブジェクトの形を書ける</h2>
+
+<pre><code>type UserA = {
+	name: string;
+	age: number;
+};
+
+interface UserB {
+	name: string;
+	age: number;
+}</code></pre>
+
+	<p><strong>この2つはほぼ同じです。</strong>相互に代入でき、どちらも構造的型付け（<a class="doclink doc05" href="05-構造的型付け.html">05</a>）で判定されます。</p>
+
+	<h2>違いは3つだけ</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th class="nowrap"><code>type</code></th><th class="nowrap"><code>interface</code></th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">union を作れる</td><td class="nowrap"><span class="badge b-ok">できる</span></td><td class="nowrap"><span class="badge b-ng">できない</span></td></tr>
+			<tr><td class="nowrap">同名で再宣言</td><td class="nowrap"><span class="badge b-ng">エラー</span></td><td class="nowrap"><span class="badge b-warn">合体する</span></td></tr>
+			<tr><td class="nowrap">プリミティブに別名</td><td class="nowrap"><span class="badge b-ok">できる</span></td><td class="nowrap"><span class="badge b-ng">できない</span></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+<pre><code>// type にしかできないこと
+type Status = "pending" | "active";     // union
+type ID = string;                       // プリミティブの別名
+
+// interface にしかできないこと — 同名の宣言が合体する（宣言のマージ）
+interface Window { myApp: string; }     // 既存の Window に足す</code></pre>
+
+	<div class="callout">
+		<p><strong>迷ったら <code>type</code> を使ってください。</strong></p>
+		<p>union やタプルを扱えるぶん <code>type</code> のほうが用途が広く、<strong>意図せず合体することもありません。</strong><code>interface</code> が要るのは、外部ライブラリの型を拡張する（宣言のマージ）場合です。</p>
+		<p>ただし<strong>プロジェクト内で統一されているなら、そちらに合わせてください。</strong>混在しているほうが読みにくくなります。</p>
+	</div>
+
+	<div class="callout">
+		<p><strong>Java・C# から来た人へ</strong></p>
+		<p>TypeScript の <code>interface</code> は、Java・C# の <code>interface</code> とは別物です。</p>
+		<ul>
+			<li><strong><code>implements</code> を書かなくても、形が合っていれば互換</strong>になります（<a class="doclink doc05" href="05-構造的型付け.html">05. 構造的型付け</a>）</li>
+			<li><strong>実行時には存在しません。</strong><code>x instanceof User</code> と書けません（<a class="doclink doc01" href="01-背景.html">01. 背景</a>）</li>
+			<li>データの形を表すために使われ、「実装すべき契約」という意味合いは弱くなります</li>
+		</ul>
+	</div>
+
+	<h2>組み合わせる</h2>
+
+<pre><code>type Base = { id: string };
+type Timestamps = { createdAt: Date };
+
+type Entity = Base &amp; Timestamps;        // 交差型（両方の性質を持つ）
+
+const e: Entity = { id: "1", createdAt: new Date() };</code></pre>
+
+	<p><code>interface</code> では <code>extends</code> を使います。</p>
+
+<pre><code>interface Entity extends Base, Timestamps {}</code></pre>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="ch05" id="c5">
+	<h1>04.5 null と undefined</h1>
+
+	<h2>2つある</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">値</th><th>意味</th><th>いつ現れるか</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>undefined</code></td><td>「まだ入っていない」</td><td>初期化していない変数、存在しないプロパティ、戻り値のない関数</td></tr>
+			<tr><td class="nowrap"><code>null</code></td><td>「意図的に空」</td><td>明示的に代入したとき、一部の API の戻り値</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>実務では <code>undefined</code> に寄せるのが一般的です。</strong></p>
+		<p>JavaScript の言語機能（省略可能引数、分割代入の既定値、<code>?.</code>）が <code>undefined</code> を前提にしているためです。<strong><code>null</code> は外部から来たとき（JSON・DB・API）だけ扱う</strong>と決めておくと、判定が減ります。</p>
+	</div>
+
+	<h2>strictNullChecks があると代入できない</h2>
+
+	<p><span class="badge b-strict">strict</span> <a class="doclink doc03" href="03-tsconfig.html">03. tsconfig</a> で見たとおり、<code>strict</code> が有効だと <code>null</code> を勝手に入れられません。</p>
+
+<pre><code>let s: string = null;
+//  ~
+// error TS2322: Type 'null' is not assignable to type 'string'.
+//
+// 訳: 型 'null' を型 'string' に割り当てることはできません。
+
+let t: string | null = null;      // これなら通る</code></pre>
+
+	<h2>安全に扱う3つの記法</h2>
+
+<pre><code>type User = { name: string; profile?: { bio: string } };
+
+function show(u: User) {
+	// ① オプショナルチェーン — undefined なら undefined を返す
+	console.log(u.profile?.bio);
+
+	// ② null 合体演算子 — null / undefined のときだけ既定値
+	console.log(u.profile?.bio ?? "（未設定）");
+
+	// ③ 絞り込み — if で確かめる
+	if (u.profile) {
+		console.log(u.profile.bio);      // ここでは確実にある
+	}
+}</code></pre>
+
+	<div class="callout">
+		<p><strong><code>??</code> と <code>||</code> は違います。</strong></p>
+		<p><code>||</code> は <code>0</code> や <code>""</code> も「偽」として既定値に置き換えてしまいます。<strong><code>??</code> は <code>null</code> と <code>undefined</code> のときだけ</strong>働きます。</p>
+<pre><code>const port1 = 0 || 3000;     // 3000 になる（0 が消える）
+const port2 = 0 ?? 3000;     // 0 のまま</code></pre>
+		<p><strong>設定値を扱うときは <code>??</code> を使ってください。</strong>「0 を指定したのに既定値になる」という不具合の原因になります。</p>
+	</div>
+
+	<h2>動かしてみる</h2>
+
+<pre><code>// null-check.ts
+type User = { name: string; age?: number };
+
+function describe(u: User): string {
+	return `${u.name} (${u.age ?? "年齢不明"})`;
+}
+
+console.log(describe({ name: "Alice", age: 30 }));
+console.log(describe({ name: "Bob" }));</code></pre>
+
+<pre><code>$ npx tsx null-check.ts
+Alice (30)
+Bob (年齢不明)</code></pre>
+</section>
+
+<div class="next">
+	<p><strong>まとめ</strong></p>
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>この章の結論</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">基本型</td><td><code>number</code> に <code>int</code>／<code>double</code> の区別はない。<code>readonly</code> で中身を守る</td></tr>
+			<tr><td class="nowrap">オブジェクト</td><td><code>?</code> は「キーがなくてもよい」。インデックスシグネチャは検査を弱める</td></tr>
+			<tr><td class="nowrap">union・リテラル</td><td><strong>TypeScript で最もよく使う道具。</strong><code>enum</code> の代わりに文字列リテラルの union を使う</td></tr>
+			<tr><td class="nowrap"><code>type</code>／<code>interface</code></td><td>ほぼ同じ。<strong>迷ったら <code>type</code></strong>。<code>interface</code> は宣言のマージが要るときだけ</td></tr>
+			<tr><td class="nowrap"><code>null</code>／<code>undefined</code></td><td><code>undefined</code> に寄せる。<code>??</code> と <code>||</code> を混同しない</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p><strong>次は <a class="doclink doc05" href="05-構造的型付け.html">05. 構造的型付け</a> です。</strong>この資料の<strong>山場のひとつ</strong>で、Java・C# 経験者が最もつまずく箇所です。</p>
+</div>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink doc03" href="03-tsconfig.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>03. tsconfig</a> <a class="doclink doc05" href="05-構造的型付け.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>05. 構造的型付け</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>

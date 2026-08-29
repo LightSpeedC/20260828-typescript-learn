@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>08. 型の絞り込み — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（5章 / 刻み 70） */
+.ch01 { --accent: hsl(280,78%,25%); --accent2: hsl(280,58%,55%); --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(210,78%,25%); --accent2: hsl(210,58%,55%); --soft: hsl(210,28%,95%); }
+.ch03 { --accent: hsl(140,78%,25%); --accent2: hsl(140,58%,55%); --soft: hsl(140,28%,95%); }
+.ch04 { --accent: hsl(70,78%,25%);  --accent2: hsl(70,58%,55%);  --soft: hsl(70,28%,95%); }
+.ch05 { --accent: hsl(0,78%,25%);   --accent2: hsl(0,58%,55%);   --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "08." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "08." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>08. 型の絞り込み</h1>
+		<p class="lead">union を安全に使う ／ この資料の山場②</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink doc07" href="07-関数の型.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>07. 関数の型</a> <a class="doclink doc09" href="09-ジェネリクス.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>09. ジェネリクス</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この章の到達点</h2>
+	<ul>
+		<li><code>if</code> を書くと<strong>型が変わる</strong>ことを理解し、意図して使える</li>
+		<li><strong>判別可能ユニオン</strong>でデータの形を設計できる</li>
+		<li><code>never</code> による<strong>網羅性チェック</strong>で、分岐の漏れをコンパイル時に検出できる</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>この章の内容</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">typeof と instanceof</a></li>
+		<li class="ch02"><a href="#c2">in と真偽値による絞り込み</a></li>
+		<li class="ch03"><a href="#c3">判別可能ユニオン</a></li>
+		<li class="ch04"><a href="#c4">型ガード関数</a></li>
+		<li class="ch05"><a href="#c5">never による網羅性チェック</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>08.1 typeof と instanceof</h1>
+
+	<h2>if を書くと型が変わる</h2>
+
+	<p>TypeScript は<strong>条件分岐の中で型を絞り込みます。</strong>これを制御フロー解析と呼びます。</p>
+
+<pre><code>function show(id: string | number) {
+	// ここでは string | number
+
+	if (typeof id === "string") {
+		console.log(id.toUpperCase());    // ここでは string
+	} else {
+		console.log(id.toFixed(2));       // ここでは number
+	}
+}</code></pre>
+
+	<div class="callout">
+		<p><strong>これは TypeScript 特有の考え方です。</strong></p>
+		<p>Java・C# では、<code>instanceof</code> で確認しても<strong>キャストを書かなければ</strong>その型として使えません（Java 16 以降のパターンマッチングを除く）。TypeScript では<strong>確認しただけで型が変わります。</strong>キャストは不要です。</p>
+	</div>
+
+	<h2>typeof で判定できるもの</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">式</th><th>絞り込まれる型</th><th>注意</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>typeof x === "string"</code></td><td><code>string</code></td><td>—</td></tr>
+			<tr><td class="nowrap"><code>typeof x === "number"</code></td><td><code>number</code></td><td><code>NaN</code> も number</td></tr>
+			<tr><td class="nowrap"><code>typeof x === "boolean"</code></td><td><code>boolean</code></td><td>—</td></tr>
+			<tr><td class="nowrap"><code>typeof x === "function"</code></td><td>関数型</td><td>—</td></tr>
+			<tr><td class="nowrap"><code>typeof x === "object"</code></td><td>オブジェクト型 ＋ <code>null</code></td><td><strong><code>null</code> も "object" になる。</strong>別途 <code>x !== null</code> が要る</td></tr>
+			<tr><td class="nowrap"><code>typeof x === "undefined"</code></td><td><code>undefined</code></td><td>—</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong><code>typeof null === "object"</code> は JavaScript の歴史的な仕様です。</strong></p>
+		<p>オブジェクトかどうかを判定するときは、<strong>必ず <code>null</code> のチェックを併記してください。</strong></p>
+<pre><code>if (typeof x === "object" &amp;&amp; x !== null) { /* ... */ }</code></pre>
+	</div>
+
+	<h2>instanceof — クラスの判定</h2>
+
+<pre><code>class ApiError extends Error {
+	constructor(public status: number, message: string) {
+		super(message);
+	}
+}
+
+function handle(e: unknown) {
+	if (e instanceof ApiError) {
+		console.log(e.status);       // ApiError として扱える
+	} else if (e instanceof Error) {
+		console.log(e.message);      // Error として扱える
+	}
+}</code></pre>
+
+	<div class="callout">
+		<p><strong><code>instanceof</code> はクラスにしか使えません。</strong></p>
+		<p><code>type</code> や <code>interface</code> は<strong>実行時に存在しない</strong>ため、<code>x instanceof User</code> と書くことはできません（<a class="doclink doc01" href="01-背景.html">01. 背景</a>）。オブジェクトの形を判定したいときは <code>in</code> か型ガード関数を使います。</p>
+	</div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>08.2 in と真偽値による絞り込み</h1>
+
+	<h2>in — プロパティの有無で判定する</h2>
+
+<pre><code>type Dog = { bark: () =&gt; void };
+type Cat = { meow: () =&gt; void };
+
+function speak(animal: Dog | Cat) {
+	if ("bark" in animal) {
+		animal.bark();      // Dog
+	} else {
+		animal.meow();      // Cat
+	}
+}</code></pre>
+
+	<h2>真偽値による絞り込み</h2>
+
+<pre><code>function show(name: string | undefined) {
+	if (name) {
+		console.log(name.toUpperCase());   // string（undefined が除かれた）
+	}
+}</code></pre>
+
+	<div class="callout">
+		<p><strong>空文字と 0 に注意してください。</strong></p>
+		<p><code>if (name)</code> は <code>undefined</code> だけでなく<strong>空文字 <code>""</code> も偽</strong>として扱います。数値なら <code>0</code> も偽です。<strong>「値が存在するか」を判定したいなら、明示的に書いてください。</strong></p>
+<pre><code>if (name !== undefined) { /* "" も通る */ }
+if (name != null)       { /* null と undefined だけを除く */ }</code></pre>
+		<p><code>!=</code> は通常避けますが、<code>x != null</code> は<strong><code>null</code> と <code>undefined</code> の両方を一度に除く慣用句</strong>として使われます。</p>
+	</div>
+
+	<h2>絞り込みが消える場面</h2>
+
+	<p>絞り込みは<strong>再代入やコールバックをまたぐと失われます。</strong></p>
+
+<pre><code>function f(v: string | undefined) {
+	if (!v) return;
+	// ここでは string
+
+	[1, 2].forEach(() =&gt; {
+		console.log(v.toUpperCase());   // OK（v は const 相当）
+	});
+}
+
+function g(obj: { v?: string }) {
+	if (!obj.v) return;
+	// ここでは obj.v は string
+
+	setTimeout(() =&gt; {
+		console.log(obj.v.toUpperCase());
+		//              ~
+		// error TS18048: 'obj.v' is possibly 'undefined'.
+		// （間に obj.v が変わる可能性があるため）
+	});
+}</code></pre>
+
+	<p><strong>プロパティは変わりうるため、絞り込みが保持されません。</strong>ローカル変数に取り出すと解決します。</p>
+
+<pre><code>function g(obj: { v?: string }) {
+	const v = obj.v;
+	if (!v) return;
+	setTimeout(() =&gt; console.log(v.toUpperCase()));   // OK
+}</code></pre>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>08.3 判別可能ユニオン</h1>
+
+	<h2>実務で最もよく使う設計</h2>
+
+	<p><strong>共通のプロパティに、それぞれ別のリテラル型を持たせます。</strong>そのプロパティを見れば、どれなのか判定できます。</p>
+
+<pre><code>type Result =
+	| { status: "success"; data: string }
+	| { status: "error"; message: string }
+	| { status: "loading" };
+
+function show(r: Result) {
+	switch (r.status) {
+		case "success":
+			console.log(r.data);       // data がある
+			break;
+		case "error":
+			console.log(r.message);    // message がある
+			break;
+		case "loading":
+			console.log("読み込み中");
+			break;
+	}
+}</code></pre>
+
+	<figure>
+		<svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="判別可能ユニオンの仕組み">
+			<defs>
+				<linearGradient id="g-08-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-08-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-08-1c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-08-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="330" y="20" width="240" height="54" rx="8" fill="#f2f5fb" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="450" y="43" text-anchor="middle" fill="#1c2330" font-size="14" font-family="sans-serif" font-weight="600">r.status を見る</text>
+			<text x="450" y="63" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">判別のためのプロパティ</text>
+
+			<rect x="20" y="140" width="250" height="90" rx="8" fill="url(#g-08-1a)"/>
+			<text x="145" y="166" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">"success"</text>
+			<text x="145" y="190" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">status: "success"</text>
+			<text x="145" y="210" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">data: string</text>
+
+			<rect x="325" y="140" width="250" height="90" rx="8" fill="url(#g-08-1b)"/>
+			<text x="450" y="166" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">"error"</text>
+			<text x="450" y="190" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">status: "error"</text>
+			<text x="450" y="210" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">message: string</text>
+
+			<rect x="630" y="140" width="250" height="90" rx="8" fill="url(#g-08-1c)"/>
+			<text x="755" y="166" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">"loading"</text>
+			<text x="755" y="190" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">status: "loading"</text>
+			<text x="755" y="210" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">（他のプロパティなし）</text>
+
+			<path d="M400,78 L160,132" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-08-1)"/>
+			<path d="M450,78 L450,132" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-08-1)"/>
+			<path d="M500,78 L740,132" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-08-1)"/>
+
+			<text x="450" y="266" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">分岐に入った時点で、その形のプロパティだけが使える</text>
+			<text x="450" y="286" text-anchor="middle" fill="#4a5568" font-size="12.5" font-family="sans-serif">"loading" の分岐で r.data と書くとエラーになる</text>
+		</svg>
+		<figcaption>図 1 — 判別用のプロパティを見ることで、残りのプロパティが確定する</figcaption>
+	</figure>
+
+	<h2>なぜこの形にするか</h2>
+
+	<div class="callout">
+		<p><strong>「ありえない組み合わせ」を型で禁止できます。</strong></p>
+		<p>次のように書くと、<strong><code>success</code> なのに <code>message</code> があり <code>data</code> がない</strong>という状態を作れてしまいます。</p>
+<pre><code>// 悪い例 — すべて省略可能にしてしまう
+type Result = {
+	status: "success" | "error" | "loading";
+	data?: string;
+	message?: string;
+};</code></pre>
+		<p>この形だと、使う側は毎回 <code>data</code> の存在を確認しなければなりません。<strong>判別可能ユニオンなら、分岐に入った時点で確定します。</strong></p>
+	</div>
+
+	<h2>動かしてみる</h2>
+
+<pre><code>// discriminated.ts
+type Shape =
+	| { kind: "circle"; radius: number }
+	| { kind: "rect"; width: number; height: number };
+
+function area(s: Shape): number {
+	switch (s.kind) {
+		case "circle": return Math.PI * s.radius ** 2;
+		case "rect":   return s.width * s.height;
+	}
+}
+
+console.log(area({ kind: "circle", radius: 2 }).toFixed(2));
+console.log(area({ kind: "rect", width: 3, height: 4 }));</code></pre>
+
+<pre><code>$ npx tsx discriminated.ts
+12.57
+12</code></pre>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>08.4 型ガード関数</h1>
+
+	<h2>絞り込みを関数に切り出す</h2>
+
+	<p>判定を関数にすると、<strong>戻り値の型を <code>x is T</code> と書くことで絞り込みを伝えられます。</strong></p>
+
+<pre><code>type User = { name: string; age: number };
+
+function isUser(v: unknown): v is User {
+	if (typeof v !== "object" || v === null) return false;
+	const o = v as Record&lt;string, unknown&gt;;
+	return typeof o.name === "string" &amp;&amp; typeof o.age === "number";
+}
+
+const data: unknown = JSON.parse('{"name":"Alice","age":30}');
+
+if (isUser(data)) {
+	console.log(data.name);      // User として扱える
+}</code></pre>
+
+	<div class="callout">
+		<p><strong><code>v is User</code> は「そう見なせ」という宣言で、検査されません。</strong></p>
+		<p>関数の中身が間違っていても、TypeScript は指摘しません。<strong><code>return true;</code> とだけ書いても通ります。</strong><code>as</code> と同じく、<strong>正しさは書き手が保証します。</strong>その代わり、保証する場所が<strong>この関数の中だけ</strong>に閉じ込められます。</p>
+	</div>
+
+	<h2>配列の絞り込み</h2>
+
+<pre><code>const values: (string | undefined)[] = ["a", undefined, "b"];
+
+// filter だけでは型が変わらない
+const a = values.filter((v) =&gt; v !== undefined);     // (string | undefined)[]
+
+// 型ガードを書くと変わる
+const b = values.filter((v): v is string =&gt; v !== undefined);   // string[]</code></pre>
+
+	<h2>assert 関数</h2>
+
+	<p><code>asserts</code> を使うと、<strong>「ここを通過したら確定している」</strong>という形も書けます。</p>
+
+<pre><code>function assertIsUser(v: unknown): asserts v is User {
+	if (!isUser(v)) {
+		throw new Error("User の形ではありません");
+	}
+}
+
+const data: unknown = JSON.parse(text);
+assertIsUser(data);
+console.log(data.name);      // ここでは User</code></pre>
+
+	<div class="callout">
+		<p><strong><code>asserts</code> を使う関数は、明示的な型注釈が要ります。</strong></p>
+		<p><code>const f = (v: unknown): asserts v is User =&gt; {...}</code> のようにアロー関数で書くと、<strong>呼び出し側で効きません。</strong><code>function</code> 宣言か、明示的に型を付けた変数として定義してください。</p>
+	</div>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="ch05" id="c5">
+	<h1>08.5 never による網羅性チェック</h1>
+
+	<h2>分岐の漏れをコンパイル時に見つける</h2>
+
+	<p><strong><code>never</code> は「ありえない型」</strong>です。すべての分岐を書き切れば、最後には <code>never</code> だけが残ります。</p>
+
+<pre><code>type Shape =
+	| { kind: "circle"; radius: number }
+	| { kind: "rect"; width: number; height: number };
+
+function area(s: Shape): number {
+	switch (s.kind) {
+		case "circle": return Math.PI * s.radius ** 2;
+		case "rect":   return s.width * s.height;
+		default: {
+			const _exhaustive: never = s;     // ここに来るはずがない
+			throw new Error(`未対応の形状: ${JSON.stringify(_exhaustive)}`);
+		}
+	}
+}</code></pre>
+
+	<figure>
+		<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="never による網羅性チェックの仕組み">
+			<defs>
+				<linearGradient id="g-08-2a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-08-2b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-08-2c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-08-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<!-- 全部書いた場合 -->
+			<text x="20" y="28" fill="#1d7a3c" font-size="13.5" font-family="sans-serif" font-weight="700">すべての分岐を書いた場合</text>
+
+			<rect x="20" y="42" width="150" height="48" rx="8" fill="url(#g-08-2a)"/>
+			<text x="95" y="72" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">circle | rect</text>
+
+			<rect x="230" y="42" width="130" height="48" rx="8" fill="url(#g-08-2b)"/>
+			<text x="295" y="72" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">case "circle"</text>
+
+			<rect x="410" y="42" width="130" height="48" rx="8" fill="url(#g-08-2b)"/>
+			<text x="475" y="72" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">case "rect"</text>
+
+			<rect x="590" y="42" width="150" height="48" rx="8" fill="#fff" stroke="#7aa87a" stroke-width="2"/>
+			<text x="665" y="63" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">default</text>
+			<text x="665" y="81" text-anchor="middle" fill="#1d7a3c" font-size="12" font-family="sans-serif">残りは never</text>
+
+			<path d="M170,66 L222,66" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-08-2)"/>
+			<path d="M360,66 L402,66" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-08-2)"/>
+			<path d="M540,66 L582,66" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-08-2)"/>
+
+			<text x="790" y="70" text-anchor="middle" fill="#1d7a3c" font-size="13" font-family="sans-serif" font-weight="700">通る</text>
+
+			<!-- 種類を足した場合 -->
+			<text x="20" y="150" fill="#a51f22" font-size="13.5" font-family="sans-serif" font-weight="700">union に triangle を足した場合 — 分岐を書き忘れている</text>
+
+			<rect x="20" y="164" width="150" height="48" rx="8" fill="url(#g-08-2a)"/>
+			<text x="95" y="186" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif" font-weight="600">circle | rect</text>
+			<text x="95" y="203" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif" font-weight="600">| triangle</text>
+
+			<rect x="230" y="164" width="130" height="48" rx="8" fill="url(#g-08-2b)"/>
+			<text x="295" y="194" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">case "circle"</text>
+
+			<rect x="410" y="164" width="130" height="48" rx="8" fill="url(#g-08-2b)"/>
+			<text x="475" y="194" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">case "rect"</text>
+
+			<rect x="590" y="164" width="150" height="48" rx="8" fill="url(#g-08-2c)"/>
+			<text x="665" y="185" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">default</text>
+			<text x="665" y="203" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">triangle が残る</text>
+
+			<path d="M170,188 L222,188" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-08-2)"/>
+			<path d="M360,188 L402,188" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-08-2)"/>
+			<path d="M540,188 L582,188" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-08-2)"/>
+
+			<text x="790" y="184" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="700">TS2322</text>
+			<text x="790" y="202" text-anchor="middle" fill="#a51f22" font-size="12" font-family="sans-serif" font-weight="600">never に入らない</text>
+
+			<rect x="20" y="238" width="860" height="40" rx="8" fill="#f2f5fb" stroke="#d9dfe8"/>
+			<text x="450" y="263" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">union に種類を足すと、対応が必要な箇所をコンパイラが教えてくれる</text>
+		</svg>
+		<figcaption>図 2 — 分岐を書き切れば残りは <code>never</code>。書き忘れると <code>never</code> に代入できずエラーになる</figcaption>
+	</figure>
+
+	<h2>種類を増やすとエラーになる</h2>
+
+<pre><code>type Shape =
+	| { kind: "circle"; radius: number }
+	| { kind: "rect"; width: number; height: number }
+	| { kind: "triangle"; base: number; height: number };   // ← 追加した
+
+// area の default 節でエラーになる
+//   const _exhaustive: never = s;
+//         ~~~~~~~~~~~
+// error TS2322: Type '{ kind: "triangle"; base: number; height: number; }'
+//               is not assignable to type 'never'.
+//
+// 訳: 型 '{ kind: "triangle"; ... }' を型 'never' に割り当てることはできません。</code></pre>
+
+	<div class="callout">
+		<p><strong>これが TypeScript で最も価値のある機能のひとつです。</strong></p>
+		<p>union に種類を追加したとき、<strong>対応が必要な箇所をコンパイラが列挙してくれます。</strong>実行してみるまで漏れに気づけない、という状況がなくなります。</p>
+		<p><strong>判別可能ユニオンを使うなら、必ず網羅性チェックもセットで書いてください。</strong>この2つは組み合わせて初めて効果があります。</p>
+	</div>
+
+	<h2>動かしてみる</h2>
+
+<pre><code>// exhaustive.ts
+type Event =
+	| { type: "click"; x: number; y: number }
+	| { type: "key"; code: string }
+	| { type: "close" };
+
+function describe(e: Event): string {
+	switch (e.type) {
+		case "click": return `クリック (${e.x}, ${e.y})`;
+		case "key":   return `キー ${e.code}`;
+		case "close": return "閉じる";
+		default: {
+			const _exhaustive: never = e;
+			throw new Error(`未対応のイベント: ${JSON.stringify(_exhaustive)}`);
+		}
+	}
+}
+
+console.log(describe({ type: "click", x: 10, y: 20 }));
+console.log(describe({ type: "key", code: "Enter" }));
+console.log(describe({ type: "close" }));</code></pre>
+
+<pre><code>$ npx tsx exhaustive.ts
+クリック (10, 20)
+キー Enter
+閉じる</code></pre>
+
+	<h2>if 文でも使える</h2>
+
+<pre><code>function describe(e: Event): string {
+	if (e.type === "click") return `クリック (${e.x}, ${e.y})`;
+	if (e.type === "key")   return `キー ${e.code}`;
+	if (e.type === "close") return "閉じる";
+
+	const _exhaustive: never = e;
+	throw new Error(`未対応: ${JSON.stringify(_exhaustive)}`);
+}</code></pre>
+</section>
+
+<div class="next">
+	<p><strong>まとめ</strong></p>
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">手段</th><th>使いどころ</th><th>注意</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>typeof</code></td><td>プリミティブの判定</td><td><code>typeof null === "object"</code></td></tr>
+			<tr><td class="nowrap"><code>instanceof</code></td><td>クラスの判定</td><td><code>type</code>・<code>interface</code> には使えない</td></tr>
+			<tr><td class="nowrap"><code>in</code></td><td>プロパティの有無</td><td>—</td></tr>
+			<tr><td class="nowrap">真偽値</td><td>存在の確認</td><td><strong><code>""</code> と <code>0</code> も偽</strong></td></tr>
+			<tr><td class="nowrap"><strong>判別可能ユニオン</strong></td><td><strong>実務で最も使う設計</strong></td><td>ありえない組み合わせを型で禁止できる</td></tr>
+			<tr><td class="nowrap">型ガード関数</td><td>判定を切り出す</td><td>中身は検査されない。書き手が保証する</td></tr>
+			<tr><td class="nowrap"><strong><code>never</code></strong></td><td><strong>網羅性チェック</strong></td><td>判別可能ユニオンと必ずセットで書く</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p><strong>次は <a class="doclink doc09" href="09-ジェネリクス.html">09. ジェネリクス</a> です。</strong>型を引数として受け取る仕組みを扱います。Java・C# のジェネリクスとの違いにも触れます。</p>
+</div>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink doc07" href="07-関数の型.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>07. 関数の型</a> <a class="doclink doc09" href="09-ジェネリクス.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>09. ジェネリクス</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03. tsconfig — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（4章 / 刻み 93.3） */
+.ch01 { --accent: hsl(280,78%,25%);   --accent2: hsl(280,58%,55%);   --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(186.7,78%,25%); --accent2: hsl(186.7,58%,55%); --soft: hsl(186.7,28%,95%); }
+.ch03 { --accent: hsl(93.3,78%,25%);  --accent2: hsl(93.3,58%,55%);  --soft: hsl(93.3,28%,95%); }
+.ch04 { --accent: hsl(0,78%,25%);     --accent2: hsl(0,58%,55%);     --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "03." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "03." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>03. tsconfig</h1>
+		<p class="lead">検査の厳しさ・出力する JavaScript・<code>import</code> の解決を決める</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink doc02" href="02-実行環境.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>02. 実行環境</a> <a class="doclink doc04" href="04-型の基本.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>04. 型の基本</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この章の到達点</h2>
+	<ul>
+		<li><code>strict</code> が何を有効にするのか、<strong>無効だと何が通ってしまうのか</strong>を説明できる</li>
+		<li><code>target</code>・<code>module</code>・<code>moduleResolution</code> の役割を区別できる</li>
+		<li>設定を変えてもエラーが変わらないときに、原因を切り分けられる</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>この章の内容</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">tsconfig.json は3つのことを決める</a></li>
+		<li class="ch02"><a href="#c2">strict — 何を防いでいるか</a></li>
+		<li class="ch03"><a href="#c3">target と lib — どの JavaScript を出すか</a></li>
+		<li class="ch04"><a href="#c4">module と moduleResolution — import の解決</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>03.1 tsconfig.json は3つのことを決める</h1>
+
+	<h2>設定項目は多いが、決めていることは少ない</h2>
+
+	<p><code>tsc --init</code> が生成する <code>tsconfig.json</code> には数十の項目が並びます。しかし<strong>決めていることは大きく3つ</strong>です。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">何を決めるか</th><th class="nowrap">主な項目</th><th>間違えるとどうなるか</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><strong>検査の厳しさ</strong></td><td class="nowrap"><code>strict</code> 系</td><td>危ないコードが通る。<code>null</code> 由来の実行時エラーが残る</td></tr>
+			<tr><td class="nowrap"><strong>出力する JavaScript</strong></td><td class="nowrap"><code>target</code>・<code>lib</code>・<code>outDir</code></td><td>古い環境で動かない。新しい API が「存在しない」と言われる</td></tr>
+			<tr><td class="nowrap"><strong><code>import</code> の解決</strong></td><td class="nowrap"><code>module</code>・<code>moduleResolution</code></td><td><strong>モジュールが見つからない。</strong>実務で最も事故る</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<figure>
+		<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="tsconfig.json が決める3つのこと">
+			<defs>
+				<linearGradient id="g-03-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(280,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(280,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-03-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-03-1c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-03-1d" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-03-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="330" y="16" width="240" height="52" rx="8" fill="url(#g-03-1d)"/>
+			<text x="450" y="48" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">tsconfig.json</text>
+
+			<rect x="20" y="128" width="260" height="76" rx="8" fill="url(#g-03-1a)"/>
+			<text x="150" y="154" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">検査の厳しさ</text>
+			<text x="150" y="176" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">strict 系</text>
+			<text x="150" y="194" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">危ないコードを弾くか</text>
+
+			<rect x="320" y="128" width="260" height="76" rx="8" fill="url(#g-03-1b)"/>
+			<text x="450" y="154" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">出力する JavaScript</text>
+			<text x="450" y="176" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">target ／ lib ／ outDir</text>
+			<text x="450" y="194" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">どの構文・どの標準 API</text>
+
+			<rect x="620" y="128" width="260" height="76" rx="8" fill="url(#g-03-1c)"/>
+			<text x="750" y="154" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">import の解決</text>
+			<text x="750" y="176" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">module ／ moduleResolution</text>
+			<text x="750" y="194" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">どのファイルを指すか</text>
+
+			<path d="M400,70 L180,120" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-03-1)"/>
+			<path d="M450,70 L450,120" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-03-1)"/>
+			<path d="M500,70 L720,120" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-03-1)"/>
+
+			<text x="150" y="234" text-anchor="middle" fill="#4a5568" font-size="12.5" font-family="sans-serif">間違えると：危ないコードが通る</text>
+			<text x="450" y="234" text-anchor="middle" fill="#4a5568" font-size="12.5" font-family="sans-serif">間違えると：古い環境で動かない</text>
+			<text x="750" y="234" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">間違えると：モジュールが見つからない</text>
+
+			<rect x="620" y="248" width="260" height="28" rx="6" fill="#fdf0f0" stroke="#e0a0a0"/>
+			<text x="750" y="267" text-anchor="middle" fill="#a51f22" font-size="12" font-family="sans-serif" font-weight="600">実務で最も事故る</text>
+		</svg>
+		<figcaption>図 1 — <code>tsconfig.json</code> が決める3つのこと。設定項目は多いが、決めていることは少ない</figcaption>
+	</figure>
+
+	<h2>最小の設定</h2>
+
+	<p>Node で動かす前提なら、まずこれで足ります。</p>
+
+<pre><code>{
+	"compilerOptions": {
+		"target": "es2022",
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"strict": true,
+		"types": ["node"],
+		"outDir": "dist"
+	},
+	"include": ["src/**/*.ts"]
+}</code></pre>
+
+	<div class="callout">
+		<p><strong>設定を変えてもエラーが変わらないときは、設定が読まれていないことを疑ってください。</strong></p>
+		<p><a class="doclink doc02" href="02-実行環境.html">02. 実行環境</a>で見たとおり、<strong>コマンドラインにファイル名を指定すると <code>tsconfig.json</code> は無視されます。</strong>プロジェクト全体を検査するときは <code>npx tsc</code> だけを実行します。</p>
+	</div>
+
+	<h2>include と exclude</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>意味</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>include</code></td><td>検査の対象。省略すると設定ファイルのある場所以下すべて</td></tr>
+			<tr><td class="nowrap"><code>exclude</code></td><td><code>include</code> から除く。既定で <code>node_modules</code> が入っている</td></tr>
+			<tr><td class="nowrap"><code>files</code></td><td>個別に列挙する。ファイル数が少ないときだけ</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p><strong>「特定のファイルだけ型が付かない」ときは、まず <code>include</code> から漏れていないかを見ます。</strong></p>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>03.2 strict — 何を防いでいるか</h1>
+
+	<h2>TypeScript 7 では既定で有効になった</h2>
+
+	<p><span class="badge b-ts7">TS7</span> <strong>TypeScript 7 は <code>strict</code> が既定で <code>true</code> です。</strong>5 系は既定で <code>false</code> でした。</p>
+
+<pre><code>// strict-test.ts
+function greet(name) {
+	return "Hello, " + name.toUpperCase();
+}
+const u: { name?: string } = {};
+console.log(u.name.length);</code></pre>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">バージョン</th><th class="nowrap">設定なしで実行</th><th>結果</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">TypeScript 7.0.2</td><td class="nowrap"><code>npx tsc --noEmit</code></td><td><span class="badge b-ng">エラー2件</span> <code>TS7006</code> と <code>TS18048</code></td></tr>
+			<tr><td class="nowrap">TypeScript 5.9.3</td><td class="nowrap"><code>npx tsc --noEmit</code></td><td><span class="badge b-ok">エラーなし</span> 素通りする</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>「5 では通っていたコードが 7 でエラーになる」原因の多くがこれです。</strong></p>
+		<p>移行時に大量のエラーが出ても、コードが急に壊れたわけではありません。<strong>今まで見逃されていた問題が表示されるようになっただけ</strong>です。一時的に <code>"strict": false</code> にして段階的に直す手もありますが、<strong>新規プロジェクトでは必ず有効にしてください。</strong></p>
+	</div>
+
+	<h2>strict が有効にする主な項目</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>防いでいること</th><th class="nowrap">エラー番号</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>noImplicitAny</code></td><td>型を書き忘れた引数が暗黙に <code>any</code> になること。<strong>1か所の <code>any</code> が下流の検査を無効化する</strong>（<a class="doclink doc06" href="06-any-unknown-アサーション.html">06</a>）</td><td class="nowrap"><code>TS7006</code></td></tr>
+			<tr><td class="nowrap"><code>strictNullChecks</code></td><td><code>null</code>・<code>undefined</code> を素通りさせること。<strong>最も効果が大きい</strong></td><td class="nowrap"><code>TS18048</code><br><code>TS2531</code></td></tr>
+			<tr><td class="nowrap"><code>strictFunctionTypes</code></td><td>関数の引数の型が緩く扱われること（反変チェック）</td><td class="nowrap"><code>TS2345</code></td></tr>
+			<tr><td class="nowrap"><code>strictPropertyInitialization</code></td><td>クラスのプロパティが初期化されないまま使われること</td><td class="nowrap"><code>TS2564</code></td></tr>
+			<tr><td class="nowrap"><code>useUnknownInCatchVariables</code></td><td><code>catch (e)</code> の <code>e</code> が <code>any</code> になること（<a class="doclink doc11" href="11-非同期とエラー処理.html">11</a>）</td><td class="nowrap"><code>TS18046</code></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h3>実際のエラー</h3>
+
+<pre><code>$ npx tsc --noEmit
+strict-test.ts(1,16): error TS7006: Parameter 'name' implicitly has an 'any' type.
+strict-test.ts(5,13): error TS18048: 'u.name' is possibly 'undefined'.
+
+訳: 引数 'name' は暗黙的に 'any' 型になっています。
+    'u.name' は 'undefined' の可能性があります。</code></pre>
+
+	<h2>個別に切る場合</h2>
+
+	<p><code>strict: true</code> のまま、特定の項目だけ切ることもできます。<strong>順序が重要で、<code>strict</code> の後に書いた項目が勝ちます。</strong></p>
+
+<pre><code>{
+	"compilerOptions": {
+		"strict": true,
+		"strictPropertyInitialization": false   // ← strict の後なのでこちらが有効
+	}
+}</code></pre>
+
+	<div class="callout">
+		<p><strong>Java・C# から来た人へ</strong></p>
+		<p><code>strictNullChecks</code> が有効な TypeScript の <code>string</code> は、<strong><code>null</code> を代入できません。</strong>Java の <code>String</code> や C# の参照型（null 許容が既定の場合）とは違います。</p>
+<pre><code>let s: string = null;         // エラー TS2322
+let t: string | null = null;  // これなら通る</code></pre>
+		<p>C# の nullable 参照型（<code>string?</code>）に近い考え方です。<strong>「null かもしれない」ことを型で示さないと、null を入れられません。</strong></p>
+	</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>03.3 target と lib — どの JavaScript を出すか</h1>
+
+	<h2>target — 出力する構文のレベル</h2>
+
+	<p><code>target</code> は<strong>出力する JavaScript の文法レベル</strong>を決めます。古い値にすると、新しい構文が古い書き方に変換されます。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">target</th><th>出力される <code>const x = a ?? b;</code></th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>es2022</code></td><td><code>const x = a ?? b;</code>（そのまま）</td></tr>
+			<tr><td class="nowrap"><code>es5</code></td><td><code>var x = a !== null &amp;&amp; a !== void 0 ? a : b;</code>（変換される）</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p><strong>Node で動かすなら <code>es2022</code> 以上で構いません。</strong>古い値にする理由は、古いブラウザを相手にする場合だけです。</p>
+
+	<h2>lib — 使える標準 API</h2>
+
+	<p><code>lib</code> は<strong>型として存在する標準 API</strong>を決めます。<code>target</code> から自動で決まるため、通常は書きません。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">症状</th><th>原因</th></tr>
+		</thead>
+		<tbody>
+			<tr><td><code>Array.prototype.at</code> が「存在しない」と言われる</td><td><code>lib</code> が古い（<code>at</code> は ES2022）</td></tr>
+			<tr><td><code>document</code> や <code>window</code> が見つからない</td><td><code>lib</code> に <code>DOM</code> が入っていない（Node 向け設定では正常）</td></tr>
+			<tr><td>ブラウザ向けなのに <code>document</code> が使えない</td><td><code>"lib": ["es2022", "DOM"]</code> を明示する</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong><code>lib</code> は「型があるか」だけを決めます。実行時に動くかは別問題です。</strong></p>
+		<p><code>lib</code> を新しくすれば型エラーは消えますが、<strong>古い実行環境で動く保証にはなりません。</strong>逆に、実行環境が新しくても <code>lib</code> が古ければ型エラーになります。<strong>型と実行時は連動していません</strong>（<a class="doclink doc01" href="01-背景.html">01. 背景</a>）。</p>
+	</div>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>03.4 module と moduleResolution — import の解決</h1>
+
+	<h2>2つは役割が違う</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>決めること</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>module</code></td><td><strong>出力する</strong>モジュール形式（<code>import</code> のまま出すか <code>require</code> にするか）</td></tr>
+			<tr><td class="nowrap"><code>moduleResolution</code></td><td><strong>探し方</strong>。<code>import "./foo"</code> をどのファイルに対応させるか</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>Node 向けなら nodenext</h2>
+
+	<p><span class="badge b-esm">ESM</span><span class="badge b-cjs">CJS</span> Node で動かすなら、両方 <code>nodenext</code> にするのが確実です。<strong><code>package.json</code> の <code>"type"</code> を見て、ESM と CJS を自動で切り替えます。</strong></p>
+
+<pre><code>{
+	"compilerOptions": {
+		"module": "nodenext",
+		"moduleResolution": "nodenext"
+	}
+}</code></pre>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">用途</th><th class="nowrap">module</th><th class="nowrap">moduleResolution</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">Node で実行する</td><td class="nowrap"><code>nodenext</code></td><td class="nowrap"><code>nodenext</code></td></tr>
+			<tr><td class="nowrap">Vite・webpack 等で束ねる</td><td class="nowrap"><code>esnext</code></td><td class="nowrap"><code>bundler</code></td></tr>
+			<tr><td class="nowrap">古い CommonJS プロジェクト</td><td class="nowrap"><code>commonjs</code></td><td class="nowrap"><code>node10</code></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>paths は実行時には効かない</h2>
+
+	<p><code>paths</code> でインポートの別名を作れますが、<strong>これは型検査だけの機能です。</strong></p>
+
+<pre><code>{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": { "@/*": ["src/*"] }
+	}
+}</code></pre>
+
+<pre><code>import { greet } from "@/greet";   // tsc は解決できる
+                                   // node は解決できない</code></pre>
+
+	<div class="callout">
+		<p><strong><code>paths</code> を使うなら、実行側にも同じ設定が要ります。</strong></p>
+		<p><code>tsc</code> が出力する JavaScript には <code>@/greet</code> がそのまま残ります。<strong>Node はこれを解決できません。</strong>バンドラを使うか、<code>package.json</code> の <code>imports</code> フィールドを使うか、そもそも <code>paths</code> を使わないかを選びます。「型は通るのに実行時に落ちる」典型例です。</p>
+	</div>
+
+	<h2>設定が合っているかの確かめ方</h2>
+
+<pre><code>$ npx tsc --showConfig      # 実際に使われる設定を展開して表示する</code></pre>
+
+	<p><strong>継承（<code>extends</code>）や既定値を含めた最終的な設定</strong>が出ます。「書いたはずの設定が効かない」ときは、これで実際の値を確認します。</p>
+</section>
+
+<div class="next">
+	<p><strong>まとめ</strong></p>
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>この章の結論</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">決めていること</td><td>検査の厳しさ・出力する JavaScript・<code>import</code> の解決の3つ</td></tr>
+			<tr><td class="nowrap"><code>strict</code></td><td><strong>TypeScript 7 では既定で有効。</strong>5 系では無効。移行時のエラー増加の主因</td></tr>
+			<tr><td class="nowrap"><code>target</code>・<code>lib</code></td><td>Node なら <code>es2022</code> 以上。<code>lib</code> は型の有無だけを決め、実行可否とは無関係</td></tr>
+			<tr><td class="nowrap"><code>module</code> 系</td><td>Node なら両方 <code>nodenext</code>。<code>paths</code> は<strong>実行時には効かない</strong></td></tr>
+			<tr><td class="nowrap">確認方法</td><td><code>npx tsc --showConfig</code> で実際に使われる設定を見る</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p><strong>次は <a class="doclink doc04" href="04-型の基本.html">04. 型の基本</a> です。</strong>ここから型そのものの話に入ります。<strong>04 と 05 は飛ばさないでください。</strong></p>
+</div>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink doc02" href="02-実行環境.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>02. 実行環境</a> <a class="doclink doc04" href="04-型の基本.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>04. 型の基本</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>

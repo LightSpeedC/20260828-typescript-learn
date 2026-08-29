@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02. 実行環境 — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* 章アクセント（5章 / 刻み 70） */
+.ch01 { --accent: hsl(280,78%,25%); --accent2: hsl(280,58%,55%); --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(210,78%,25%); --accent2: hsl(210,58%,55%); --soft: hsl(210,28%,95%); }
+.ch03 { --accent: hsl(140,78%,25%); --accent2: hsl(140,58%,55%); --soft: hsl(140,28%,95%); }
+.ch04 { --accent: hsl(70,78%,25%);  --accent2: hsl(70,58%,55%);  --soft: hsl(70,28%,95%); }
+.ch05 { --accent: hsl(0,78%,25%);   --accent2: hsl(0,58%,55%);   --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "02." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "02." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>02. 実行環境</h1>
+		<p class="lead">検査する道具と、実行する道具は別 ／ 手元で <code>.ts</code> が動く状態を作る</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink doc01" href="01-背景.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>01. 背景</a> <a class="doclink doc03" href="03-tsconfig.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>03. tsconfig</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<div class="goal">
+	<h2>この章の到達点</h2>
+	<ul>
+		<li><code>tsc</code>・<code>tsx</code>・<code>node</code> の<strong>役割の違い</strong>を説明できる</li>
+		<li>手元で <code>.ts</code> を実行し、型エラーを表示できる状態を作れる</li>
+		<li>型定義（<code>@types</code>）がどこから来るのかを説明できる</li>
+	</ul>
+</div>
+
+<div class="toc">
+	<h2>この章の内容</h2>
+	<ol>
+		<li class="ch01"><a href="#c1">動かす方法は4つある</a></li>
+		<li class="ch02"><a href="#c2">tsc — 検査する道具</a></li>
+		<li class="ch03"><a href="#c3">その場で実行する — tsx・node・bun・deno</a></li>
+		<li class="ch04"><a href="#c4">npm と型定義（@types）</a></li>
+		<li class="ch05"><a href="#c5">エディタと言語サーバ</a></li>
+	</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="c1">
+	<h1>02.1 動かす方法は4つある</h1>
+
+	<h2>「検査する」と「実行する」は別の仕事</h2>
+
+	<p><a class="doclink doc01" href="01-背景.html">01. 背景</a>で見たとおり、<code>tsc</code> の仕事は<strong>型を検査すること</strong>と<strong>型を取り除いた JavaScript を出力すること</strong>の2つでした。実行はしません。</p>
+
+	<p>一方、手元で動かすだけなら <code>tsc</code> を通さない道具もあります。<strong>それらは型を検査しません。</strong>型注釈を捨てて実行するだけです。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">道具</th><th class="nowrap">型を検査する</th><th class="nowrap">実行する</th><th>使いどころ</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>tsc</code></td><td class="nowrap"><span class="badge b-ok">する</span></td><td class="nowrap"><span class="badge b-ng">しない</span></td><td>検査と、配布用 JavaScript の生成</td></tr>
+			<tr><td class="nowrap"><code>tsx</code></td><td class="nowrap"><span class="badge b-ng">しない</span></td><td class="nowrap"><span class="badge b-ok">する</span></td><td>開発中にすぐ動かす。制約が少ない</td></tr>
+			<tr><td class="nowrap"><code>node</code></td><td class="nowrap"><span class="badge b-ng">しない</span></td><td class="nowrap"><span class="badge b-ok">する</span></td><td>道具を増やさず動かす。<strong>使えない構文がある</strong></td></tr>
+			<tr><td class="nowrap"><code>bun</code> / <code>deno</code></td><td class="nowrap"><span class="badge b-ng">しない</span>／一部する</td><td class="nowrap"><span class="badge b-ok">する</span></td><td>Node 以外の処理系を使う場合</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>実行できたことは、型が正しいことを意味しません。</strong></p>
+		<p><code>tsx</code> も <code>node</code> も型注釈を<strong>捨てるだけ</strong>で、内容を見ていません。型エラーがあっても平然と動きます。<strong>検査は <code>tsc</code> かエディタが行います。</strong>この分担を混同すると、「動いているのにビルドが通らない」という状況の理由が分からなくなります。</p>
+	</div>
+
+	<figure>
+		<svg viewBox="0 0 900 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="検査する経路と実行する経路">
+			<defs>
+				<linearGradient id="g-02-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(280,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(280,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-02-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-02-1c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-02-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="16" y="112" width="130" height="60" rx="8" fill="url(#g-02-1c)"/>
+			<text x="81" y="138" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">main.ts</text>
+			<text x="81" y="158" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">型注釈あり</text>
+
+			<!-- 上の経路: 検査してから実行 -->
+			<rect x="238" y="26" width="120" height="56" rx="8" fill="url(#g-02-1a)"/>
+			<text x="298" y="50" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">tsc</text>
+			<text x="298" y="70" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">検査 ＋ 出力</text>
+
+			<rect x="416" y="12" width="150" height="34" rx="6" fill="#fff" stroke="#a51f22" stroke-width="2"/>
+			<text x="491" y="34" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">型エラーの報告</text>
+
+			<rect x="416" y="62" width="150" height="34" rx="6" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="491" y="84" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif">main.js</text>
+
+			<rect x="628" y="26" width="120" height="56" rx="8" fill="url(#g-02-1b)"/>
+			<text x="688" y="58" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">node</text>
+
+			<text x="820" y="52" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif">実行結果</text>
+
+			<path d="M146,132 L230,70" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-02-1)"/>
+			<path d="M358,44 L408,32" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-02-1)"/>
+			<path d="M358,64 L408,76" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-02-1)"/>
+			<path d="M566,79 L620,60" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-02-1)"/>
+			<path d="M748,54 L780,54" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-02-1)"/>
+
+			<!-- 下の経路: そのまま実行 -->
+			<rect x="238" y="198" width="200" height="56" rx="8" fill="url(#g-02-1b)"/>
+			<text x="338" y="222" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">tsx ／ node ／ bun</text>
+			<text x="338" y="242" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">型注釈を取り除いて実行</text>
+
+			<text x="560" y="230" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif">実行結果</text>
+
+			<path d="M146,152 L230,215" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-02-1)"/>
+			<path d="M438,226 L512,226" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-02-1)"/>
+
+			<text x="338" y="278" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">こちらの経路では型エラーがあっても止まらない</text>
+
+			<text x="180" y="105" fill="#4a5568" font-size="12" font-family="sans-serif">検査してから</text>
+			<text x="180" y="186" fill="#4a5568" font-size="12" font-family="sans-serif">そのまま</text>
+		</svg>
+		<figcaption>図 1 — 検査する経路と、そのまま実行する経路。<code>tsx</code>・<code>node</code> は型を見ない</figcaption>
+	</figure>
+
+	<h2>この資料での使い分け</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">場面</th><th>使うもの</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">コード例を動かす</td><td><code>npx tsx ファイル名.ts</code></td></tr>
+			<tr><td class="nowrap">型エラーを確かめる</td><td><code>npx tsc --noEmit</code>、またはエディタの波線</td></tr>
+			<tr><td class="nowrap">出力される JavaScript を見る</td><td><code>npx tsc</code></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>コード例は実ファイルで用意してあります</h2>
+
+	<p>この資料に出てくるコード例は、<code>docs/samples/</code> に実ファイルとして置いてあります。<strong>写経せずに動かしたい場合はこちらを使ってください。</strong></p>
+
+<pre><code>$ cd docs/samples
+$ npm i
+
+$ npx tsx 04-null-check.ts    # 個別に実行する
+$ npx tsc                     # 全ファイルをまとめて型検査する</code></pre>
+
+	<p>ファイル名は <code>04-null-check.ts</code> のように<strong>資料番号が接頭辞</strong>になっています。読んでいる章に対応するファイルがすぐ見つかります。</p>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="c2">
+	<h1>02.2 tsc — 検査する道具</h1>
+
+	<h2>導入する</h2>
+
+	<p>プロジェクトごとに入れます。グローバルに入れると、プロジェクトごとにバージョンを変えられません。</p>
+
+<pre><code>$ npm init -y
+$ npm i -D typescript tsx
+
+$ npx tsc --version
+Version 7.0.2</code></pre>
+
+	<h2>検査だけする — --noEmit</h2>
+
+	<p><code>tsc</code> は既定で JavaScript を出力します。<strong>検査だけしたいときは <code>--noEmit</code></strong> を付けます。</p>
+
+<pre><code>$ npx tsc --noEmit greet.ts
+greet.ts:7:21 - error TS2353: Object literal may only specify known properties,
+                              and 'namae' does not exist in type 'User'.
+
+7 console.log(greet({ namae: "Alice" }));
+                      ~~~~
+
+Found 1 error in greet.ts:7</code></pre>
+
+	<p>エラーがなければ<strong>何も出力しません</strong>。「何も出ない = 合格」です。</p>
+
+	<h2>設定ファイルとコマンドライン引数は併用できない</h2>
+
+	<p><span class="badge b-ts7">TS7</span> <code>tsconfig.json</code> がある状態でコマンドラインにファイル名を指定すると、<strong><code>tsconfig.json</code> は読み込まれません。</strong>TypeScript 7 はこれをエラーで教えてくれます。</p>
+
+<pre><code>$ npx tsc --noEmit fs-test.ts
+error TS5112: tsconfig.json is present but will not be loaded if files are
+              specified on commandline. Use '--ignoreConfig' to skip this error.
+
+訳: tsconfig.json がありますが、コマンドラインでファイルを指定すると読み込まれません。
+    このエラーを飛ばすには '--ignoreConfig' を使ってください。</code></pre>
+
+	<div class="callout">
+		<p><strong>この挙動は TypeScript 5 系でも同じですが、警告が出ません。</strong></p>
+		<p>5 系では黙って <code>tsconfig.json</code> を無視するため、<strong>「設定したはずのオプションが効かない」</strong>という形で現れます。プロジェクト全体を検査するときは、<strong>ファイル名を指定せず <code>npx tsc</code> だけ</strong>を実行してください。</p>
+	</div>
+
+	<h2>設定を作る</h2>
+
+	<p><code>tsconfig.json</code> の雛形は次のコマンドで作れます。中身は <a class="doclink doc03" href="03-tsconfig.html">03. tsconfig</a> で扱います。</p>
+
+<pre><code>$ npx tsc --init</code></pre>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="c3">
+	<h1>02.3 その場で実行する — tsx・node・bun・deno</h1>
+
+	<h2>tsx — 制約が少ない</h2>
+
+	<p><code>tsx</code> は型注釈を取り除いて実行します。<strong>この資料のコード例はすべて <code>tsx</code> で動きます。</strong></p>
+
+<pre><code>$ npx tsx hello.ts
+Hello, TypeScript!</code></pre>
+
+	<h2>node — 道具を増やさずに動かす</h2>
+
+	<p><span class="badge b-strip">Node型ストリップ</span> 新しい Node は <code>.ts</code> をそのまま実行できます。型注釈を取り除いてから実行する仕組み（type stripping）が入っているためです。</p>
+
+<pre><code>$ node --version
+v26.8.1
+
+$ node hello.ts
+Hello, TypeScript!</code></pre>
+
+	<h3>使えない構文がある</h3>
+
+	<p>Node の型ストリップは<strong>「取り除く」だけで、変換はしません。</strong>そのため、<strong>JavaScript のコードを生成する必要がある構文は使えません。</strong></p>
+
+<pre><code>// enum-test.ts
+enum Color { Red, Green, Blue }
+const c: Color = Color.Green;
+console.log(Color[c]);</code></pre>
+
+<pre><code>$ node enum-test.ts
+SyntaxError [ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX]:
+  TypeScript enum is not supported in strip-only mode
+
+訳: TypeScript の enum は、取り除くだけのモードでは対応していません。</code></pre>
+
+	<p><code>enum</code> は型ではなく<strong>実行時のオブジェクトを生成する</strong>ため、取り除くだけでは成立しません。同じ理由で、クラスの<strong>パラメータプロパティ</strong>も使えません。</p>
+
+<pre><code>// param-prop.ts
+class User {
+	constructor(public name: string) {}   // ← public が代入コードを生む
+}</code></pre>
+
+<pre><code>$ node param-prop.ts
+SyntaxError [ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX]:
+  TypeScript parameter property is not supported in strip-only mode
+
+訳: TypeScript のパラメータプロパティは、取り除くだけのモードでは対応していません。</code></pre>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>構文</th><th class="nowrap">node</th><th class="nowrap">tsx</th><th>理由</th></tr>
+		</thead>
+		<tbody>
+			<tr><td>型注釈・<code>interface</code>・<code>type</code></td><td class="nowrap"><span class="badge b-ok">使える</span></td><td class="nowrap"><span class="badge b-ok">使える</span></td><td>取り除くだけで済む</td></tr>
+			<tr><td><code>enum</code></td><td class="nowrap"><span class="badge b-ng">使えない</span></td><td class="nowrap"><span class="badge b-ok">使える</span></td><td>実行時のオブジェクトを生成する</td></tr>
+			<tr><td>パラメータプロパティ</td><td class="nowrap"><span class="badge b-ng">使えない</span></td><td class="nowrap"><span class="badge b-ok">使える</span></td><td>代入コードを生成する</td></tr>
+			<tr><td><code>namespace</code></td><td class="nowrap"><span class="badge b-ng">使えない</span></td><td class="nowrap"><span class="badge b-ok">使える</span></td><td>同上</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>この制約は、むしろ推奨される書き方に沿っています。</strong></p>
+		<p><code>enum</code> と <code>namespace</code> は「JavaScript に何も足さない」という TypeScript の設計方針の例外にあたる機能で、現在は使用を避けるのが一般的です。<code>enum</code> の代わりに何を使うかは <a class="doclink doc04" href="04-型の基本.html">04. 型の基本</a> で扱います。</p>
+	</div>
+
+	<h2>bun と deno</h2>
+
+	<p>Node 以外の処理系も <code>.ts</code> をそのまま実行できます。</p>
+
+<pre><code>$ bun --version
+1.4.0
+$ bun run hello.ts
+Hello, TypeScript!
+
+$ deno --version
+deno 1.31.1 (release, x86_64-pc-windows-msvc)
+$ deno run hello.ts
+Hello, TypeScript!</code></pre>
+
+	<p><code>bun</code> は <code>enum</code> も実行できます（取り除くだけでなく変換するため）。<strong>この資料は Node を前提に進めますが、コード例は bun・deno でもそのまま動きます。</strong></p>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="c4">
+	<h1>02.4 npm と型定義（@types）</h1>
+
+	<h2>型定義はライブラリとは別に配られることがある</h2>
+
+	<p>JavaScript のライブラリには型がありません。TypeScript から使うには<strong>型定義ファイル（<code>.d.ts</code>）</strong>が必要です。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">型定義の在り処</th><th>説明</th><th>例</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">ライブラリに同梱</td><td>何もしなくても型が付く。最近のライブラリはこれが多い</td><td><code>zod</code>、<code>hono</code></td></tr>
+			<tr><td class="nowrap"><code>@types/*</code></td><td>有志が書いた型定義を別途入れる（DefinitelyTyped）</td><td><code>@types/node</code>、<code>@types/express</code></td></tr>
+			<tr><td class="nowrap">存在しない</td><td>自分で書くか、<code>unknown</code> で受ける（<a class="doclink doc10" href="10-モジュールと宣言ファイル.html">10</a>）</td><td>古いライブラリ</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<figure>
+		<svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="型定義がどこから来るか">
+			<defs>
+				<linearGradient id="g-02-2a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-02-2b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-02-2c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-02-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="330" y="14" width="240" height="44" rx="8" fill="#f2f5fb" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="450" y="42" text-anchor="middle" fill="#1c2330" font-size="13.5" font-family="sans-serif" font-weight="600">ライブラリを使いたい</text>
+
+			<rect x="20" y="106" width="266" height="86" rx="8" fill="url(#g-02-2a)"/>
+			<text x="153" y="132" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">① ライブラリに同梱</text>
+			<text x="153" y="153" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">何もしなくても型が付く</text>
+			<text x="153" y="173" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">package.json の "types"</text>
+
+			<rect x="317" y="106" width="266" height="86" rx="8" fill="url(#g-02-2b)"/>
+			<text x="450" y="132" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">② @types/* を入れる</text>
+			<text x="450" y="153" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">npm i -D @types/node</text>
+			<text x="450" y="173" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">＋ tsconfig の types に列挙</text>
+
+			<rect x="614" y="106" width="266" height="86" rx="8" fill="url(#g-02-2c)"/>
+			<text x="747" y="132" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">③ 型定義が存在しない</text>
+			<text x="747" y="153" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">自分で .d.ts を書く</text>
+			<text x="747" y="173" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">またはラッパーで包む</text>
+
+			<path d="M400,60 L180,98" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-02-2)"/>
+			<path d="M450,60 L450,98" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-02-2)"/>
+			<path d="M500,60 L720,98" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-02-2)"/>
+
+			<text x="153" y="216" text-anchor="middle" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">最近のライブラリはこれが多い</text>
+			<text x="450" y="216" text-anchor="middle" fill="#b8620a" font-size="12.5" font-family="sans-serif" font-weight="600">Node の標準 API もここ</text>
+			<text x="747" y="216" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">10 モジュールで扱う</text>
+		</svg>
+		<figcaption>図 2 — 型定義の入手経路は3つ。どれに当たるかで対処が変わる</figcaption>
+	</figure>
+
+	<h2>Node の標準 API にも型定義が要る</h2>
+
+	<p><code>node:fs</code> のような標準モジュールも、<strong>型定義は別途入れます</strong>。入れないとこうなります。</p>
+
+<pre><code>// fs-test.ts
+import { readFileSync } from "node:fs";
+const s = readFileSync("package.json", "utf8");</code></pre>
+
+<pre><code>$ npx tsc
+fs-test.ts(1,30): error TS2591: Cannot find name 'node:fs'.
+  Do you need to install type definitions for node?
+  Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+
+訳: 'node:fs' という名前が見つかりません。node の型定義を入れる必要がありますか。
+    `npm i --save-dev @types/node` を実行し、tsconfig の types に 'node' を追加してください。</code></pre>
+
+<pre><code>$ npm i -D @types/node</code></pre>
+
+	<h2>TypeScript 7 では types への明示が必要</h2>
+
+	<p><span class="badge b-ts7">TS7</span> <strong><code>@types/node</code> を入れるだけでは足りません。</strong><code>tsconfig.json</code> の <code>types</code> に <code>"node"</code> を書く必要があります。</p>
+
+<pre><code>{
+	"compilerOptions": {
+		"target": "es2022",
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"strict": true,
+		"types": ["node"]        // ← TypeScript 7 では必須
+	}
+}</code></pre>
+
+	<div class="callout">
+		<p><strong>TypeScript 5 系では <code>types</code> を書かなくても通ります。</strong></p>
+		<p>5 系は <code>node_modules/@types/</code> 配下を<strong>自動で読み込んで</strong>いました。7 では明示が必要です。<strong>「5 では通っていたコードが 7 で TS2591 になる」</strong>のはこれが原因です。エラーメッセージ自身が <code>types</code> への追加を促しているので、指示どおりに直せば解決します。</p>
+	</div>
+
+	<h2>devDependencies に入れる</h2>
+
+	<p>型定義は<strong>開発中にしか使いません</strong>（実行時には消えているため）。<code>-D</code>（<code>--save-dev</code>）で入れます。</p>
+
+<pre><code>$ npm i -D typescript tsx @types/node</code></pre>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="ch05" id="c5">
+	<h1>02.5 エディタと言語サーバ</h1>
+
+	<h2>波線を出しているのは tsc ではない</h2>
+
+	<p>エディタが型エラーを波線で示すのは、<strong>TypeScript の言語サーバ（tsserver）</strong>が裏で動いているためです。<code>tsc</code> とは別のプロセスですが、<strong>同じ TypeScript のコード</strong>を使っています。</p>
+
+	<h2>エディタとコマンドラインで結果が違うとき</h2>
+
+	<p>「エディタは赤いのに <code>tsc</code> は通る」「その逆」が起きたら、<strong>ほぼ確実にバージョンか設定の食い違い</strong>です。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>症状</th><th>疑うところ</th></tr>
+		</thead>
+		<tbody>
+			<tr><td>エディタだけエラーが出る／出ない</td><td><strong>エディタが使っている TypeScript のバージョン</strong>。VS Code は既定で同梱版を使う。プロジェクトの版に切り替える</td></tr>
+			<tr><td>特定のファイルだけ型が付かない</td><td><code>tsconfig.json</code> の <code>include</code> / <code>exclude</code> から漏れている</td></tr>
+			<tr><td>設定を変えても反映されない</td><td>言語サーバの再起動が必要（VS Code: <code>TypeScript: Restart TS Server</code>）</td></tr>
+			<tr><td>コマンドラインだけエラーが出る</td><td>ファイル名を指定して <code>tsconfig.json</code> が無視されている（<strong>02.2</strong>）</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>VS Code のバージョンをプロジェクトのものに合わせます。</strong></p>
+		<p><code>.ts</code> を開いた状態で、コマンドパレットから <code>TypeScript: Select TypeScript Version</code> →「Use Workspace Version」を選びます。これをしないと、<strong>チーム内で人によってエラーの出方が変わります</strong>。</p>
+	</div>
+
+	<h2>動作確認の3点</h2>
+
+	<p>この先の章を読む前に、次の3つが通ることを確かめてください。</p>
+
+<pre><code>$ node --version                    # LTS 以降であること
+$ npx tsx --version                 # 実行できること
+$ npx tsc --noEmit                  # 検査が動くこと</code></pre>
+
+	<p>エディタで <code>.ts</code> を開き、わざと <code>const n: number = "文字列";</code> と書いて<strong>波線が出ること</strong>も確認してください。出なければ、この先のコード例で「エラーになるはず」の箇所が確認できません。</p>
+</section>
+
+<div class="next">
+	<p><strong>まとめ</strong></p>
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>この章の結論</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">検査と実行</td><td><strong>別の道具が担当する。</strong><code>tsx</code>・<code>node</code> は型を見ずに実行する</td></tr>
+			<tr><td class="nowrap"><code>tsc</code></td><td>検査だけなら <code>--noEmit</code>。<strong>ファイル名を指定すると <code>tsconfig.json</code> が無視される</strong></td></tr>
+			<tr><td class="nowrap"><code>node</code> の型ストリップ</td><td>取り除くだけ。<code>enum</code>・パラメータプロパティ・<code>namespace</code> は使えない</td></tr>
+			<tr><td class="nowrap">型定義</td><td>ライブラリ同梱か <code>@types/*</code>。<strong>TypeScript 7 では <code>types</code> への明示が要る</strong></td></tr>
+			<tr><td class="nowrap">エディタ</td><td>言語サーバが検査している。<strong>バージョンをプロジェクトに合わせる</strong></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<p><strong>次は <a class="doclink doc03" href="03-tsconfig.html">03. tsconfig</a> です。</strong>この章で作った <code>tsconfig.json</code> の中身を読み解きます。<strong>読者が最も詰まる章</strong>です。</p>
+</div>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink doc01" href="01-背景.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3 L5.5 8 l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>01. 背景</a> <a class="doclink doc03" href="03-tsconfig.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 L10.5 8 l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>03. tsconfig</a> <a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>
