@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZZ. 資料の構成 — TypeScript 学習資料</title>
+<style>
+/* css/style.css が読めなかったときの代替色。link より前に置くので、読めれば上書きされる */
+.titlebar, section h1, th, a.doclink, .badge { background: #12224d; color: #fff; }
+</style>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.ch01 { --accent: hsl(280,78%,25%); --accent2: hsl(280,58%,55%); --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(240,78%,25%); --accent2: hsl(240,58%,55%); --soft: hsl(240,28%,95%); }
+.ch03 { --accent: hsl(200,78%,25%); --accent2: hsl(200,58%,55%); --soft: hsl(200,28%,95%); }
+.ch04 { --accent: hsl(160,78%,25%); --accent2: hsl(160,58%,55%); --soft: hsl(160,28%,95%); }
+.ch05 { --accent: hsl(120,78%,25%); --accent2: hsl(120,58%,55%); --soft: hsl(120,28%,95%); }
+.ch06 { --accent: hsl(80,78%,25%);  --accent2: hsl(80,58%,55%);  --soft: hsl(80,28%,95%); }
+.ch07 { --accent: hsl(40,78%,25%);  --accent2: hsl(40,58%,55%);  --soft: hsl(40,28%,95%); }
+.ch08 { --accent: hsl(0,78%,25%);   --accent2: hsl(0,58%,55%);   --soft: hsl(0,28%,95%); }
+
+/* 目次の番号は「資料番号.章番号」。章番号だけ CSS カウンタで自動採番する。
+   ★ 他の資料にコピーしたら "ZZ." を自分の資料番号に必ず書き換える */
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: "ZZ." counter(tocnum); }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>ZZ. 資料の構成</h1>
+		<p class="lead">Node+JavaScript／Java／C# のいずれかを知っている読者を対象にした、本編12章＋付録4本のカリキュラム設計</p>
+		<p class="date">📅 作成: 2026-08-28 / 更新: 2026-08-29 ／ ステータス: 本編12章 ＋ 付録4本 完成</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<p class="backlink"><!-- AUTO:nav --><a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav --></p>
+
+<section class="toc">
+	<h2>目次</h2>
+	<ol>
+		<li class="ch01"><a href="#s1">全体方針と対象読者</a></li>
+		<li class="ch02"><a href="#s2">資料16本の構成とロードマップ</a></li>
+		<li class="ch03"><a href="#s3">基礎編（01〜04）の詳細</a></li>
+		<li class="ch04"><a href="#s4">型システム編（05〜09）の詳細</a></li>
+		<li class="ch05"><a href="#s5">実践編（10〜12）の詳細</a></li>
+		<li class="ch06"><a href="#s6">付録（A1〜A4）の詳細</a></li>
+		<li class="ch07"><a href="#s7">勉強会の進行案</a></li>
+		<li class="ch08"><a href="#s8">資料のビルドと運用</a></li>
+	</ol>
+</section>
+
+<!-- ============ 1 ============ -->
+<section class="ch01" id="s1">
+	<h1>ZZ.1 全体方針と対象読者</h1>
+
+	<h2>3種類の読者を1つの資料でカバーする</h2>
+
+	<p>この資料は読者を3種類想定します。<strong>Node+JavaScript の開発経験がある人</strong>、<strong>Java を知っている人</strong>、<strong>C# を知っている人</strong>です。どの読者も、変数・条件分岐・繰り返し・関数・クラスは理解している前提です。</p>
+
+	<p>読者ごとに資料を分けると保守が3重になるため、<strong>本文は JavaScript 経験者向けに書き、Java・C# 経験者が引っかかる箇所だけ補足枠を添える</strong>方式にします。TypeScript は JavaScript の上に型を足した言語であり、本文の土台を JavaScript に置くのが構造的に自然だからです。</p>
+
+	<figure>
+		<svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3種類の読者を1つの資料でカバーする図">
+			<defs>
+				<linearGradient id="g-plan-1a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(205,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(205,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-plan-1b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(130,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(130,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-plan-1c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-plan-1d" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(280,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(280,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-plan-1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="20" y="34" width="210" height="58" rx="8" fill="url(#g-plan-1a)"/>
+			<text x="125" y="60" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">読者A</text>
+			<text x="125" y="80" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif">Node + JavaScript 経験者</text>
+
+			<rect x="20" y="120" width="210" height="58" rx="8" fill="url(#g-plan-1b)"/>
+			<text x="125" y="146" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">読者B</text>
+			<text x="125" y="166" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif">Java 経験者</text>
+
+			<rect x="20" y="206" width="210" height="58" rx="8" fill="url(#g-plan-1c)"/>
+			<text x="125" y="232" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">読者C</text>
+			<text x="125" y="252" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif">C# 経験者</text>
+
+			<rect x="330" y="140" width="230" height="66" rx="8" fill="none" stroke="#6b7686" stroke-width="2" stroke-dasharray="6 4"/>
+			<text x="445" y="168" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">補足枠</text>
+			<text x="445" y="189" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">「Java・C# から来た人へ」</text>
+
+			<rect x="650" y="110" width="230" height="86" rx="8" fill="url(#g-plan-1d)"/>
+			<text x="765" y="142" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">TypeScript 学習資料</text>
+			<text x="765" y="164" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif">本文は JavaScript 基準</text>
+			<text x="765" y="183" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif">本編12章 ＋ 付録4本</text>
+
+			<path d="M230,63 L640,130" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-plan-1)"/>
+			<path d="M230,149 L322,163" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-plan-1)"/>
+			<path d="M230,235 L322,190" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-plan-1)"/>
+			<path d="M560,173 L640,160" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-plan-1)"/>
+
+			<text x="420" y="88" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">そのまま本文へ</text>
+		</svg>
+		<figcaption>図 1 — 資料を分けず、補足枠で3種類の読者を吸収する</figcaption>
+	</figure>
+
+	<div class="callout">
+		<p><strong>プログラミング未経験者は対象外とします。</strong></p>
+		<p>「変数とは」「関数とは」から始めると分量が数倍になり、経験者には冗長な資料になります。読者はすでに何らかの言語を書けるという前提を置くことで、TypeScript 固有の話に集中できます。</p>
+	</div>
+
+	<h2>本文を書くときの5原則</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">原則</th><th>内容</th><th>理由</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">［原則1］</td><td><strong>同じ処理の JavaScript を必ず並べる</strong></td><td>TypeScript は JavaScript の拡張。「JS ではこう書いていた／型を付けるとこうなる」が最も速い導線になる</td></tr>
+			<tr><td class="nowrap">［原則2］</td><td><strong>Java・C# 経験者が引っかかる箇所だけ補足枠を置く</strong></td><td>静的型付けの経験がかえって邪魔をする場面（構造的型付け・型消去・変性）が存在する</td></tr>
+			<tr><td class="nowrap">［原則3］</td><td><strong>「なぜそうなっているか」を先に書く</strong></td><td><code>strict</code> や <code>moduleResolution</code> は理由を知らないと必ず忘れる</td></tr>
+			<tr><td class="nowrap">［原則4］</td><td><strong>動かせる短いコードで終わる</strong></td><td>各節の最後に <code>npx tsx</code> でそのまま実行できる5行以内の例を置く</td></tr>
+			<tr><td class="nowrap">［原則5］</td><td><strong>設定差・環境差はバッジで示す</strong></td><td>コピペして動かなかったとき、原因が設定差だと分かるようにする</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>補足枠に書くこと・書かないこと</h2>
+
+	<p>読者がプログラミングの基礎を持っている前提により、補足枠の中身は絞り込めます。書くのは<strong>静的型付け言語の経験者が TypeScript で誤解する点</strong>だけです。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">判定</th><th>内容</th><th>例</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><span class="badge b-ok">書く</span></td><td>Java・C# と仕組みが根本的に違う点</td><td>構造的型付け、型は実行時に消える、ジェネリクスに実行時情報がない</td></tr>
+			<tr><td class="nowrap"><span class="badge b-ok">書く</span></td><td>同名だが意味が異なる用語</td><td><code>interface</code>、<code>enum</code>、<code>readonly</code>、<code>private</code></td></tr>
+			<tr><td class="nowrap"><span class="badge b-ok">書く</span></td><td>JavaScript 側の前提知識</td><td>プロトタイプ、<code>undefined</code> と <code>null</code> の使い分け、イベントループ</td></tr>
+			<tr><td class="nowrap"><span class="badge b-ng">書かない</span></td><td>プログラミングの基礎概念</td><td>変数とは、関数とは、クラスとは、条件分岐とは</td></tr>
+			<tr><td class="nowrap"><span class="badge b-ng">書かない</span></td><td>本文の単なる繰り返し</td><td>本文で説明済みの内容を言い換えただけの枠</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>枠の見出しは「Java・C# から来た人へ」で統一します。</strong></p>
+		<p>「はじめての人へ」だと未経験者向けに読めてしまいます。補うのは<strong>静的型付け言語との差分であって、プログラミングそのものではない</strong>ことを見出しで示します。</p>
+	</div>
+
+	<h2>バッジの使い方</h2>
+
+	<p>TypeScript は<strong>同じコードでも設定と実行環境で結果が変わる</strong>言語です。差がある箇所だけ、その場でバッジを示します。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">バッジ</th><th>意味</th><th>使用例</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><span class="badge b-strict">strict</span></td><td><code>strict: true</code> のときだけエラーになる／挙動が変わる</td><td><code>null</code> チェックの強制、暗黙の <code>any</code> の禁止、関数引数の反変チェック</td></tr>
+			<tr><td class="nowrap"><span class="badge b-esm">ESM</span><span class="badge b-cjs">CJS</span></td><td>モジュール形式で書き方が変わる</td><td><code>import</code> の拡張子指定、<code>__dirname</code> の有無、<code>require</code> との相互運用</td></tr>
+			<tr><td class="nowrap"><span class="badge b-strip">Node型ストリップ</span></td><td>Node が <code>.ts</code> を直接実行する場合の制約</td><td><code>enum</code>・<code>namespace</code>・パラメータプロパティが使えない</td></tr>
+			<tr><td class="nowrap"><span class="badge b-ts7">TS7</span></td><td>TypeScript 7 と 5 系で挙動が違う</td><td><strong><code>strict</code> が既定で有効</strong>、<code>@types</code> に <code>types</code> の明示が必要、<code>TS5112</code></td></tr>
+			<tr><td class="nowrap">（なし）</td><td>どの環境でも同じ。大半の内容</td><td>バッジを付けない</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>設定バッジは判定バッジと色相帯を分けます。</strong></p>
+		<p>判定バッジ（<span class="badge b-ok">良い</span><span class="badge b-ng">悪い</span><span class="badge b-warn">警告</span><span class="badge b-none">未実施</span>）と同じ色を使うと、<strong><span class="badge b-strict">strict</span> が「良いこと」に読めてしまいます。</strong>設定バッジは事実を示すだけで、良し悪しの評価ではありません。藍・青緑・茶・紫を割り当て、緑・赤・橙・灰とは重ならないようにします。</p>
+	</div>
+
+	<div class="callout">
+		<p><strong>バッジを付けすぎない。</strong></p>
+		<p>どこでも動く内容にまで付けると、本当に注意が必要な箇所が埋もれます。<strong>コピペして動かなかったときに原因が設定差だと分かる</strong>ことが目的なので、差がある箇所に限定します。</p>
+	</div>
+
+	<h2>1ファイルの構成テンプレート</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">位置</th><th>内容</th><th>目的</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">冒頭</td><td>この章で何ができるようになるか（3行）</td><td>読む前に到達点を示す</td></tr>
+			<tr><td class="nowrap">各章 (h1)</td><td>概念 → JavaScript との対比 → TypeScript の書き方 → 短い実例</td><td>既知から未知へ橋を架ける</td></tr>
+			<tr><td class="nowrap">補足枠</td><td><code>.callout</code> で「Java・C# から来た人へ」</td><td>読者B・Cの補足。読者Aは飛ばせる</td></tr>
+			<tr><td class="nowrap">末尾</td><td>まとめ表 ＋ 次章への導線</td><td>復習と連続性</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>番号の付け方 — 「資料番号.章番号」で通す</h2>
+
+	<p>資料全体で番号体系を1つに揃えます。資料 01 の中の章は <code>01.1</code>・<code>01.2</code>…、付録 A1 の中の章は <code>A1.1</code>・<code>A1.2</code>… とします。<strong>どの番号を見ても、どの資料のどこかが一意に決まります。</strong></p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">場所</th><th class="nowrap">表記</th><th>例</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">README の資料一覧</td><td class="nowrap">資料番号 ＋ <strong>太字のタイトル</strong></td><td>01. <strong>背景</strong></td></tr>
+			<tr><td class="nowrap">各資料の目次</td><td class="nowrap">資料番号.章番号 ＋ <strong>太字のタイトル</strong></td><td>01.2 <strong>TypeScript は「検査して、型を消す」だけ</strong></td></tr>
+			<tr><td class="nowrap">各資料の見出し (h1)</td><td class="nowrap">資料番号.章番号 ＋ タイトル</td><td>01.2 TypeScript は「検査して、型を消す」だけ</td></tr>
+			<tr><td class="nowrap">他の資料からの参照</td><td class="nowrap">資料番号.章番号</td><td>「詳細は 08.3 で扱います」</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>章番号だけ CSS カウンタで自動採番します。</strong></p>
+		<p>目次の <code>a::before</code> を <code>content: "01." counter(tocnum)</code> の形にすると、<strong>資料番号は固定文字列、章番号だけが自動採番</strong>されます。章を増減しても番号を書き直す必要がありません。</p>
+		<p>ただし <strong>README の資料一覧はカウンタを使えません。</strong><code>01</code>〜<code>12</code> と <code>A1</code>〜<code>A4</code> で番号体系が違うためです。ここだけは直書きし、資料を増減したときに手で直します。h1 の見出しも直書きです。</p>
+	</div>
+
+	<h2>エラーメッセージの載せ方</h2>
+
+	<p><code>tsc</code> のエラーは<strong>既定で英語</strong>です。実際に出力される英語をそのまま載せ、日本語訳を添えます。</p>
+
+<pre><code>// error TS2353: Object literal may only specify known properties,
+//               and 'namae' does not exist in type 'User'.
+//
+// 訳: オブジェクト リテラルは既知のプロパティのみ指定できます。
+//     'namae' は型 'User' に存在しません。</code></pre>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">項目</th><th>方針</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">英語を先に置く</td><td><strong>エラー番号で検索したとき、英語のほうが情報が見つかります。</strong>読者が実際に目にするのも英語です</td></tr>
+			<tr><td class="nowrap">訳の出典</td><td><code>tsc --locale ja</code> の出力に合わせます。<strong>独自に訳しません</strong>（読者が日本語表示にしたとき、文言が一致します）</td></tr>
+			<tr><td class="nowrap">表示形式</td><td><code>--pretty</code> の形式（<code>ファイル:行:桁 - error TSxxxx:</code>）に合わせます</td></tr>
+			<tr><td class="nowrap">省略</td><td>長いメッセージは折り返して載せます。<code>...</code> で省略しません</td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="ch02" id="s2">
+	<h1>ZZ.2 資料16本の構成とロードマップ</h1>
+
+	<h2>本編12章＋付録4本を通し番号で扱う</h2>
+
+	<p>本編と付録は<strong>1つの連続したリスト</strong>として並べ、目次の色も 01 から A4 まで通しで割り当てます。本編を読み終えた読者がそのまま付録へ進めること、逆引きで飛び込んだ読者が本編との位置関係を色で把握できることを狙っています。</p>
+
+	<figure>
+		<svg viewBox="0 0 960 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3部構成と付録のロードマップ">
+			<defs>
+				<linearGradient id="g-plan-2a" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(270,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(270,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-plan-2b" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(195,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(195,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-plan-2c" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(105,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(105,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="g-plan-2d" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(25,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(25,58%,55%)"/>
+				</linearGradient>
+				<marker id="m-plan-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="16" y="24" width="212" height="52" rx="8" fill="url(#g-plan-2a)"/>
+			<text x="122" y="47" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">第1部 基礎編</text>
+			<text x="122" y="66" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">01〜04 ／ 書いて動かす</text>
+
+			<text x="26" y="102" fill="#1c2330" font-size="12.5" font-family="sans-serif">01 背景</text>
+			<text x="26" y="122" fill="#1c2330" font-size="12.5" font-family="sans-serif">02 実行環境</text>
+			<text x="26" y="142" fill="#1c2330" font-size="12.5" font-family="sans-serif">03 tsconfig</text>
+			<text x="26" y="162" fill="#1c2330" font-size="12.5" font-family="sans-serif">04 型の基本</text>
+
+			<rect x="248" y="24" width="212" height="52" rx="8" fill="url(#g-plan-2b)"/>
+			<text x="354" y="47" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">第2部 型システム編</text>
+			<text x="354" y="66" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">05〜09 ／ 資料の山場</text>
+
+			<text x="258" y="102" fill="#1c2330" font-size="12.5" font-family="sans-serif">05 構造的型付け</text>
+			<text x="258" y="122" fill="#1c2330" font-size="12.5" font-family="sans-serif">06 any・unknown・アサーション</text>
+			<text x="258" y="142" fill="#1c2330" font-size="12.5" font-family="sans-serif">07 関数の型</text>
+			<text x="258" y="162" fill="#1c2330" font-size="12.5" font-family="sans-serif">08 型の絞り込み</text>
+			<text x="258" y="182" fill="#1c2330" font-size="12.5" font-family="sans-serif">09 ジェネリクス</text>
+
+			<rect x="480" y="24" width="212" height="52" rx="8" fill="url(#g-plan-2c)"/>
+			<text x="586" y="47" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">第3部 実践編</text>
+			<text x="586" y="66" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">10〜12 ／ 実務と演習</text>
+
+			<text x="490" y="102" fill="#1c2330" font-size="12.5" font-family="sans-serif">10 モジュールと宣言ファイル</text>
+			<text x="490" y="122" fill="#1c2330" font-size="12.5" font-family="sans-serif">11 非同期とエラー処理</text>
+			<text x="490" y="142" fill="#1c2330" font-size="12.5" font-family="sans-serif">12 ハンズオン</text>
+
+			<rect x="712" y="24" width="232" height="52" rx="8" fill="url(#g-plan-2d)"/>
+			<text x="828" y="47" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">付録</text>
+			<text x="828" y="66" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">A1〜A4 ／ 必要なときに引く</text>
+
+			<text x="722" y="102" fill="#1c2330" font-size="12.5" font-family="sans-serif">A1 逆引き</text>
+			<text x="722" y="122" fill="#1c2330" font-size="12.5" font-family="sans-serif">A2 型レシピ集</text>
+			<text x="722" y="142" fill="#1c2330" font-size="12.5" font-family="sans-serif">A3 実務パターン集</text>
+			<text x="722" y="162" fill="#1c2330" font-size="12.5" font-family="sans-serif">A4 型レベルプログラミング</text>
+
+			<path d="M228,50 L242,50" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-plan-2)"/>
+			<path d="M460,50 L474,50" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-plan-2)"/>
+			<path d="M692,50 L706,50" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#m-plan-2)"/>
+
+			<rect x="16" y="236" width="928" height="60" rx="8" fill="#f2f5fb" stroke="#d9dfe8"/>
+			<text x="36" y="262" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">到達目標</text>
+			<text x="36" y="283" fill="#4a5568" font-size="12.5" font-family="sans-serif">型の付いた .ts を自分で書き、tsc の吐くエラーを自力で読み解いて直せる状態にする</text>
+		</svg>
+		<figcaption>図 2 — 3部構成と付録のロードマップ。付録は本編を読み終えた後も引き続き使う</figcaption>
+	</figure>
+
+	<h2>資料一覧</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">No.</th><th class="nowrap">タイトル</th><th>扱う内容</th><th class="num">色相</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap doc01"><span class="docbadge">01</span></td><td class="nowrap">背景</td><td>TypeScript は何を解決したか、<strong>型は実行時に消える</strong>、JSDoc・Flow との違い、Java/C# のコンパイルとの決定的な差</td><td class="num">280</td></tr>
+			<tr><td class="nowrap doc02"><span class="docbadge">02</span></td><td class="nowrap">実行環境</td><td><code>tsc</code>・<code>tsx</code>・Node の型ストリップ・Bun／Deno、npm と <code>@types</code>、エディタと言語サーバ</td><td class="num">261.3</td></tr>
+			<tr><td class="nowrap doc03"><span class="docbadge">03</span></td><td class="nowrap">tsconfig</td><td><code>strict</code> 系の各項目、<code>target</code>／<code>module</code>／<code>moduleResolution</code>、パス解決。<strong>最大の詰まりどころ</strong></td><td class="num">242.7</td></tr>
+			<tr><td class="nowrap doc04"><span class="docbadge">04</span></td><td class="nowrap">型の基本</td><td>プリミティブ、配列、オブジェクト型、union・リテラル型、<code>type</code> と <code>interface</code> の使い分け</td><td class="num">224</td></tr>
+			<tr><td class="nowrap doc05"><span class="docbadge">05</span></td><td class="nowrap">構造的型付け</td><td><strong>山場①</strong>。名前的型付けとの違い、互換性の判定、余剰プロパティチェック</td><td class="num">205.3</td></tr>
+			<tr><td class="nowrap doc06"><span class="docbadge">06</span></td><td class="nowrap">any・unknown・型アサーション</td><td>型検査から降りる3つの方法とその代償。<code>any</code> の伝播、<code>as</code> が嘘をつく瞬間</td><td class="num">186.7</td></tr>
+			<tr><td class="nowrap doc07"><span class="docbadge">07</span></td><td class="nowrap">関数の型</td><td>シグネチャ、省略可能引数、オーバーロード、コールバックの型、戻り値の推論</td><td class="num">168</td></tr>
+			<tr><td class="nowrap doc08"><span class="docbadge">08</span></td><td class="nowrap">型の絞り込み</td><td><strong>山場②</strong>。<code>typeof</code>／<code>in</code>／判別可能ユニオン、型ガード関数、<code>never</code> による網羅性チェック</td><td class="num">149.3</td></tr>
+			<tr><td class="nowrap doc09"><span class="docbadge">09</span></td><td class="nowrap">ジェネリクス</td><td>制約、型引数の推論、Java／C# のジェネリクスとの違い（変性・実行時情報なし）</td><td class="num">130.7</td></tr>
+			<tr><td class="nowrap doc10"><span class="docbadge">10</span></td><td class="nowrap">モジュールと宣言ファイル</td><td>ESM と CJS の相互運用（<strong>実務で最も事故る</strong>）、<code>.d.ts</code>、型定義のないライブラリへの対処</td><td class="num">112</td></tr>
+			<tr><td class="nowrap doc11"><span class="docbadge">11</span></td><td class="nowrap">非同期とエラー処理</td><td><code>Promise</code> の型、<code>async</code>／<code>await</code>、<code>catch</code> が <code>unknown</code> である理由、例外と戻り値の使い分け</td><td class="num">93.3</td></tr>
+			<tr><td class="nowrap doc12"><span class="docbadge">12</span></td><td class="nowrap">ハンズオン</td><td>勉強会用の課題と解答例。JSON を読んで型を付け、集計して出力するまで</td><td class="num">74.7</td></tr>
+			<tr><td class="nowrap doc13"><span class="docbadge">A1</span></td><td class="nowrap">逆引き</td><td>4つの入口から本編へ引く索引 — やりたいこと／<code>tsc</code> のエラー番号／JS・Java・C# の構文／用語</td><td class="num">56</td></tr>
+			<tr><td class="nowrap doc14"><span class="docbadge">A2</span></td><td class="nowrap">型レシピ集</td><td><strong>型定義の断片</strong>。<code>Result</code> 型、型ガード関数、設定オブジェクト型、ブランド型、判別可能ユニオンの雛形</td><td class="num">37.3</td></tr>
+			<tr><td class="nowrap doc15"><span class="docbadge">A3</span></td><td class="nowrap">実務パターン集</td><td><strong>動くコードのまとまり</strong>。外部入力（JSON）の検証、環境変数、API クライアント、CLI 引数、ファイル I/O</td><td class="num">18.7</td></tr>
+			<tr><td class="nowrap doc16"><span class="docbadge">A4</span></td><td class="nowrap">型レベルプログラミング</td><td>Mapped Types・Conditional Types・テンプレートリテラル型・ユーティリティ型</td><td class="num">0</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>付録は <code>A1</code>〜<code>A4</code> の記法にします。</strong></p>
+		<p>本編の <code>01</code>〜<code>12</code> は順に読む前提ですが、付録は<strong>必要になったときに引く</strong>ものです。番号体系を変えることで、読者が「順番に読まなくてよい」と判断できます。ファイル名でも <code>12-</code> の後ろに並ぶため、一覧の見た目も崩れません。</p>
+	</div>
+
+	<h2>A2 と A3 の切り分け</h2>
+
+	<p>付録の A2 と A3 は<strong>粒度</strong>で分けます。同じ話題が両方に登場することがありますが、読者の入口が違います。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">付録</th><th class="nowrap">何から引くか</th><th>中身</th><th>例</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">A2</td><td class="nowrap">こういう<strong>型</strong>を書きたい</td><td>型定義の断片。単体で完結する</td><td><code>Result&lt;T, E&gt;</code> の定義、<code>isUser</code> のような型ガード関数、ブランド型</td></tr>
+			<tr><td class="nowrap">A3</td><td class="nowrap">こういう<strong>処理</strong>を書きたい</td><td>動くコードのまとまり。そのまま貼って使える</td><td>JSON ファイルを読んで検証し、型の付いた値として返す一式</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>読む順序の依存関係</h2>
+
+	<ul>
+		<li><strong>01 → 02 → 03</strong> は順番必須。環境が整わないと以降を動かせない</li>
+		<li><strong>04・05</strong> は TypeScript の核心。ここだけは飛ばさせない</li>
+		<li><strong>06〜09</strong> は 05 に依存する。順に読むのが望ましい</li>
+		<li><strong>10・11</strong> は独立性が高く、必要な順に読んでよい</li>
+		<li><strong>12</strong> は 09 まで終わっていれば着手できる</li>
+	</ul>
+
+	<div class="callout">
+		<p><strong>05「構造的型付け」と 08「型の絞り込み」が本資料の2つの山場です。</strong></p>
+		<p>05 は Java・C# 経験者が最もつまずく箇所、08 は JavaScript 経験者が最もつまずく箇所です。読者によって難所が違うため、どちらも時間を厚く取ります。</p>
+	</div>
+
+	<h2>README の構成 — 目次までを1画面に収める</h2>
+
+	<p>README を開いた読者の目的は<strong>読むことではなく、目的の資料へ移動すること</strong>です。案内や約束事を先に長く置くと、リンクにたどり着く前に読者が疲れます。<strong>読者への案内は2〜3行に留め、すぐ目次を出します。</strong></p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">位置</th><th class="nowrap">内容</th><th>分量と方針</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">1</td><td class="nowrap">タイトルバー</td><td>資料名と日付のみ</td></tr>
+			<tr><td class="nowrap">2</td><td class="nowrap">読者への案内</td><td><strong>2〜3行。</strong>「誰向けか」と「何ができるようになるか」だけ。読者が自分向けの資料かを判断できれば足りる</td></tr>
+			<tr><td class="nowrap">3</td><td class="nowrap"><strong>目次（16本）</strong></td><td>通し色のバッジ。<strong>ここまでを1画面に収める</strong></td></tr>
+			<tr><td class="nowrap">4</td><td class="nowrap">この資料の約束事</td><td>バッジの意味、補足枠の見出し、コードの前提（バージョン・実行方法・文字コード）</td></tr>
+			<tr><td class="nowrap">5</td><td class="nowrap">読み方</td><td>順に読む場合と、目的から引く場合の2通り</td></tr>
+			<tr><td class="nowrap">6</td><td class="nowrap">勉強会で使う場合</td><td>5回の割り当て表のみ。詳細はこの構成案へリンク</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>説明は目次より後ろに置きます。</strong></p>
+		<p>順に読む読者は目次を飛ばして下へ進み、目的の資料を探しに来た読者は目次で離脱します。<strong>どちらの読者も損をしない順序</strong>がこれです。逆にすると、後者が毎回同じ説明をスクロールで飛ばすことになります。</p>
+	</div>
+
+	<h2>README には資料作成向けの情報を書かない</h2>
+
+	<p>README は<strong>読者だけのためのページ</strong>です。資料を作る側・運用する側の情報は README に置かず、この構成案に集めます。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th>README に書かないもの</th><th class="nowrap">置き場所</th><th>README での扱い</th></tr>
+		</thead>
+		<tbody>
+			<tr><td>HTML が原本であること、Markdown の生成手順</td><td class="nowrap">この構成案 ZZ.8</td><td>書かない</td></tr>
+			<tr><td>設計方針・執筆原則・章立ての意図</td><td class="nowrap">この構成案 ZZ.1〜ZZ.6</td><td>書かない</td></tr>
+			<tr><td>勉強会の時間配分・進行（主催側）</td><td class="nowrap">この構成案 ZZ.7</td><td>5回の割り当て表と、参加者の事前準備だけを書く</td></tr>
+			<tr><td>ディレクトリ構成・ビルド手順・文字コード規則</td><td class="nowrap">この構成案 ZZ.8</td><td>書かない（読者が書くコードの文字コードだけは約束事に書く）</td></tr>
+			<tr><td>構成案の中身（対象読者・章立ての意図・執筆方針）</td><td class="nowrap">この構成案</td><td><strong>リンクだけを「この資料について」に置く</strong></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>構成案は公開しますが、読む前提にはしません。</strong></p>
+		<p>この構成案は読者にも見せる資料として <code>docs/ZZ-構成.html</code> に置いています。ただし<strong>読まなくても本編は読めます。</strong>README では「この資料について」の中にリンクを1つ置くだけにし、<strong>目次（資料一覧）には並べません。</strong>本編・付録と同じ列に置くと、読むべきものだと受け取られるためです。</p>
+	</div>
+
+	<h2>同じ説明を2か所に書かない</h2>
+
+	<p>README・各資料・この構成案で内容が重複すると、<strong>片方だけ直して食い違います。</strong>項目ごとに「どこに書くか」を1か所に決め、他の場所では繰り返しません。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">内容</th><th class="nowrap">書く場所</th><th>他の場所での扱い</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">対象読者・前提知識</td><td class="nowrap">README の案内</td><td>各資料では繰り返さない</td></tr>
+			<tr><td class="nowrap">各資料が何を扱うか</td><td class="nowrap">README の目次</td><td>各資料の冒頭には<strong>到達点</strong>（この章で何ができるようになるか）を書く。扱う内容の再掲はしない</td></tr>
+			<tr><td class="nowrap">バッジの意味</td><td class="nowrap">README の約束事</td><td>各資料では使うだけ。凡例を再掲しない</td></tr>
+			<tr><td class="nowrap">環境構築の手順</td><td class="nowrap">02 実行環境</td><td>README はリンクのみ。手順を書かない</td></tr>
+			<tr><td class="nowrap">勉強会の進行</td><td class="nowrap">この構成案</td><td>README は5回の割り当て表のみ</td></tr>
+			<tr><td class="nowrap">執筆方針・原則</td><td class="nowrap">この構成案</td><td>README・各資料には書かない</td></tr>
+			<tr><td class="nowrap">用語の定義</td><td class="nowrap">初出の資料</td><td>以降の資料は初出章へリンクする</td></tr>
+		</tbody>
+	</table>
+	</div>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="ch03" id="s3">
+	<h1>ZZ.3 基礎編（01〜04）の詳細</h1>
+
+	<h2>01. 背景</h2>
+
+	<p>「なぜ型を書くのか」ではなく、<strong>「TypeScript の型がどういう立場のものか」</strong>を最初に据えます。ここを誤解したまま進むと、後の章がすべて歪みます。</p>
+
+	<ul>
+		<li>JavaScript の何が問題だったか — 実行するまで壊れていることが分からない</li>
+		<li><strong>型は実行時に消える</strong> — <code>tsc</code> は型を検査して、型を消した JavaScript を出力するだけ</li>
+		<li>Java・C# のコンパイルとの決定的な違い — 型情報が実行時に残らない、型エラーがあっても出力はできる</li>
+		<li>JSDoc・Flow という選択肢との比較</li>
+	</ul>
+
+	<h2>02. 実行環境</h2>
+
+	<ul>
+		<li><code>tsc</code> — 検査して出力する。<code>--noEmit</code> で検査だけにもできる</li>
+		<li><code>tsx</code>／<code>ts-node</code> — その場で実行する</li>
+		<li><strong>Node の型ストリップ</strong> — Node が <code>.ts</code> を直接実行できるようになった経緯と制約</li>
+		<li>Bun・Deno — 標準で <code>.ts</code> を扱える処理系</li>
+		<li>npm と <code>@types</code> — 型定義がどこから来るのか</li>
+	</ul>
+
+	<h2>03. tsconfig</h2>
+
+	<p><strong>読者が最も詰まる章</strong>です。設定項目を網羅列挙するのではなく、「この設定が無いと何が起きるか」の順で並べます。</p>
+
+	<ul>
+		<li><code>strict</code> — なぜ既定で有効にすべきか。内訳の各項目が何を防ぐか</li>
+		<li><code>target</code>／<code>lib</code> — 出力する構文のレベルと、使える標準 API</li>
+		<li><code>module</code>／<code>moduleResolution</code> — <strong>ESM と CJS の分岐点</strong></li>
+		<li><code>paths</code>・<code>baseUrl</code> — 便利だが実行時には効かないことの説明</li>
+	</ul>
+
+	<h2>04. 型の基本</h2>
+
+	<ul>
+		<li>プリミティブ、配列、タプル、オブジェクト型</li>
+		<li>union 型とリテラル型 — <strong>Java・C# に無い、TypeScript で最もよく使う道具</strong></li>
+		<li><code>type</code> と <code>interface</code> の使い分け</li>
+		<li><code>null</code>／<code>undefined</code> と省略可能プロパティ</li>
+	</ul>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="ch04" id="s4">
+	<h1>ZZ.4 型システム編（05〜09）の詳細</h1>
+
+	<h2>05. 構造的型付け</h2>
+
+	<p><strong>山場①。</strong>Java・C# 経験者にとって最も違和感のある部分です。「同じ形なら同じ型として通る」という判定基準を、通る例と通らない例の両方で示します。</p>
+
+	<ul>
+		<li>名前ではなく形で判定する — <code>implements</code> を書かなくても互換になる</li>
+		<li>余剰プロパティチェック — オブジェクトリテラルを直接渡したときだけ厳しくなる理由</li>
+		<li>意図的に区別したいときのブランド型</li>
+	</ul>
+
+	<h2>06. any・unknown・型アサーション</h2>
+
+	<p>型検査から降りる3つの方法と、それぞれの代償を扱います。<strong>実務で型が壊れる原因のほとんどがここ</strong>です。</p>
+
+	<ul>
+		<li><code>any</code> — 伝播する。1か所の <code>any</code> が下流の検査をすべて無効化する</li>
+		<li><code>unknown</code> — 安全な受け口。使う前に絞り込みを強制する</li>
+		<li><code>as</code> による型アサーション — 検査を黙らせるだけで、値は変わらない</li>
+		<li><code>!</code>（非 null アサーション）を使ってよい場面・いけない場面</li>
+	</ul>
+
+	<h2>07. 関数の型</h2>
+
+	<ul>
+		<li>引数と戻り値の型、戻り値の型を書くべき場面・省くべき場面</li>
+		<li>省略可能引数とデフォルト値</li>
+		<li>オーバーロード — Java・C# のそれとは仕組みが違う</li>
+		<li>コールバックの型と、引数の数が合わなくても通る理由</li>
+	</ul>
+
+	<h2>08. 型の絞り込み</h2>
+
+	<p><strong>山場②。</strong>TypeScript を「書ける」から「使える」に変える章です。</p>
+
+	<ul>
+		<li><code>typeof</code>／<code>instanceof</code>／<code>in</code> による絞り込み</li>
+		<li><strong>判別可能ユニオン</strong> — 実務で最も使う設計パターン</li>
+		<li>型ガード関数（<code>x is T</code>）</li>
+		<li><code>never</code> による網羅性チェック — <code>switch</code> の漏れをコンパイル時に検出する</li>
+	</ul>
+
+	<h2>09. ジェネリクス</h2>
+
+	<ul>
+		<li>型引数の基本と <code>extends</code> による制約</li>
+		<li>推論が効く場面・効かない場面</li>
+		<li>Java・C# のジェネリクスとの違い — <strong>実行時に型引数の情報が残らない</strong></li>
+		<li>変性（共変・反変）に触れる範囲を限定する</li>
+	</ul>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="ch05" id="s5">
+	<h1>ZZ.5 実践編（10〜12）の詳細</h1>
+
+	<h2>10. モジュールと宣言ファイル</h2>
+
+	<p><strong>実務で最も事故が多い領域</strong>です。型の話というより、Node のモジュール解決の話が中心になります。</p>
+
+	<ul>
+		<li><code>import</code>／<code>export</code> と、型だけを import する <code>import type</code></li>
+		<li><strong>ESM と CJS の相互運用</strong> — <code>"type": "module"</code>、拡張子、<code>default</code> の食い違い</li>
+		<li><code>.d.ts</code> が何をしているか</li>
+		<li>型定義が無いライブラリへの対処 — <code>@types</code> を探す、自分で書く、諦めて <code>unknown</code> で受ける</li>
+	</ul>
+
+	<h2>11. 非同期とエラー処理</h2>
+
+	<ul>
+		<li><code>Promise&lt;T&gt;</code> と <code>async</code>／<code>await</code> の型</li>
+		<li><strong><code>catch</code> の変数が <code>unknown</code> である理由</strong> — Java・C# の <code>catch (Exception e)</code> との違い</li>
+		<li>例外で投げるか、戻り値で返すか（<code>Result</code> 型との対比）</li>
+		<li>並行実行と型 — <code>Promise.all</code> のタプル推論</li>
+	</ul>
+
+	<h2>12. ハンズオン</h2>
+
+	<p>勉強会の最終回に対応します。課題は<strong>1本の実用スクリプト</strong>に絞り、それを段階的に完成させる形にします。</p>
+
+	<ul>
+		<li>課題 — JSON ファイルを読み込み、型を付けて検証し、集計して出力する</li>
+		<li>段階1: <code>any</code> のまま動かす → 段階2: 型を付ける → 段階3: 検証を入れる → 段階4: エラー処理を足す</li>
+		<li>詰まりやすい箇所の解説と解答例</li>
+	</ul>
+
+	<div class="callout">
+		<p><strong>ハンズオンは「型を後から付ける」順序で進めます。</strong></p>
+		<p>実務で TypeScript を導入する場面は、既存の JavaScript に型を足す形が大半です。最初から完成形の型を書かせるより、<code>any</code> を潰していく過程を体験させるほうが実務に近くなります。</p>
+	</div>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="ch06" id="s6">
+	<h1>ZZ.6 付録（A1〜A4）の詳細</h1>
+
+	<h2>本編との役割の違い</h2>
+
+	<p>本編は<strong>読んで理解するもの</strong>、付録は<strong>手を動かしている最中に引くもの</strong>です。付録は通読を前提にせず、どこから開いても意味が通るように書きます。</p>
+
+	<h2>A1. 逆引き — 4つの入口</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">入口</th><th>読者の状況</th><th>例</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">やりたいこと</td><td>書きたい処理は決まっている</td><td>「オブジェクトの一部だけ省略可能にしたい」</td></tr>
+			<tr><td class="nowrap"><strong>エラー番号</strong></td><td><code>tsc</code> のエラーが読めない</td><td><code>TS2322</code>／<code>TS2345</code>／<code>TS7006</code>／<code>TS2339</code></td></tr>
+			<tr><td class="nowrap">他言語の構文</td><td>JS・Java・C# での書き方は知っている</td><td>「Java の <code>Optional</code> に相当するものは」</td></tr>
+			<tr><td class="nowrap">用語</td><td>言葉の意味が分からない</td><td>「判別可能ユニオン」「型消去」「変性」</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>エラー番号からの入口が、PowerShell 資料の逆引きとの最大の違いです。</strong></p>
+		<p>TypeScript のエラーメッセージは長く、番号でしか検索できない場面が多くあります。頻出のエラー番号を実際のメッセージ全文とともに載せ、原因と修正を対にします。</p>
+	</div>
+
+	<h2>A2. 型レシピ集</h2>
+
+	<p>型定義の断片を集めます。<code>Result</code> 型、型ガード関数、設定オブジェクト型、ブランド型、判別可能ユニオンの雛形、部分更新用の型など。<strong>1レシピは20行以内</strong>に収め、使いどころと落とし穴を1〜2行添えます。</p>
+
+	<h2>A3. 実務パターン集</h2>
+
+	<p>そのまま貼って使えるコードのまとまりを集めます。A2 との違いは<strong>粒度</strong>で、こちらは「処理として完結していること」を条件にします。</p>
+
+	<ul>
+		<li>外部入力（JSON）を読んで検証し、型の付いた値として返す</li>
+		<li>環境変数を型付きで読む</li>
+		<li>API クライアントの型付け</li>
+		<li>CLI 引数の解析</li>
+		<li>ファイル I/O とエラー処理</li>
+	</ul>
+
+	<h2>A4. 型レベルプログラミング</h2>
+
+	<p>ライブラリの型定義を読むために必要な道具立てを扱います。<strong>「書けなくても読めればよい」という線引きを冒頭で明示</strong>し、実務で書く必要が出る範囲だけ深掘りします。</p>
+
+	<ul>
+		<li>組み込みユーティリティ型（<code>Partial</code>・<code>Pick</code>・<code>Omit</code>・<code>Record</code> ほか）</li>
+		<li>Mapped Types</li>
+		<li>Conditional Types と <code>infer</code></li>
+		<li>テンプレートリテラル型</li>
+	</ul>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="ch07" id="s7">
+	<h1>ZZ.7 勉強会の進行案</h1>
+
+	<h2>全5回・1回90分</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">回</th><th class="nowrap">範囲</th><th>ねらい</th><th class="nowrap">難度</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">第1回</td><td class="nowrap">01〜03</td><td>環境を動かす。全員が <code>tsc</code> の通る状態を作る</td><td class="nowrap"><span class="badge b-ok">低</span></td></tr>
+			<tr><td class="nowrap">第2回</td><td class="nowrap">04〜06</td><td>型を書く。<code>any</code> に逃げない習慣をつける</td><td class="nowrap"><span class="badge b-warn">中</span></td></tr>
+			<tr><td class="nowrap">第3回</td><td class="nowrap">07〜08</td><td><strong>山場。</strong>絞り込みと網羅性チェック</td><td class="nowrap"><span class="badge b-ng">高</span></td></tr>
+			<tr><td class="nowrap">第4回</td><td class="nowrap">09〜11</td><td>ジェネリクスとモジュール。実務の事故を潰す</td><td class="nowrap"><span class="badge b-ng">高</span></td></tr>
+			<tr><td class="nowrap">第5回</td><td class="nowrap">12</td><td>ハンズオン</td><td class="nowrap"><span class="badge b-warn">中</span></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>1回あたりの時間配分</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">時間</th><th>内容</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">10分</td><td>前回の振り返りと質問</td></tr>
+			<tr><td class="nowrap">50分</td><td>資料の読み合わせ。要所で手を止めて各自実行</td></tr>
+			<tr><td class="nowrap">25分</td><td>その回の演習</td></tr>
+			<tr><td class="nowrap">5分</td><td>次回範囲の予告</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>事前準備（参加者）</h2>
+
+	<ul>
+		<li>Node.js の LTS を入れておく</li>
+		<li><code>npx tsx --version</code> が通る状態にしておく</li>
+		<li>エディタ（VS Code 想定）で <code>.ts</code> を開き、型エラーが波線で出ることを確認しておく</li>
+	</ul>
+
+	<div class="callout">
+		<p><strong>第1回の冒頭で環境構築に時間を溶かさないことを最優先にします。</strong></p>
+		<p>PowerShell 資料の勉強会でも同じ問題が起きます。参加者の環境が揃っていないと、その回の内容に入る前に時間が尽きます。事前準備の3点は<strong>必須条件</strong>として案内します。</p>
+	</div>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="ch08" id="s8">
+	<h1>ZZ.8 資料のビルドと運用</h1>
+
+	<h2>HTML が原本</h2>
+
+	<p>各資料は HTML と Markdown の両方を用意し、<strong>HTML を原本</strong>とします。内容を直すときは HTML を編集し、そのあと変換スクリプトで <code>.md</code> を作り直します。Markdown を直接編集しません。</p>
+
+	<h2>ディレクトリ構成</h2>
+
+<pre><code>typescript-learn/
+├─ index.html              README.html へのリダイレクト
+├─ README.html             原本（目次・約束事・逆引き入口）
+├─ README.md               生成物
+├─ docs\                   公開資料（読者に配るもの）
+│   ├─ 01-背景.html 〜 12-ハンズオン.html
+│   ├─ A1-逆引き.html 〜 A4-型レベルプログラミング.html
+│   ├─ ZZ-構成.html         このファイル
+│   ├─ *.md                生成物
+│   ├─ images\             切り出した SVG（Markdown 生成時に作る）
+│   └─ samples\            動作確認済みサンプル（.ts）
+├─ etc\c.bat
+└─ tmp\</code></pre>
+
+	<h2>サンプルコードの文字コード</h2>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">対象</th><th class="nowrap">文字コード</th><th class="nowrap">改行</th><th>理由</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>.ts</code>／<code>.json</code></td><td class="nowrap">UTF-8（BOM なし）</td><td class="nowrap">LF</td><td>Node・<code>tsc</code> の既定。BOM があると設定ファイルの解析に失敗する場合がある</td></tr>
+			<tr><td class="nowrap"><code>.cmd</code>／<code>.bat</code></td><td class="nowrap">SJIS（CP932）</td><td class="nowrap">CRLF</td><td>UTF-8 で保存すると日本語が化けて構文エラーになる</td></tr>
+			<tr><td class="nowrap"><code>.ps1</code></td><td class="nowrap">BOM 付き UTF-8</td><td class="nowrap">CRLF</td><td>BOM が無いと Windows PowerShell 5.1 で日本語が壊れる</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<h2>サンプルコードは実際に動かしてから載せる</h2>
+
+	<p>資料に載せるコードと<strong>出力の両方を、実際に動かした結果から貼ります。</strong>記憶や推測で書きません。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">場所</th><th>用途</th><th class="nowrap">git</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>tmp\</code></td><td>検証用の使い捨てプロジェクト。<code>npm init</code> と <code>node_modules</code> はここに置く</td><td class="nowrap">管理外</td></tr>
+			<tr><td class="nowrap"><code>docs\samples\</code></td><td>動作確認が済んだサンプル。資料から参照する</td><td class="nowrap">管理対象</td></tr>
+		</tbody>
+	</table>
+	</div>
+
+<pre><code># 検証用プロジェクトの作り方
+cd tmp
+npm init -y
+npm i -D typescript tsx
+
+npx tsc --version          # バージョンを実測する
+npx tsc --noEmit ファイル名.ts   # 型エラーの実物を得る
+npx tsx ファイル名.ts            # 実行結果の実物を得る</code></pre>
+
+	<div class="callout">
+		<p><strong>バージョンは必ず実測します。</strong></p>
+		<p>この構成案を書いた時点では TypeScript 5.x 系を想定していましたが、<strong>実際の環境は 7.0.2 でした。</strong>想定と実機は食い違います。<strong>動作確認環境は README に明記</strong>し、実測した値を書きます。</p>
+		<p>本資料は <strong>TypeScript 7.0.2 と 5.9.3 の両方で検証</strong>しました。エラーメッセージ・<code>--pretty</code> の表示形式・出力される JavaScript のいずれにも差はありません。実行環境は <strong>Node.js 26 系</strong>を対象とします。</p>
+	</div>
+
+	<div class="callout">
+		<p><strong>検証で出たエラーが、書いたコードのものとは限りません。</strong></p>
+		<p>検証中、<strong>プロジェクトの親ディレクトリにある <code>node_modules\@types\node</code> を <code>tsc</code> が拾い</strong>、無関係な型定義エラーが6件出ました。TypeScript のバージョン差だと誤認しかけましたが、原因は環境でした。<strong>自分のファイル名が行頭にないエラーは、まず環境を疑います。</strong></p>
+	</div>
+
+	<div class="callout">
+		<p><strong>この資料は <code>.ts</code> と <code>.cmd</code> で文字コードの規則が逆になります。</strong></p>
+		<p>サンプルを動かす <code>.cmd</code> ランチャーと、その中身の <code>.ts</code> が別の規則になるため、<strong>どちらのファイルを編集しているか</strong>を常に意識する必要があります。02 の章でこの点に触れます。</p>
+	</div>
+
+	<h2>Markdown の生成と検証</h2>
+
+	<ul>
+		<li>インライン SVG は <code>docs\images\</code> に切り出し、<code>![](images/xxx.svg)</code> で参照する（GitHub がインライン SVG を除去するため）</li>
+		<li>日本語の <code>**</code> 強調が効かない箇所は <code>&lt;strong&gt;</code> に置換する。判定は変換スクリプト側で機械的に行う</li>
+		<li>生成後、リンク切れと <code>**</code> の残りを機械的に検査する</li>
+	</ul>
+
+	<h2>資料をコピーして次の資料を作るときに書き換える箇所</h2>
+
+	<p>既存の資料（例: <code>01-背景.html</code>）をコピーして <code>02</code> を作る場合、<strong>書き換え忘れると前の資料の情報が残る箇所</strong>があります。特に下の2つは、見た目が崩れないため気づきません。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">箇所</th><th>書き換える内容（01 → 02 の例）</th><th class="nowrap">見落としやすさ</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap"><code>&lt;title&gt;</code></td><td><code>01 背景 —</code> → <code>02 実行環境 —</code></td><td class="nowrap"><span class="badge b-ok">低</span></td></tr>
+			<tr><td class="nowrap">タイトルバー</td><td>h1 と lead の文言</td><td class="nowrap"><span class="badge b-ok">低</span></td></tr>
+			<tr><td class="nowrap"><strong>目次の資料番号</strong></td><td>CSS の <code>content: "01." counter(tocnum)</code> → <code>"02."</code></td><td class="nowrap"><span class="badge b-ng">高</span></td></tr>
+			<tr><td class="nowrap">章見出しの番号</td><td><code>01.1</code>〜 → <code>02.1</code>〜</td><td class="nowrap"><span class="badge b-warn">中</span></td></tr>
+			<tr><td class="nowrap"><code>.chNN</code> の色相</td><td>章数が変われば全章を再計算（刻み ＝ 280 ÷（章数 − 1））</td><td class="nowrap"><span class="badge b-warn">中</span></td></tr>
+			<tr><td class="nowrap"><strong>SVG の <code>&lt;defs&gt;</code> id</strong></td><td><code>g-01-1a</code> → <code>g-02-1a</code></td><td class="nowrap"><span class="badge b-ng">高</span></td></tr>
+			<tr><td class="nowrap">次章への導線</td><td>末尾のリンク先</td><td class="nowrap"><span class="badge b-warn">中</span></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout">
+		<p><strong>この2つは CSS と SVG の中にあるため、本文を読み返しても見つかりません。</strong></p>
+		<p>目次の資料番号を直し忘れると、02 の目次が <code>01.1</code>〜と表示されます。<strong>本文の見出しは <code>02.1</code> なので、目次と本文で番号が食い違います。</strong>SVG の id は、重複しても片方の図が正しく表示されることがあり、崩れて初めて気づきます。<strong>機械的に確認します。</strong></p>
+	</div>
+
+<pre><code># 目次の資料番号がファイル名の番号と一致しているか
+Select-String -Path docs\*.html -Pattern 'content: "([0-9A]\w)\." counter'
+
+# SVG の defs id に、そのファイルの番号が入っているか
+Select-String -Path docs\*.html -Pattern '&lt;(?:linearGradient|marker|clipPath|filter) id="([^"]+)"'</code></pre>
+
+	<h2>章を増減したときの手順</h2>
+
+	<ul>
+		<li>資料を1本増減したら、<strong>16本の通し色相を新しい本数で計算し直す</strong>（刻み ＝ 280 ÷（本数 − 1））</li>
+		<li>README の目次バッジと、この構成案の資料一覧を同じ値に揃える</li>
+		<li>各資料の中の章（h1）の色相は、そのファイル内の章数で別途計算する</li>
+	</ul>
+</section>
+
+</div>
+
+<footer>
+	<div class="inner">
+		<!-- AUTO:nav --><a class="doclink dochome" href="../README.html"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg>資料トップへ戻る</a><!-- /AUTO:nav -->
+	</div>
+</footer>
+
+<script src="js/highlight.js" defer></script>
+</body>
+</html>
