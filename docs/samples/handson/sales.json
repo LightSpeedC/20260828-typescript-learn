@@ -1,0 +1,7 @@
+[
+	{ "date": "2026-01-15", "product": "ノート", "amount": 1200, "qty": 3 },
+	{ "date": "2026-01-16", "product": "ペン", "amount": 300, "qty": 10 },
+	{ "date": "2026-02-01", "product": "ノート", "amount": 800, "qty": 2 },
+	{ "date": "2026-02-03", "product": "消しゴム", "amount": 150, "qty": 5 },
+	{ "date": "2026-02-20", "product": "ペン", "amount": 450, "qty": 15 }
+]
