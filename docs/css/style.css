@@ -1,0 +1,350 @@
+/*
+ * TypeScript 学習資料 共通スタイル
+ *
+ * 各 HTML には「その資料だけのもの」（章アクセント .chNN と目次の資料番号）だけを残し、
+ * 共通部分はここに集約している。色相を変えるときはこのファイルだけを直す。
+ */
+
+:root {
+	--navy1: #12224d;
+	--navy2: #2f5fbf;
+	--ink: #1c2330;
+	--ink-soft: #4a5568;
+	--line: #d9dfe8;
+	--code-bg: #f4f6fa;
+	--accent: var(--navy1, #12224d);
+	--accent2: var(--navy2, #2f5fbf);
+	--soft: #f2f5fb;
+	/* 資料バッジの既定値。doc クラスの外で色が消えないようにする */
+	--dc: var(--navy1, #12224d);
+	--dc2: var(--navy2, #2f5fbf);
+	--link: #1a4fa0;
+	/* コードの色付け（背景は --code-bg） */
+	--t-kw: #8b1a8b;
+	--t-typ: #0f5d8b;
+	--t-str: #1d6b3c;
+	--t-num: #a5521f;
+	--t-com: #6b7686;
+	--t-err: #a51f22;
+}
+
+* { box-sizing: border-box; }
+
+body {
+	margin: 0;
+	font-family: "Segoe UI", "Yu Gothic UI", "Meiryo", sans-serif;
+	font-size: 15.5px;
+	line-height: 1.85;
+	color: var(--ink, #1c2330);
+	background: #fff;
+}
+
+/* ---- タイトルバー ---- */
+
+.titlebar {
+	background: linear-gradient(135deg, var(--navy1, #12224d), var(--navy2, #2f5fbf));
+	color: #fff;
+	padding: 34px 30px 30px;
+}
+
+.titlebar .inner { max-width: 1600px; margin: 0 auto; }
+.titlebar h1 { font-size: 1.85em; margin: 0 0 8px; color: #fff; }
+.titlebar .lead { margin: 0 0 10px; font-size: 0.98em; color: #dbe4f7; }
+.titlebar .date { margin: 0; font-size: 0.88em; color: #c6d4ee; }
+.titlebar code { background: rgba(255,255,255,0.16); color: #fff; border: none; }
+
+/* ---- 本文 ---- */
+
+.wrap { max-width: 1600px; margin: 0 auto; padding: 0 30px; }
+
+.backlink { margin: 22px 0 0; font-size: 0.94em; }
+.intro { margin: 26px 0 0; }
+
+section {
+	padding: 4px 26px 26px;
+	margin: 34px 0;
+	border-radius: 12px;
+	background: linear-gradient(180deg, var(--soft, #f2f5fb), #fff 320px);
+}
+
+section h1 {
+	font-size: 1.42em;
+	color: #fff;
+	background: linear-gradient(100deg, var(--accent, #12224d), var(--accent2, #2f5fbf));
+	padding: 14px 20px;
+	margin: 26px 0 20px;
+	border-radius: 10px;
+	box-shadow: 0 4px 14px rgba(20,30,60,0.22);
+}
+
+section h1 code { background: rgba(255,255,255,0.16); color: #fff; border: none; }
+
+h2 {
+	font-size: 1.14em;
+	color: var(--accent, #12224d);
+	border-left: 6px solid var(--accent, #12224d);
+	background: linear-gradient(90deg, var(--soft, #f2f5fb), #fff);
+	padding: 6px 12px;
+	margin: 30px 0 12px;
+	border-radius: 0 6px 6px 0;
+}
+
+h3 {
+	font-size: 1.02em;
+	color: var(--accent, #12224d);
+	display: inline-block;
+	border-bottom: 2px dotted var(--accent2, #2f5fbf);
+	padding-bottom: 3px;
+	margin: 20px 0 8px;
+}
+
+p { margin: 10px 0; }
+
+/* ---- コード ---- */
+
+code {
+	background: var(--code-bg, #f4f6fa);
+	border: 1px solid var(--line, #d9dfe8);
+	color: #17335f;
+	border-radius: 4px;
+	padding: 1px 5px;
+	font-family: "Cascadia Mono", "Consolas", monospace;
+	font-size: 0.92em;
+}
+
+pre {
+	background: var(--code-bg, #f4f6fa);
+	color: var(--ink, #1c2330);
+	border: 1px solid var(--line, #d9dfe8);
+	border-left: 5px solid var(--accent2, #2f5fbf);
+	border-radius: 0 8px 8px 0;
+	padding: 13px 16px;
+	overflow-x: auto;
+	line-height: 1.65;
+}
+
+pre code { background: none; border: none; padding: 0; color: inherit; }
+
+/* js/highlight.js が付けるトークン。読み込めなければ色が付かないだけで内容は読める */
+.t-kw  { color: var(--t-kw,  #8b1a8b); font-weight: 600; }
+.t-typ { color: var(--t-typ, #0f5d8b); }
+.t-str { color: var(--t-str, #1d6b3c); }
+.t-num { color: var(--t-num, #a5521f); }
+.t-com { color: var(--t-com, #6b7686); font-style: italic; }
+.t-err { color: var(--t-err, #a51f22); }
+
+/* ---- 表 ---- */
+
+.tablewrap { overflow-x: auto; margin: 14px 0; }
+
+table {
+	border-collapse: collapse;
+	width: 100%;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 2px 8px rgba(20,30,60,0.10);
+	font-size: 0.96em;
+}
+
+th {
+	background: linear-gradient(100deg, var(--accent, #12224d), var(--accent2, #2f5fbf));
+	color: #fff;
+	text-align: left;
+	padding: 9px 12px;
+	white-space: nowrap;
+}
+
+th code { background: rgba(255,255,255,0.16); color: #fff; border: none; }
+
+td { padding: 9px 12px; border-bottom: 1px solid var(--line, #d9dfe8); vertical-align: top; }
+
+tr:nth-child(even) td { background: #fafbfe; }
+
+.nowrap { white-space: nowrap; }
+.num { text-align: right; white-space: nowrap; }
+
+/* ---- 補足枠 ---- */
+
+.callout {
+	border-left: 6px solid var(--accent, #12224d);
+	background: linear-gradient(180deg, var(--soft, #f2f5fb), #fff);
+	padding: 12px 18px;
+	margin: 18px 0;
+	border-radius: 0 8px 8px 0;
+}
+
+.callout strong { color: var(--accent, #12224d); }
+
+/* ---- バッジ ---- */
+
+.badge {
+	display: inline-block;
+	color: #fff;
+	border-radius: 4px;
+	padding: 1px 9px;
+	font-size: 0.84em;
+	white-space: nowrap;
+	margin-right: 4px;
+}
+
+/* 判定バッジ */
+.b-ok   { background: linear-gradient(100deg, #1d7a3c, #45b56c); }
+.b-ng   { background: linear-gradient(100deg, #a51f22, #e05a5c); }
+.b-none { background: linear-gradient(100deg, #5a6472, #97a1ae); }
+.b-warn { background: linear-gradient(100deg, #b8620a, #f0a548); }
+
+/* 設定バッジ — 判定バッジと色相帯を分ける */
+.b-strict { background: linear-gradient(100deg, #1e3a8a, #5b8def); }
+.b-esm    { background: linear-gradient(100deg, #0f6e6e, #3aa8a8); }
+.b-cjs    { background: linear-gradient(100deg, #7a4a1d, #c08a4a); }
+.b-strip  { background: linear-gradient(100deg, #4a1d7a, #8a5ac0); }
+.b-ts7    { background: linear-gradient(100deg, #7a1d5a, #c05a9a); }
+
+/* ---- 到達点・次章への導線 ---- */
+
+.goal, .next {
+	border-left: 6px solid var(--navy1, #12224d);
+	background: linear-gradient(180deg, #f2f5fb, #fff);
+	padding: 14px 20px;
+	border-radius: 0 8px 8px 0;
+}
+
+.goal { margin: 26px 0; }
+.next { margin: 30px 0; }
+
+.goal h2 {
+	--accent: var(--navy1, #12224d);
+	--accent2: var(--navy2, #2f5fbf);
+	--soft: #f2f5fb;
+	margin: 0 0 8px;
+	border: none;
+	background: none;
+	padding: 0;
+	font-size: 1.05em;
+}
+
+.goal ul { margin: 0; padding-left: 22px; }
+
+/* ---- 目次 ---- */
+
+.toc { margin: 26px 0 34px; }
+
+.toc h2 {
+	--accent: var(--navy1, #12224d);
+	--accent2: var(--navy2, #2f5fbf);
+	--soft: #f2f5fb;
+	margin-top: 0;
+}
+
+/* counter-reset / counter-increment は各 HTML 側に置く。
+   このファイルが読めなくても番号が振られるようにするため */
+.toc ol, .toc ul {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 0;
+	margin: 14px 0 0;
+}
+
+/* 目次バッジは ol / ul の中のリンクだけ。枠外のリンクに効かせない */
+.toc ol a, .toc ul a {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: normal;
+	width: 310px;
+	max-width: 100%;
+	color: #fff;
+	text-decoration: none;
+	border-radius: 8px;
+	padding: 8px 14px;
+	font-size: 0.95em;
+	line-height: 1.45;
+	font-weight: 700;
+}
+
+/* 各資料の目次は章アクセント、README の資料一覧は通し色 */
+.toc ol a { background: linear-gradient(100deg, var(--accent, #12224d), var(--accent2, #2f5fbf)); }
+.toc ul a { background: linear-gradient(100deg, var(--dc, #12224d), var(--dc2, #2f5fbf)); }
+
+.toc ol a::before { margin-right: 8px; }
+
+/* README の資料一覧 — 番号は通常の太さ、資料タイトルは太字 */
+.toc ul a .no { margin-right: 8px; }
+.toc ul a strong { color: inherit; font-weight: 700; }
+
+.toc ol a:hover, .toc ul a:hover { filter: brightness(1.12); }
+
+.tocnote { margin: 14px 0 0; font-size: 0.94em; color: var(--ink-soft, #4a5568); }
+
+/* ---- リンク ---- */
+
+/* 本文中のリンク — 背景を持たないので文字色を明示する */
+.wrap a { color: var(--link, #1a4fa0); }
+
+/* 資料間リンクのバッジ — 色は README の資料一覧と揃える。幅は文字数で決まる */
+a.doclink {
+	display: inline-block;
+	background: linear-gradient(100deg, var(--dc, #12224d), var(--dc2, #2f5fbf));
+	color: #fff;
+	text-decoration: none;
+	border-radius: 6px;
+	padding: 0 9px;
+	font-size: 0.92em;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+a.doclink:hover { filter: brightness(1.12); }
+
+/* バッジ内のアイコン。currentColor なのでバッジの文字色に追随する */
+a.doclink .navicon {
+	width: 1em;
+	height: 1em;
+	vertical-align: -0.13em;
+	margin-right: 5px;
+}
+
+/* 資料16本の通し色（本編12＋付録4 / 刻み 18.67） */
+.doc01 { --dc: hsl(280,78%,25%);   --dc2: hsl(280,58%,55%); }
+.doc02 { --dc: hsl(261.3,78%,25%); --dc2: hsl(261.3,58%,55%); }
+.doc03 { --dc: hsl(242.7,78%,25%); --dc2: hsl(242.7,58%,55%); }
+.doc04 { --dc: hsl(224,78%,25%);   --dc2: hsl(224,58%,55%); }
+.doc05 { --dc: hsl(205.3,78%,25%); --dc2: hsl(205.3,58%,55%); }
+.doc06 { --dc: hsl(186.7,78%,25%); --dc2: hsl(186.7,58%,55%); }
+.doc07 { --dc: hsl(168,78%,25%);   --dc2: hsl(168,58%,55%); }
+.doc08 { --dc: hsl(149.3,78%,25%); --dc2: hsl(149.3,58%,55%); }
+.doc09 { --dc: hsl(130.7,78%,25%); --dc2: hsl(130.7,58%,55%); }
+.doc10 { --dc: hsl(112,78%,25%);   --dc2: hsl(112,58%,55%); }
+.doc11 { --dc: hsl(93.3,78%,25%);  --dc2: hsl(93.3,58%,55%); }
+.doc12 { --dc: hsl(74.7,78%,25%);  --dc2: hsl(74.7,58%,55%); }
+.doc13 { --dc: hsl(56,78%,25%);    --dc2: hsl(56,58%,55%); }
+.doc14 { --dc: hsl(37.3,78%,25%);  --dc2: hsl(37.3,58%,55%); }
+.doc15 { --dc: hsl(18.7,78%,25%);  --dc2: hsl(18.7,58%,55%); }
+.doc16 { --dc: hsl(0,78%,25%);     --dc2: hsl(0,58%,55%); }
+
+/* 構成案は本編・付録の外なので無彩色、README へ戻るリンクは紺 */
+.doczz   { --dc: #4a5568; --dc2: #97a1ae; }
+.dochome { --dc: #12224d; --dc2: #2f5fbf; }
+
+/* ---- 図 ---- */
+
+figure { margin: 20px 0; }
+figure svg { max-width: 100%; height: auto; display: block; }
+figcaption { font-size: 0.9em; color: var(--ink-soft, #4a5568); margin-top: 8px; }
+
+/* ---- フッター ---- */
+
+footer {
+	border-top: 1px solid var(--line, #d9dfe8);
+	margin-top: 40px;
+	padding: 18px 30px 0;
+	font-size: 0.94em;
+}
+
+footer .inner { max-width: 1600px; margin: 0 auto; padding-bottom: 30px; }
+footer .navlabel { color: var(--ink-soft, #4a5568); margin: 0 4px 0 14px; }
+footer .navlabel:first-child { margin-left: 0; }
