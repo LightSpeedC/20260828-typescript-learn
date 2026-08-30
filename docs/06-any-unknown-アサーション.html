@@ -49,22 +49,22 @@
 <div class="toc">
 	<h2>この章の内容</h2>
 	<ol>
-		<li class="ch01"><a href="#c1">any — 伝播する</a></li>
-		<li class="ch02"><a href="#c2">unknown — 安全な受け口</a></li>
-		<li class="ch03"><a href="#c3">as — 検査を黙らせる</a></li>
-		<li class="ch04"><a href="#c4">! — 非 null アサーション</a></li>
+		<li class="ch01"><a href="#ch01">any — 伝播する</a></li>
+		<li class="ch02"><a href="#ch02">unknown — 安全な受け口</a></li>
+		<li class="ch03"><a href="#ch03">as — 検査を黙らせる</a></li>
+		<li class="ch04"><a href="#ch04">! — 非 null アサーション</a></li>
 	</ol>
 </div>
 
 <!-- ============ 1 ============ -->
-<section class="ch01" id="c1">
+<section class="ch01" id="ch01">
 	<h1>06.1 any — 伝播する</h1>
 
 	<h2>any は「何でも入る」ではなく「検査しない」</h2>
 
 	<p><code>any</code> を付けた値には、<strong>どんな操作をしてもエラーになりません。</strong></p>
 
-<pre><code>const x: any = "文字列";
+<pre><code class="language-typescript">const x: any = "文字列";
 
 x.toFixed(2);          // エラーにならない（実行時に落ちる）
 x.foo.bar.baz;         // エラーにならない（実行時に落ちる）
@@ -74,7 +74,7 @@ x();                   // エラーにならない（実行時に落ちる）</c
 
 	<p>問題は、<strong><code>any</code> が伝染すること</strong>です。</p>
 
-<pre><code>function parse(json: string): any {
+<pre><code class="language-typescript">function parse(json: string): any {
 	return JSON.parse(json);
 }
 
@@ -83,7 +83,7 @@ const name = user.name;                   // name も any
 const upper = name.toUpperCase();          // upper も any
 const len = upper.lenght;                  // 打ち間違いも通る（実行時 undefined）</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong>1か所の <code>any</code> が、その先すべての検査を無効化します。</strong></p>
 		<p>上の例では <code>lenght</code> という打ち間違いが検出されません。<strong><code>any</code> を返す関数を1つ書くと、それを使うコード全体が型のない世界になります。</strong></p>
 	</div>
@@ -172,7 +172,7 @@ const len = upper.lenght;                  // 打ち間違いも通る（実行�
 
 	<p><span class="badge b-strict">strict</span> 型を書き忘れた引数は、<strong>暗黙に <code>any</code></strong> になります。<code>strict</code> が有効ならエラーで教えてくれます。</p>
 
-<pre><code>function greet(name) {
+<pre><code class="language-typescript">function greet(name) {
 	//         ~~~~
 	// error TS7006: Parameter 'name' implicitly has an 'any' type.
 	//
@@ -201,14 +201,14 @@ const len = upper.lenght;                  // 打ち間違いも通る（実行�
 </section>
 
 <!-- ============ 2 ============ -->
-<section class="ch02" id="c2">
+<section class="ch02" id="ch02">
 	<h1>06.2 unknown — 安全な受け口</h1>
 
 	<h2>「何でも入るが、確かめるまで何もできない」</h2>
 
 	<p><code>unknown</code> は <code>any</code> と同じく<strong>どんな値でも代入できます。</strong>違うのは<strong>使うときに絞り込みを強制される</strong>点です。</p>
 
-<pre><code>const x: unknown = "文字列";
+<pre><code class="language-typescript">const x: unknown = "文字列";
 
 x.toUpperCase();
 // ~
@@ -238,7 +238,7 @@ if (typeof x === "string") {
 
 	<p><code>JSON.parse</code> の戻り値は <code>any</code> です。<strong>受け口で <code>unknown</code> に変えると、検証を強制できます。</strong></p>
 
-<pre><code>// unknown-parse.ts
+<pre><code class="language-typescript">// unknown-parse.ts
 function parseJson(text: string): unknown {
 	return JSON.parse(text);
 }
@@ -263,27 +263,27 @@ if (isUser(data)) {
 
 console.log(isUser(parseJson('{"name":"Bob"}')));</code></pre>
 
-<pre><code>$ npx tsx unknown-parse.ts
+<pre><code class="language-shell">$ npx tsx unknown-parse.ts
 Alice は 30 歳
 false</code></pre>
 
 	<p><code>v is User</code> という書き方は<strong>型ガード関数</strong>です。詳細は <a class="doclink doc08" href="08-型の絞り込み.html">08. 型の絞り込み</a> で扱います。</p>
 
-	<div class="callout">
+	<div class="callout callout-tip">
 		<p><strong>実務ではライブラリを使ってください。</strong></p>
 		<p>上のような検証を手で書くと、プロパティが増えるたびに書き足すことになります。<strong>zod・valibot のようなスキーマ検証ライブラリ</strong>を使うと、検証と型定義を1か所で書けます。この資料では仕組みを理解するために手書きしています。実務での書き方は <a class="doclink doc15" href="A3-実務パターン集.html">A3. 実務パターン集</a> に置いています。</p>
 	</div>
 </section>
 
 <!-- ============ 3 ============ -->
-<section class="ch03" id="c3">
+<section class="ch03" id="ch03">
 	<h1>06.3 as — 検査を黙らせる</h1>
 
 	<h2>as は変換ではない</h2>
 
 	<p><code>as</code> は<strong>型アサーション</strong>です。「この値はこの型だと思って扱え」と<strong>コンパイラに指示する</strong>だけで、<strong>値は何も変わりません。</strong></p>
 
-<pre><code>const x: unknown = "文字列";
+<pre><code class="language-typescript">const x: unknown = "文字列";
 const n = x as number;        // 通る。何も起きない
 
 console.log(n.toFixed(2));    // 実行時エラー: n.toFixed is not a function</code></pre>
@@ -296,7 +296,7 @@ console.log(n.toFixed(2));    // 実行時エラー: n.toFixed is not a function
 
 	<h2>as が嘘をつく瞬間</h2>
 
-<pre><code>type User = { name: string; age: number };
+<pre><code class="language-typescript">type User = { name: string; age: number };
 
 const data = JSON.parse('{"name":"Alice"}') as User;
 
@@ -379,7 +379,7 @@ console.log(data.age.toFixed(0));
 
 	<h2>二段階の as は危険信号</h2>
 
-<pre><code>const s = "文字列";
+<pre><code class="language-typescript">const s = "文字列";
 const n = s as unknown as number;      // 無関係な型にも変換できてしまう</code></pre>
 
 	<p><code>as</code> は<strong>近い型どうし</strong>でしか使えませんが、<code>as unknown as</code> を挟むと<strong>何にでも変換できます。</strong>この書き方が出てきたら、設計を見直す合図です。</p>
@@ -388,7 +388,7 @@ const n = s as unknown as number;      // 無関係な型にも変換できて�
 
 	<p><code>as</code> の代わりに使える演算子です。<strong>「この型を満たしているか確かめるが、推論された型はそのまま残す」</strong>という意味です。</p>
 
-<pre><code>type Config = Record&lt;string, string | number&gt;;
+<pre><code class="language-typescript">type Config = Record&lt;string, string | number&gt;;
 
 // as だと、推論された具体的な型が失われる
 const a = { host: "localhost", port: 3000 } as Config;
@@ -402,12 +402,12 @@ const b = { host: "localhost", port: 3000 } satisfies Config;
 </section>
 
 <!-- ============ 4 ============ -->
-<section class="ch04" id="c4">
+<section class="ch04" id="ch04">
 	<h1>06.4 ! — 非 null アサーション</h1>
 
 	<h2>「null ではない」と言い切る</h2>
 
-<pre><code>function find(id: string): User | undefined { /* ... */ }
+<pre><code class="language-typescript">function find(id: string): User | undefined { /* ... */ }
 
 const user = find("1");
 console.log(user.name);
@@ -436,7 +436,7 @@ console.log(user!.name);     // ! を付けると通る（検査されない）<
 
 	<h2>! の代わりに例外を投げる</h2>
 
-<pre><code>// assert.ts
+<pre><code class="language-typescript">// assert.ts
 function findUser(id: string): { name: string } | undefined {
 	const db: Record&lt;string, { name: string }&gt; = { "1": { name: "Alice" } };
 	return db[id];
@@ -459,11 +459,11 @@ try {
 	console.log((e as Error).message);
 }</code></pre>
 
-<pre><code>$ npx tsx assert.ts
+<pre><code class="language-shell">$ npx tsx assert.ts
 Alice
 ユーザーが見つかりません: 999</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong>どちらも実行時に落ちますが、落ち方が違います。</strong></p>
 		<p><code>!</code> を使うと <code>TypeError: Cannot read properties of undefined</code> という<strong>原因の分からないエラー</strong>になります。明示的に投げれば<strong>「何が見つからなかったか」が分かります。</strong>デバッグにかかる時間が変わります。</p>
 	</div>

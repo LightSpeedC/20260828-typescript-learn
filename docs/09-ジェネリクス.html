@@ -49,22 +49,22 @@
 <div class="toc">
 	<h2>この章の内容</h2>
 	<ol>
-		<li class="ch01"><a href="#c1">型引数の基本</a></li>
-		<li class="ch02"><a href="#c2">extends による制約</a></li>
-		<li class="ch03"><a href="#c3">推論が効く場面・効かない場面</a></li>
-		<li class="ch04"><a href="#c4">Java・C# のジェネリクスとの違い</a></li>
+		<li class="ch01"><a href="#ch01">型引数の基本</a></li>
+		<li class="ch02"><a href="#ch02">extends による制約</a></li>
+		<li class="ch03"><a href="#ch03">推論が効く場面・効かない場面</a></li>
+		<li class="ch04"><a href="#ch04">Java・C# のジェネリクスとの違い</a></li>
 	</ol>
 </div>
 
 <!-- ============ 1 ============ -->
-<section class="ch01" id="c1">
+<section class="ch01" id="ch01">
 	<h1>09.1 型引数の基本</h1>
 
 	<h2>any との違い</h2>
 
 	<p>「どんな型でも受け取る関数」を <code>any</code> で書くと、<strong>戻り値の型情報も失われます。</strong></p>
 
-<pre><code>// any で書く — 型が消える
+<pre><code class="language-typescript">// any で書く — 型が消える
 function firstAny(items: any[]): any {
 	return items[0];
 }
@@ -142,7 +142,7 @@ const b = first(["x", "y"]);         // b は string</code></pre>
 
 	<h2>複数の型引数</h2>
 
-<pre><code>function pair&lt;A, B&gt;(a: A, b: B): [A, B] {
+<pre><code class="language-typescript">function pair&lt;A, B&gt;(a: A, b: B): [A, B] {
 	return [a, b];
 }
 
@@ -150,7 +150,7 @@ const p = pair("x", 1);      // [string, number]</code></pre>
 
 	<h2>型にも使える</h2>
 
-<pre><code>type Box&lt;T&gt; = { value: T };
+<pre><code class="language-typescript">type Box&lt;T&gt; = { value: T };
 
 const b1: Box&lt;string&gt; = { value: "x" };
 const b2: Box&lt;number&gt; = { value: 1 };
@@ -164,14 +164,14 @@ type Result&lt;T, E = Error&gt; =
 </section>
 
 <!-- ============ 2 ============ -->
-<section class="ch02" id="c2">
+<section class="ch02" id="ch02">
 	<h1>09.2 extends による制約</h1>
 
 	<h2>「こういう性質を持つ型だけ」</h2>
 
 	<p>型引数のままでは、<strong>その値に対して何もできません。</strong>どんな型が来るか分からないためです。</p>
 
-<pre><code>function showLength&lt;T&gt;(x: T) {
+<pre><code class="language-typescript">function showLength&lt;T&gt;(x: T) {
 	console.log(x.length);
 	//            ~~~~~~
 	// error TS2339: Property 'length' does not exist on type 'T'.
@@ -179,7 +179,7 @@ type Result&lt;T, E = Error&gt; =
 
 	<p><code>extends</code> で<strong>「少なくともこれを持っている」</strong>と制約します。</p>
 
-<pre><code>function showLength&lt;T extends { length: number }&gt;(x: T) {
+<pre><code class="language-typescript">function showLength&lt;T extends { length: number }&gt;(x: T) {
 	console.log(x.length);      // OK
 }
 
@@ -191,7 +191,7 @@ showLength(42);               // エラー TS2345</code></pre>
 
 	<p>オブジェクトのキーを型として扱えます。<strong>実務で最もよく使うジェネリクスの形</strong>です。</p>
 
-<pre><code>function getProp&lt;T, K extends keyof T&gt;(obj: T, key: K): T[K] {
+<pre><code class="language-typescript">function getProp&lt;T, K extends keyof T&gt;(obj: T, key: K): T[K] {
 	return obj[key];
 }
 
@@ -213,7 +213,7 @@ const x = getProp(user, "email");
 
 	<h2>動かしてみる</h2>
 
-<pre><code>// generics.ts
+<pre><code class="language-typescript">// generics.ts
 function getProp&lt;T, K extends keyof T&gt;(obj: T, key: K): T[K] {
 	return obj[key];
 }
@@ -233,39 +233,39 @@ console.log(getProp(user, "name"));
 const words = ["apple", "avocado", "banana"];
 console.log(groupBy(words, (w) =&gt; w[0]));</code></pre>
 
-<pre><code>$ npx tsx generics.ts
+<pre><code class="language-shell">$ npx tsx generics.ts
 Alice
 { a: [ 'apple', 'avocado' ], b: [ 'banana' ] }</code></pre>
 </section>
 
 <!-- ============ 3 ============ -->
-<section class="ch03" id="c3">
+<section class="ch03" id="ch03">
 	<h1>09.3 推論が効く場面・効かない場面</h1>
 
 	<h2>引数から決まるなら書かなくてよい</h2>
 
-<pre><code>function first&lt;T&gt;(items: T[]): T { return items[0]; }
+<pre><code class="language-typescript">function first&lt;T&gt;(items: T[]): T { return items[0]; }
 
 first([1, 2, 3]);            // T は number と推論される
 first&lt;number&gt;([1, 2, 3]);    // 書いてもよいが冗長</code></pre>
 
 	<h2>引数に現れない型引数は推論できない</h2>
 
-<pre><code>function parse&lt;T&gt;(json: string): T {
+<pre><code class="language-typescript">function parse&lt;T&gt;(json: string): T {
 	return JSON.parse(json);
 }
 
 const user = parse('{"name":"Alice"}');    // T は unknown になる
 const u2 = parse&lt;User&gt;('{"name":"Alice"}'); // 明示すれば通る</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong>この形は避けてください。</strong></p>
 		<p><code>parse&lt;User&gt;(...)</code> は <strong><code>as User</code> と同じで、何も検証していません。</strong>「型引数で指定した型が返ってくる」という保証はどこにもありません。<strong>外部から来る値は <code>unknown</code> で受け、型ガードで確かめてください</strong>（<a class="doclink doc06" href="06-any-unknown-アサーション.html">06</a>・<a class="doclink doc08" href="08-型の絞り込み.html">08</a>）。</p>
 	</div>
 
 	<h2>推論を助ける書き方</h2>
 
-<pre><code>// 引数の位置に型引数を出すと推論できる
+<pre><code class="language-typescript">// 引数の位置に型引数を出すと推論できる
 function fill&lt;T&gt;(length: number, value: T): T[] {
 	return Array.from({ length }, () =&gt; value);
 }
@@ -276,7 +276,7 @@ fill(3, "x");        // string[] と推論される</code></pre>
 
 	<p>リテラル型として推論させたいときに使います。</p>
 
-<pre><code>function toList&lt;const T&gt;(items: readonly T[]): readonly T[] {
+<pre><code class="language-typescript">function toList&lt;const T&gt;(items: readonly T[]): readonly T[] {
 	return items;
 }
 
@@ -285,7 +285,7 @@ const a = toList(["x", "y"]);        // readonly ("x" | "y")[]
 </section>
 
 <!-- ============ 4 ============ -->
-<section class="ch04" id="c4">
+<section class="ch04" id="ch04">
 	<h1>09.4 Java・C# のジェネリクスとの違い</h1>
 
 	<h2>実行時に型引数は残らない</h2>
@@ -294,13 +294,13 @@ const a = toList(["x", "y"]);        // readonly ("x" | "y")[]
 		<p><strong>Java・C# から来た人へ</strong></p>
 		<p>C# のジェネリクスは<strong>実行時にも型引数が残ります</strong>（<code>typeof(T)</code> が使えます）。Java は型消去のため残りませんが、<code>Class&lt;T&gt;</code> を引数で渡す回避策があります。</p>
 		<p><strong>TypeScript では型引数は完全に消えます。</strong>次のようなことはできません。</p>
-<pre><code>function create&lt;T&gt;(): T {
+<pre><code class="language-typescript">function create&lt;T&gt;(): T {
 	return new T();      // 書けない。T は実行時に存在しない
 	//         ~
 	// error TS2693: 'T' only refers to a type, but is being used as a value here.
 }</code></pre>
 		<p>型ではなく<strong>コンストラクタそのものを引数で渡します。</strong></p>
-<pre><code>function create&lt;T&gt;(ctor: new () =&gt; T): T {
+<pre><code class="language-typescript">function create&lt;T&gt;(ctor: new () =&gt; T): T {
 	return new ctor();
 }
 
@@ -312,7 +312,7 @@ const u = create(User);      // User</code></pre>
 
 	<p>この節は<strong>読んで意味が分かれば十分</strong>です。自分で書く必要はほとんどありません。</p>
 
-<pre><code>type Animal = { name: string };
+<pre><code class="language-typescript">type Animal = { name: string };
 type Dog = { name: string; bark(): void };
 
 // 戻り値は「狭い型」を返す関数を渡せる（共変）

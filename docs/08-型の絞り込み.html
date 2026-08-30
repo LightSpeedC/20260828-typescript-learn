@@ -50,23 +50,23 @@
 <div class="toc">
 	<h2>この章の内容</h2>
 	<ol>
-		<li class="ch01"><a href="#c1">typeof と instanceof</a></li>
-		<li class="ch02"><a href="#c2">in と真偽値による絞り込み</a></li>
-		<li class="ch03"><a href="#c3">判別可能ユニオン</a></li>
-		<li class="ch04"><a href="#c4">型ガード関数</a></li>
-		<li class="ch05"><a href="#c5">never による網羅性チェック</a></li>
+		<li class="ch01"><a href="#ch01">typeof と instanceof</a></li>
+		<li class="ch02"><a href="#ch02">in と真偽値による絞り込み</a></li>
+		<li class="ch03"><a href="#ch03">判別可能ユニオン</a></li>
+		<li class="ch04"><a href="#ch04">型ガード関数</a></li>
+		<li class="ch05"><a href="#ch05">never による網羅性チェック</a></li>
 	</ol>
 </div>
 
 <!-- ============ 1 ============ -->
-<section class="ch01" id="c1">
+<section class="ch01" id="ch01">
 	<h1>08.1 typeof と instanceof</h1>
 
 	<h2>if を書くと型が変わる</h2>
 
 	<p>TypeScript は<strong>条件分岐の中で型を絞り込みます。</strong>これを制御フロー解析と呼びます。</p>
 
-<pre><code>function show(id: string | number) {
+<pre><code class="language-typescript">function show(id: string | number) {
 	// ここでは string | number
 
 	if (typeof id === "string") {
@@ -102,12 +102,12 @@
 	<div class="callout">
 		<p><strong><code>typeof null === "object"</code> は JavaScript の歴史的な仕様です。</strong></p>
 		<p>オブジェクトかどうかを判定するときは、<strong>必ず <code>null</code> のチェックを併記してください。</strong></p>
-<pre><code>if (typeof x === "object" &amp;&amp; x !== null) { /* ... */ }</code></pre>
+<pre><code class="language-typescript">if (typeof x === "object" &amp;&amp; x !== null) { /* ... */ }</code></pre>
 	</div>
 
 	<h2>instanceof — クラスの判定</h2>
 
-<pre><code>class ApiError extends Error {
+<pre><code class="language-typescript">class ApiError extends Error {
 	constructor(public status: number, message: string) {
 		super(message);
 	}
@@ -121,19 +121,19 @@ function handle(e: unknown) {
 	}
 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong><code>instanceof</code> はクラスにしか使えません。</strong></p>
 		<p><code>type</code> や <code>interface</code> は<strong>実行時に存在しない</strong>ため、<code>x instanceof User</code> と書くことはできません（<a class="doclink doc01" href="01-背景.html">01. 背景</a>）。オブジェクトの形を判定したいときは <code>in</code> か型ガード関数を使います。</p>
 	</div>
 </section>
 
 <!-- ============ 2 ============ -->
-<section class="ch02" id="c2">
+<section class="ch02" id="ch02">
 	<h1>08.2 in と真偽値による絞り込み</h1>
 
 	<h2>in — プロパティの有無で判定する</h2>
 
-<pre><code>type Dog = { bark: () =&gt; void };
+<pre><code class="language-typescript">type Dog = { bark: () =&gt; void };
 type Cat = { meow: () =&gt; void };
 
 function speak(animal: Dog | Cat) {
@@ -146,16 +146,16 @@ function speak(animal: Dog | Cat) {
 
 	<h2>真偽値による絞り込み</h2>
 
-<pre><code>function show(name: string | undefined) {
+<pre><code class="language-typescript">function show(name: string | undefined) {
 	if (name) {
 		console.log(name.toUpperCase());   // string（undefined が除かれた）
 	}
 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong>空文字と 0 に注意してください。</strong></p>
 		<p><code>if (name)</code> は <code>undefined</code> だけでなく<strong>空文字 <code>""</code> も偽</strong>として扱います。数値なら <code>0</code> も偽です。<strong>「値が存在するか」を判定したいなら、明示的に書いてください。</strong></p>
-<pre><code>if (name !== undefined) { /* "" も通る */ }
+<pre><code class="language-typescript">if (name !== undefined) { /* "" も通る */ }
 if (name != null)       { /* null と undefined だけを除く */ }</code></pre>
 		<p><code>!=</code> は通常避けますが、<code>x != null</code> は<strong><code>null</code> と <code>undefined</code> の両方を一度に除く慣用句</strong>として使われます。</p>
 	</div>
@@ -164,7 +164,7 @@ if (name != null)       { /* null と undefined だけを除く */ }</code></pre
 
 	<p>絞り込みは<strong>再代入やコールバックをまたぐと失われます。</strong></p>
 
-<pre><code>function f(v: string | undefined) {
+<pre><code class="language-typescript">function f(v: string | undefined) {
 	if (!v) return;
 	// ここでは string
 
@@ -187,7 +187,7 @@ function g(obj: { v?: string }) {
 
 	<p><strong>プロパティは変わりうるため、絞り込みが保持されません。</strong>ローカル変数に取り出すと解決します。</p>
 
-<pre><code>function g(obj: { v?: string }) {
+<pre><code class="language-typescript">function g(obj: { v?: string }) {
 	const v = obj.v;
 	if (!v) return;
 	setTimeout(() =&gt; console.log(v.toUpperCase()));   // OK
@@ -195,14 +195,14 @@ function g(obj: { v?: string }) {
 </section>
 
 <!-- ============ 3 ============ -->
-<section class="ch03" id="c3">
+<section class="ch03" id="ch03">
 	<h1>08.3 判別可能ユニオン</h1>
 
 	<h2>実務で最もよく使う設計</h2>
 
 	<p><strong>共通のプロパティに、それぞれ別のリテラル型を持たせます。</strong>そのプロパティを見れば、どれなのか判定できます。</p>
 
-<pre><code>type Result =
+<pre><code class="language-typescript">type Result =
 	| { status: "success"; data: string }
 	| { status: "error"; message: string }
 	| { status: "loading" };
@@ -274,10 +274,10 @@ function show(r: Result) {
 
 	<h2>なぜこの形にするか</h2>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>「ありえない組み合わせ」を型で禁止できます。</strong></p>
 		<p>次のように書くと、<strong><code>success</code> なのに <code>message</code> があり <code>data</code> がない</strong>という状態を作れてしまいます。</p>
-<pre><code>// 悪い例 — すべて省略可能にしてしまう
+<pre><code class="language-typescript">// 悪い例 — すべて省略可能にしてしまう
 type Result = {
 	status: "success" | "error" | "loading";
 	data?: string;
@@ -288,7 +288,7 @@ type Result = {
 
 	<h2>動かしてみる</h2>
 
-<pre><code>// discriminated.ts
+<pre><code class="language-typescript">// discriminated.ts
 type Shape =
 	| { kind: "circle"; radius: number }
 	| { kind: "rect"; width: number; height: number };
@@ -303,20 +303,20 @@ function area(s: Shape): number {
 console.log(area({ kind: "circle", radius: 2 }).toFixed(2));
 console.log(area({ kind: "rect", width: 3, height: 4 }));</code></pre>
 
-<pre><code>$ npx tsx discriminated.ts
+<pre><code class="language-shell">$ npx tsx discriminated.ts
 12.57
 12</code></pre>
 </section>
 
 <!-- ============ 4 ============ -->
-<section class="ch04" id="c4">
+<section class="ch04" id="ch04">
 	<h1>08.4 型ガード関数</h1>
 
 	<h2>絞り込みを関数に切り出す</h2>
 
 	<p>判定を関数にすると、<strong>戻り値の型を <code>x is T</code> と書くことで絞り込みを伝えられます。</strong></p>
 
-<pre><code>type User = { name: string; age: number };
+<pre><code class="language-typescript">type User = { name: string; age: number };
 
 function isUser(v: unknown): v is User {
 	if (typeof v !== "object" || v === null) return false;
@@ -330,14 +330,14 @@ if (isUser(data)) {
 	console.log(data.name);      // User として扱える
 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong><code>v is User</code> は「そう見なせ」という宣言で、検査されません。</strong></p>
 		<p>関数の中身が間違っていても、TypeScript は指摘しません。<strong><code>return true;</code> とだけ書いても通ります。</strong><code>as</code> と同じく、<strong>正しさは書き手が保証します。</strong>その代わり、保証する場所が<strong>この関数の中だけ</strong>に閉じ込められます。</p>
 	</div>
 
 	<h2>配列の絞り込み</h2>
 
-<pre><code>const values: (string | undefined)[] = ["a", undefined, "b"];
+<pre><code class="language-typescript">const values: (string | undefined)[] = ["a", undefined, "b"];
 
 // filter だけでは型が変わらない
 const a = values.filter((v) =&gt; v !== undefined);     // (string | undefined)[]
@@ -349,7 +349,7 @@ const b = values.filter((v): v is string =&gt; v !== undefined);   // string[]</
 
 	<p><code>asserts</code> を使うと、<strong>「ここを通過したら確定している」</strong>という形も書けます。</p>
 
-<pre><code>function assertIsUser(v: unknown): asserts v is User {
+<pre><code class="language-typescript">function assertIsUser(v: unknown): asserts v is User {
 	if (!isUser(v)) {
 		throw new Error("User の形ではありません");
 	}
@@ -359,21 +359,21 @@ const data: unknown = JSON.parse(text);
 assertIsUser(data);
 console.log(data.name);      // ここでは User</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong><code>asserts</code> を使う関数は、明示的な型注釈が要ります。</strong></p>
 		<p><code>const f = (v: unknown): asserts v is User =&gt; {...}</code> のようにアロー関数で書くと、<strong>呼び出し側で効きません。</strong><code>function</code> 宣言か、明示的に型を付けた変数として定義してください。</p>
 	</div>
 </section>
 
 <!-- ============ 5 ============ -->
-<section class="ch05" id="c5">
+<section class="ch05" id="ch05">
 	<h1>08.5 never による網羅性チェック</h1>
 
 	<h2>分岐の漏れをコンパイル時に見つける</h2>
 
 	<p><strong><code>never</code> は「ありえない型」</strong>です。すべての分岐を書き切れば、最後には <code>never</code> だけが残ります。</p>
 
-<pre><code>type Shape =
+<pre><code class="language-typescript">type Shape =
 	| { kind: "circle"; radius: number }
 	| { kind: "rect"; width: number; height: number };
 
@@ -464,7 +464,7 @@ function area(s: Shape): number {
 
 	<h2>種類を増やすとエラーになる</h2>
 
-<pre><code>type Shape =
+<pre><code class="language-typescript">type Shape =
 	| { kind: "circle"; radius: number }
 	| { kind: "rect"; width: number; height: number }
 	| { kind: "triangle"; base: number; height: number };   // ← 追加した
@@ -477,7 +477,7 @@ function area(s: Shape): number {
 //
 // 訳: 型 '{ kind: "triangle"; ... }' を型 'never' に割り当てることはできません。</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>これが TypeScript で最も価値のある機能のひとつです。</strong></p>
 		<p>union に種類を追加したとき、<strong>対応が必要な箇所をコンパイラが列挙してくれます。</strong>実行してみるまで漏れに気づけない、という状況がなくなります。</p>
 		<p><strong>判別可能ユニオンを使うなら、必ず網羅性チェックもセットで書いてください。</strong>この2つは組み合わせて初めて効果があります。</p>
@@ -485,7 +485,7 @@ function area(s: Shape): number {
 
 	<h2>動かしてみる</h2>
 
-<pre><code>// exhaustive.ts
+<pre><code class="language-typescript">// exhaustive.ts
 type Event =
 	| { type: "click"; x: number; y: number }
 	| { type: "key"; code: string }
@@ -507,14 +507,14 @@ console.log(describe({ type: "click", x: 10, y: 20 }));
 console.log(describe({ type: "key", code: "Enter" }));
 console.log(describe({ type: "close" }));</code></pre>
 
-<pre><code>$ npx tsx exhaustive.ts
+<pre><code class="language-shell">$ npx tsx exhaustive.ts
 クリック (10, 20)
 キー Enter
 閉じる</code></pre>
 
 	<h2>if 文でも使える</h2>
 
-<pre><code>function describe(e: Event): string {
+<pre><code class="language-typescript">function describe(e: Event): string {
 	if (e.type === "click") return `クリック (${e.x}, ${e.y})`;
 	if (e.type === "key")   return `キー ${e.code}`;
 	if (e.type === "close") return "閉じる";

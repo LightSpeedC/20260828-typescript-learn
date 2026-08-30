@@ -48,14 +48,14 @@
 <div class="toc">
 	<h2>この章の内容</h2>
 	<ol>
-		<li class="ch01"><a href="#c1">課題と準備</a></li>
-		<li class="ch02"><a href="#c2">4段階で型を付けていく</a></li>
-		<li class="ch03"><a href="#c3">解答例と詰まりやすい箇所</a></li>
+		<li class="ch01"><a href="#ch01">課題と準備</a></li>
+		<li class="ch02"><a href="#ch02">4段階で型を付けていく</a></li>
+		<li class="ch03"><a href="#ch03">解答例と詰まりやすい箇所</a></li>
 	</ol>
 </div>
 
 <!-- ============ 1 ============ -->
-<section class="ch01" id="c1">
+<section class="ch01" id="ch01">
 	<h1>12.1 課題と準備</h1>
 
 	<h2>作るもの</h2>
@@ -64,13 +64,13 @@
 
 	<h2>準備</h2>
 
-<pre><code>$ mkdir handson &amp;&amp; cd handson
+<pre><code class="language-shell">$ mkdir handson &amp;&amp; cd handson
 $ npm init -y
 $ npm i -D typescript tsx @types/node</code></pre>
 
 	<p><code>sales.json</code> を用意します。</p>
 
-<pre><code>[
+<pre><code class="language-json">[
 	{ "date": "2026-01-15", "product": "ノート", "amount": 1200, "qty": 3 },
 	{ "date": "2026-01-16", "product": "ペン", "amount": 300, "qty": 10 },
 	{ "date": "2026-02-01", "product": "ノート", "amount": 800, "qty": 2 },
@@ -78,7 +78,7 @@ $ npm i -D typescript tsx @types/node</code></pre>
 	{ "date": "2026-02-20", "product": "ペン", "amount": 450, "qty": 15 }
 ]</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-tip">
 		<p><strong>手を動かさずに答えだけ見たい場合</strong></p>
 		<p>この課題の解答は <code>docs/samples/handson/</code> に置いてあります（<code>step1.ts</code> と <code>step4.ts</code>、<code>sales.json</code>）。<a class="doclink doc02" href="02-実行環境.html">02. 実行環境</a>で触れたとおり、<code>npm i</code> のあと <code>npx tsx step4.ts</code> で動きます。</p>
 		<p><strong>ただし、まず自分で書いてみてください。</strong>この章の目的は完成品を読むことではなく、<strong><code>any</code> を潰していく過程を体験すること</strong>です。</p>
@@ -86,19 +86,19 @@ $ npm i -D typescript tsx @types/node</code></pre>
 
 	<h2>目指す出力</h2>
 
-<pre><code>$ npx tsx step4.ts
+<pre><code class="language-shell">$ npx tsx step4.ts
 ノート: 2000 円
 ペン: 750 円
 消しゴム: 150 円</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>いきなり完成形を書こうとしないでください。</strong></p>
 		<p>実務で TypeScript を導入する場面は、<strong>既存の JavaScript に型を足す</strong>形が大半です。この課題も同じ順序で進めます。<strong>まず動かし、次に型を付け、最後に検証とエラー処理を足します。</strong></p>
 	</div>
 </section>
 
 <!-- ============ 2 ============ -->
-<section class="ch02" id="c2">
+<section class="ch02" id="ch02">
 	<h1>12.2 4段階で型を付けていく</h1>
 
 	<figure>
@@ -172,7 +172,7 @@ $ npm i -D typescript tsx @types/node</code></pre>
 
 	<p>型を気にせず、JavaScript を書く要領で動かします。</p>
 
-<pre><code>// step1.ts
+<pre><code class="language-typescript">// step1.ts
 import { readFileSync } from "node:fs";
 
 const text = readFileSync("sales.json", "utf8");
@@ -185,10 +185,10 @@ for (const s of sales) {
 
 console.log(totals);</code></pre>
 
-<pre><code>$ npx tsx step1.ts
+<pre><code class="language-shell">$ npx tsx step1.ts
 { 'ノート': 2000, 'ペン': 750, '消しゴム': 150 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong>動きますが、検査は何も働いていません。</strong></p>
 		<p><code>JSON.parse</code> の戻り値は <code>any</code> なので、<code>s.product</code> も <code>s.amount</code> も <code>any</code> です（<a class="doclink doc06" href="06-any-unknown-アサーション.html">06</a>）。<strong><code>s.prodcut</code> と打ち間違えても、実行するまで気づけません。</strong></p>
 	</div>
@@ -204,7 +204,7 @@ console.log(totals);</code></pre>
 
 	<p>データの形を <code>type</code> で書き、集計結果を <code>Map</code> に変えます。</p>
 
-<pre><code>// step2.ts
+<pre><code class="language-typescript">// step2.ts
 import { readFileSync } from "node:fs";
 
 type Sale = { date: string; product: string; amount: number; qty: number };
@@ -224,7 +224,7 @@ for (const [product, total] of sumByProduct(sales)) {
 	console.log(`${product}: ${total} 円`);
 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong>打ち間違いは検出できるようになりましたが、<code>as Sale[]</code> が残っています。</strong></p>
 		<p><a class="doclink doc06" href="06-any-unknown-アサーション.html">06</a> で見たとおり、<strong><code>as</code> は何も検証していません。</strong>JSON の中身が違っていても通ってしまいます。段階3で外します。</p>
 	</div>
@@ -240,7 +240,7 @@ for (const [product, total] of sumByProduct(sales)) {
 
 	<p><code>as</code> をやめ、<code>unknown</code> で受けて<strong>型ガードで確かめます</strong>（<a class="doclink doc08" href="08-型の絞り込み.html">08</a>）。</p>
 
-<pre><code>// step3.ts（抜粋）
+<pre><code class="language-typescript">// step3.ts（抜粋）
 function isSale(v: unknown): v is Sale {
 	if (typeof v !== "object" || v === null) return false;
 	const o = v as Record&lt;string, unknown&gt;;
@@ -293,12 +293,12 @@ for (let i = 0; i &lt; parsed.length; i++) {
 </section>
 
 <!-- ============ 3 ============ -->
-<section class="ch03" id="c3">
+<section class="ch03" id="ch03">
 	<h1>12.3 解答例と詰まりやすい箇所</h1>
 
 	<h2>解答例（段階4）</h2>
 
-<pre><code>// step4.ts
+<pre><code class="language-typescript">// step4.ts
 import { readFileSync } from "node:fs";
 
 type Sale = { date: string; product: string; amount: number; qty: number };
@@ -369,7 +369,7 @@ for (const [product, total] of [...sumByProduct(r.value)].sort((a, b) =&gt; b[1]
 const missing = loadSales("nothing.json");
 console.log(missing.ok ? "読めた" : `想定どおり失敗: ${missing.error.message}`);</code></pre>
 
-<pre><code>$ npx tsx step4.ts
+<pre><code class="language-shell">$ npx tsx step4.ts
 ノート: 2000 円
 ペン: 750 円
 消しゴム: 150 円
@@ -377,7 +377,7 @@ console.log(missing.ok ? "読めた" : `想定どおり失敗: ${missing.error.m
 
 	<p>配列でない JSON を渡すと、次のように止まります。</p>
 
-<pre><code>$ npx tsx step4.ts          # sales.json が { "not": "an array" } の場合
+<pre><code class="language-shell">$ npx tsx step4.ts          # sales.json が { "not": "an array" } の場合
 エラー: 配列ではありません</code></pre>
 
 	<h2>詰まりやすい箇所</h2>

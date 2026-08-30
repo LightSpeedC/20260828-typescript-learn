@@ -50,19 +50,19 @@
 <div class="toc">
 	<h2>レシピ一覧</h2>
 	<ol>
-		<li class="ch01"><a href="#c1">Result 型 — 失敗を戻り値で返す</a></li>
-		<li class="ch02"><a href="#c2">型ガード関数 — 外部データを確かめる</a></li>
-		<li class="ch03"><a href="#c3">設定オブジェクト型</a></li>
-		<li class="ch04"><a href="#c4">ブランド型 — 同じ形を区別する</a></li>
-		<li class="ch05"><a href="#c5">部分更新と読み取り専用</a></li>
+		<li class="ch01"><a href="#ch01">Result 型 — 失敗を戻り値で返す</a></li>
+		<li class="ch02"><a href="#ch02">型ガード関数 — 外部データを確かめる</a></li>
+		<li class="ch03"><a href="#ch03">設定オブジェクト型</a></li>
+		<li class="ch04"><a href="#ch04">ブランド型 — 同じ形を区別する</a></li>
+		<li class="ch05"><a href="#ch05">部分更新と読み取り専用</a></li>
 	</ol>
 </div>
 
 <!-- ============ 1 ============ -->
-<section class="ch01" id="c1">
+<section class="ch01" id="ch01">
 	<h1>A2.1 Result 型 — 失敗を戻り値で返す</h1>
 
-<pre><code>type Result&lt;T, E = Error&gt; =
+<pre><code class="language-typescript">type Result&lt;T, E = Error&gt; =
 	| { ok: true; value: T }
 	| { ok: false; error: E };
 
@@ -72,7 +72,7 @@ const err = &lt;E&gt;(error: E): Result&lt;never, E&gt; =&gt; ({ ok: false, erro
 
 	<h3>使い方</h3>
 
-<pre><code>function parsePort(s: string): Result&lt;number&gt; {
+<pre><code class="language-typescript">function parsePort(s: string): Result&lt;number&gt; {
 	const n = Number(s);
 	if (!Number.isInteger(n)) return err(new Error(`整数ではありません: ${s}`));
 	if (n &lt; 1 || n &gt; 65535) return err(new Error(`範囲外です: ${n}`));
@@ -93,7 +93,7 @@ if (r.ok) {
 
 	<h3>エラーの種類を型で区別する</h3>
 
-<pre><code>type LoadError =
+<pre><code class="language-typescript">type LoadError =
 	| { kind: "not-found"; path: string }
 	| { kind: "invalid-json"; path: string }
 	| { kind: "invalid-shape"; index: number };
@@ -113,12 +113,12 @@ if (!r.ok) {
 </section>
 
 <!-- ============ 2 ============ -->
-<section class="ch02" id="c2">
+<section class="ch02" id="ch02">
 	<h1>A2.2 型ガード関数 — 外部データを確かめる</h1>
 
 	<h3>オブジェクトの形を確かめる</h3>
 
-<pre><code>type User = { name: string; age: number };
+<pre><code class="language-typescript">type User = { name: string; age: number };
 
 function isUser(v: unknown): v is User {
 	if (typeof v !== "object" || v === null) return false;
@@ -128,7 +128,7 @@ function isUser(v: unknown): v is User {
 
 	<h3>配列を確かめる</h3>
 
-<pre><code>function isArrayOf&lt;T&gt;(v: unknown, isItem: (x: unknown) =&gt; x is T): v is T[] {
+<pre><code class="language-typescript">function isArrayOf&lt;T&gt;(v: unknown, isItem: (x: unknown) =&gt; x is T): v is T[] {
 	return Array.isArray(v) &amp;&amp; v.every(isItem);
 }
 
@@ -139,7 +139,7 @@ if (isArrayOf(data, isUser)) {
 
 	<h3>undefined を除く（filter で型を絞る）</h3>
 
-<pre><code>function isDefined&lt;T&gt;(v: T | undefined | null): v is T {
+<pre><code class="language-typescript">function isDefined&lt;T&gt;(v: T | undefined | null): v is T {
 	return v !== undefined &amp;&amp; v !== null;
 }
 
@@ -148,14 +148,14 @@ const filtered = values.filter(isDefined);      // string[]</code></pre>
 
 	<h3>リテラルの union を確かめる</h3>
 
-<pre><code>const STATUSES = ["pending", "active", "closed"] as const;
+<pre><code class="language-typescript">const STATUSES = ["pending", "active", "closed"] as const;
 type Status = (typeof STATUSES)[number];        // "pending" | "active" | "closed"
 
 function isStatus(v: unknown): v is Status {
 	return typeof v === "string" &amp;&amp; (STATUSES as readonly string[]).includes(v);
 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-tip">
 		<p><strong><code>(typeof ARRAY)[number]</code> は覚えておくと便利です。</strong></p>
 		<p>配列の値から union 型を作れるため、<strong>値の一覧と型の一覧が二重管理になりません。</strong>要素を足せば型も自動で増えます。</p>
 	</div>
@@ -166,12 +166,12 @@ function isStatus(v: unknown): v is Status {
 </section>
 
 <!-- ============ 3 ============ -->
-<section class="ch03" id="c3">
+<section class="ch03" id="ch03">
 	<h1>A2.3 設定オブジェクト型</h1>
 
 	<h3>satisfies で型を確かめつつ具体的な型を残す</h3>
 
-<pre><code>type Config = {
+<pre><code class="language-typescript">type Config = {
 	host: string;
 	port: number;
 	features: readonly string[];
@@ -186,14 +186,14 @@ export const CONFIG = {
 // CONFIG.port の型は 3000（number ではない）
 // CONFIG.features[0] の型は "auth"</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong><code>as Config</code> ではなく <code>satisfies Config</code> を使ってください。</strong></p>
 		<p><code>as</code> だと具体的な型が失われ、<code>port</code> は <code>number</code> になります。<code>satisfies</code> なら<strong>検査もされるし、リテラル型も残ります</strong>（<a class="doclink doc06" href="06-any-unknown-アサーション.html">06.3</a>）。</p>
 	</div>
 
 	<h3>省略可能な項目に既定値を与える</h3>
 
-<pre><code>type Options = {
+<pre><code class="language-typescript">type Options = {
 	host?: string;
 	port?: number;
 	timeout?: number;
@@ -212,10 +212,10 @@ function resolve(opts: Options = {}): ResolvedOptions {
 	return { ...DEFAULTS, ...opts };
 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong><code>{ ...DEFAULTS, ...opts }</code> には落とし穴があります。</strong></p>
 		<p><code>opts.port</code> が<strong>明示的に <code>undefined</code></strong> だと、既定値を上書きして <code>undefined</code> になります。厳密にやるなら1項目ずつ <code>??</code> で埋めてください。</p>
-<pre><code>function resolve(opts: Options = {}): ResolvedOptions {
+<pre><code class="language-typescript">function resolve(opts: Options = {}): ResolvedOptions {
 	return {
 		host: opts.host ?? DEFAULTS.host,
 		port: opts.port ?? DEFAULTS.port,
@@ -226,10 +226,10 @@ function resolve(opts: Options = {}): ResolvedOptions {
 </section>
 
 <!-- ============ 4 ============ -->
-<section class="ch04" id="c4">
+<section class="ch04" id="ch04">
 	<h1>A2.4 ブランド型 — 同じ形を区別する</h1>
 
-<pre><code>declare const brand: unique symbol;
+<pre><code class="language-typescript">declare const brand: unique symbol;
 type Brand&lt;T, B extends string&gt; = T &amp; { readonly [brand]: B };
 
 type UserId = Brand&lt;string, "UserId"&gt;;
@@ -238,7 +238,7 @@ type Positive = Brand&lt;number, "Positive"&gt;;</code></pre>
 
 	<h3>生成関数とセットにする</h3>
 
-<pre><code>function toUserId(s: string): UserId {
+<pre><code class="language-typescript">function toUserId(s: string): UserId {
 	if (!s.startsWith("user-")) throw new Error(`UserId の形式が不正です: ${s}`);
 	return s as UserId;
 }
@@ -260,7 +260,7 @@ getUser("user-001");                // エラー TS2345（as を通していな�
 
 	<h3>検証済みを型で表す</h3>
 
-<pre><code>type RawInput = Brand&lt;string, "RawInput"&gt;;
+<pre><code class="language-typescript">type RawInput = Brand&lt;string, "RawInput"&gt;;
 type SafeHtml = Brand&lt;string, "SafeHtml"&gt;;
 
 function escapeHtml(s: RawInput): SafeHtml {
@@ -275,12 +275,12 @@ function render(html: SafeHtml) { /* ... */ }
 </section>
 
 <!-- ============ 5 ============ -->
-<section class="ch05" id="c5">
+<section class="ch05" id="ch05">
 	<h1>A2.5 部分更新と読み取り専用</h1>
 
 	<h3>更新用の型</h3>
 
-<pre><code>type User = { id: string; name: string; age: number };
+<pre><code class="language-typescript">type User = { id: string; name: string; age: number };
 
 // id 以外を省略可能にした更新用の型
 type UserUpdate = Partial&lt;Omit&lt;User, "id"&gt;&gt;;
@@ -292,7 +292,7 @@ update("1", { id: "2" });              // エラー（id は変更できない�
 
 	<h3>再帰的に読み取り専用にする</h3>
 
-<pre><code>type DeepReadonly&lt;T&gt; = {
+<pre><code class="language-typescript">type DeepReadonly&lt;T&gt; = {
 	readonly [K in keyof T]: T[K] extends object ? DeepReadonly&lt;T[K]&gt; : T[K];
 };
 
@@ -307,7 +307,7 @@ c.db.port = 1;
 
 	<h3>少なくとも1つは必須</h3>
 
-<pre><code>type AtLeastOne&lt;T&gt; = {
+<pre><code class="language-typescript">type AtLeastOne&lt;T&gt; = {
 	[K in keyof T]: Required&lt;Pick&lt;T, K&gt;&gt; &amp; Partial&lt;Omit&lt;T, K&gt;&gt;;
 }[keyof T];
 
@@ -317,14 +317,14 @@ const f1: Filter = { name: "Alice" };            // OK
 const f2: Filter = { name: "A", age: 30 };       // OK
 const f3: Filter = {};                           // エラー（何も指定していない）</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>この形は読みにくいので、使う前に検討してください。</strong></p>
 		<p>実行時の検証（「1つ以上指定してください」というエラー）で十分な場面が多くあります。<strong>型で禁止する価値があるか</strong>を判断してから使ってください。</p>
 	</div>
 
 	<h3>キーと値を対応させる</h3>
 
-<pre><code>type EventMap = {
+<pre><code class="language-typescript">type EventMap = {
 	click: { x: number; y: number };
 	key: { code: string };
 	close: undefined;

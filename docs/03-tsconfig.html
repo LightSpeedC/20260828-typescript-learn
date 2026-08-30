@@ -49,15 +49,15 @@
 <div class="toc">
 	<h2>この章の内容</h2>
 	<ol>
-		<li class="ch01"><a href="#c1">tsconfig.json は3つのことを決める</a></li>
-		<li class="ch02"><a href="#c2">strict — 何を防いでいるか</a></li>
-		<li class="ch03"><a href="#c3">target と lib — どの JavaScript を出すか</a></li>
-		<li class="ch04"><a href="#c4">module と moduleResolution — import の解決</a></li>
+		<li class="ch01"><a href="#ch01">tsconfig.json は3つのことを決める</a></li>
+		<li class="ch02"><a href="#ch02">strict — 何を防いでいるか</a></li>
+		<li class="ch03"><a href="#ch03">target と lib — どの JavaScript を出すか</a></li>
+		<li class="ch04"><a href="#ch04">module と moduleResolution — import の解決</a></li>
 	</ol>
 </div>
 
 <!-- ============ 1 ============ -->
-<section class="ch01" id="c1">
+<section class="ch01" id="ch01">
 	<h1>03.1 tsconfig.json は3つのことを決める</h1>
 
 	<h2>設定項目は多いが、決めていることは少ない</h2>
@@ -139,7 +139,7 @@
 
 	<p>Node で動かす前提なら、まずこれで足ります。</p>
 
-<pre><code>{
+<pre><code class="language-json">{
 	"compilerOptions": {
 		"target": "es2022",
 		"module": "nodenext",
@@ -151,7 +151,7 @@
 	"include": ["src/**/*.ts"]
 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>設定を変えてもエラーが変わらないときは、設定が読まれていないことを疑ってください。</strong></p>
 		<p><a class="doclink doc02" href="02-実行環境.html">02. 実行環境</a>で見たとおり、<strong>コマンドラインにファイル名を指定すると <code>tsconfig.json</code> は無視されます。</strong>プロジェクト全体を検査するときは <code>npx tsc</code> だけを実行します。</p>
 	</div>
@@ -175,14 +175,14 @@
 </section>
 
 <!-- ============ 2 ============ -->
-<section class="ch02" id="c2">
+<section class="ch02" id="ch02">
 	<h1>03.2 strict — 何を防いでいるか</h1>
 
 	<h2>TypeScript 7 では既定で有効になった</h2>
 
 	<p><span class="badge b-ts7">TS7</span> <strong>TypeScript 7 は <code>strict</code> が既定で <code>true</code> です。</strong>5 系は既定で <code>false</code> でした。</p>
 
-<pre><code>// strict-test.ts
+<pre><code class="language-typescript">// strict-test.ts
 function greet(name) {
 	return "Hello, " + name.toUpperCase();
 }
@@ -201,7 +201,7 @@ console.log(u.name.length);</code></pre>
 	</table>
 	</div>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>「5 では通っていたコードが 7 でエラーになる」原因の多くがこれです。</strong></p>
 		<p>移行時に大量のエラーが出ても、コードが急に壊れたわけではありません。<strong>今まで見逃されていた問題が表示されるようになっただけ</strong>です。一時的に <code>"strict": false</code> にして段階的に直す手もありますが、<strong>新規プロジェクトでは必ず有効にしてください。</strong></p>
 	</div>
@@ -225,7 +225,7 @@ console.log(u.name.length);</code></pre>
 
 	<h3>実際のエラー</h3>
 
-<pre><code>$ npx tsc --noEmit
+<pre><code class="language-shell">$ npx tsc --noEmit
 strict-test.ts(1,16): error TS7006: Parameter 'name' implicitly has an 'any' type.
 strict-test.ts(5,13): error TS18048: 'u.name' is possibly 'undefined'.
 
@@ -236,7 +236,7 @@ strict-test.ts(5,13): error TS18048: 'u.name' is possibly 'undefined'.
 
 	<p><code>strict: true</code> のまま、特定の項目だけ切ることもできます。<strong>順序が重要で、<code>strict</code> の後に書いた項目が勝ちます。</strong></p>
 
-<pre><code>{
+<pre><code class="language-json">{
 	"compilerOptions": {
 		"strict": true,
 		"strictPropertyInitialization": false   // ← strict の後なのでこちらが有効
@@ -246,14 +246,14 @@ strict-test.ts(5,13): error TS18048: 'u.name' is possibly 'undefined'.
 	<div class="callout">
 		<p><strong>Java・C# から来た人へ</strong></p>
 		<p><code>strictNullChecks</code> が有効な TypeScript の <code>string</code> は、<strong><code>null</code> を代入できません。</strong>Java の <code>String</code> や C# の参照型（null 許容が既定の場合）とは違います。</p>
-<pre><code>let s: string = null;         // エラー TS2322
+<pre><code class="language-typescript">let s: string = null;         // エラー TS2322
 let t: string | null = null;  // これなら通る</code></pre>
 		<p>C# の nullable 参照型（<code>string?</code>）に近い考え方です。<strong>「null かもしれない」ことを型で示さないと、null を入れられません。</strong></p>
 	</div>
 </section>
 
 <!-- ============ 3 ============ -->
-<section class="ch03" id="c3">
+<section class="ch03" id="ch03">
 	<h1>03.3 target と lib — どの JavaScript を出すか</h1>
 
 	<h2>target — 出力する構文のレベル</h2>
@@ -291,14 +291,14 @@ let t: string | null = null;  // これなら通る</code></pre>
 	</table>
 	</div>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong><code>lib</code> は「型があるか」だけを決めます。実行時に動くかは別問題です。</strong></p>
 		<p><code>lib</code> を新しくすれば型エラーは消えますが、<strong>古い実行環境で動く保証にはなりません。</strong>逆に、実行環境が新しくても <code>lib</code> が古ければ型エラーになります。<strong>型と実行時は連動していません</strong>（<a class="doclink doc01" href="01-背景.html">01. 背景</a>）。</p>
 	</div>
 </section>
 
 <!-- ============ 4 ============ -->
-<section class="ch04" id="c4">
+<section class="ch04" id="ch04">
 	<h1>03.4 module と moduleResolution — import の解決</h1>
 
 	<h2>2つは役割が違う</h2>
@@ -319,7 +319,7 @@ let t: string | null = null;  // これなら通る</code></pre>
 
 	<p><span class="badge b-esm">ESM</span><span class="badge b-cjs">CJS</span> Node で動かすなら、両方 <code>nodenext</code> にするのが確実です。<strong><code>package.json</code> の <code>"type"</code> を見て、ESM と CJS を自動で切り替えます。</strong></p>
 
-<pre><code>{
+<pre><code class="language-json">{
 	"compilerOptions": {
 		"module": "nodenext",
 		"moduleResolution": "nodenext"
@@ -343,24 +343,24 @@ let t: string | null = null;  // これなら通る</code></pre>
 
 	<p><code>paths</code> でインポートの別名を作れますが、<strong>これは型検査だけの機能です。</strong></p>
 
-<pre><code>{
+<pre><code class="language-json">{
 	"compilerOptions": {
 		"baseUrl": ".",
 		"paths": { "@/*": ["src/*"] }
 	}
 }</code></pre>
 
-<pre><code>import { greet } from "@/greet";   // tsc は解決できる
+<pre><code class="language-typescript">import { greet } from "@/greet";   // tsc は解決できる
                                    // node は解決できない</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong><code>paths</code> を使うなら、実行側にも同じ設定が要ります。</strong></p>
 		<p><code>tsc</code> が出力する JavaScript には <code>@/greet</code> がそのまま残ります。<strong>Node はこれを解決できません。</strong>バンドラを使うか、<code>package.json</code> の <code>imports</code> フィールドを使うか、そもそも <code>paths</code> を使わないかを選びます。「型は通るのに実行時に落ちる」典型例です。</p>
 	</div>
 
 	<h2>設定が合っているかの確かめ方</h2>
 
-<pre><code>$ npx tsc --showConfig      # 実際に使われる設定を展開して表示する</code></pre>
+<pre><code class="language-shell">$ npx tsc --showConfig      # 実際に使われる設定を展開して表示する</code></pre>
 
 	<p><strong>継承（<code>extends</code>）や既定値を含めた最終的な設定</strong>が出ます。「書いたはずの設定が効かない」ときは、これで実際の値を確認します。</p>
 </section>

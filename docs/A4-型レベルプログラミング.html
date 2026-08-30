@@ -49,15 +49,15 @@
 <div class="toc">
 	<h2>この付録の内容</h2>
 	<ol>
-		<li class="ch01"><a href="#c1">組み込みユーティリティ型</a></li>
-		<li class="ch02"><a href="#c2">Mapped Types — キーを回す</a></li>
-		<li class="ch03"><a href="#c3">Conditional Types と infer</a></li>
-		<li class="ch04"><a href="#c4">テンプレートリテラル型</a></li>
+		<li class="ch01"><a href="#ch01">組み込みユーティリティ型</a></li>
+		<li class="ch02"><a href="#ch02">Mapped Types — キーを回す</a></li>
+		<li class="ch03"><a href="#ch03">Conditional Types と infer</a></li>
+		<li class="ch04"><a href="#ch04">テンプレートリテラル型</a></li>
 	</ol>
 </div>
 
 <!-- ============ 1 ============ -->
-<section class="ch01" id="c1">
+<section class="ch01" id="ch01">
 	<h1>A4.1 組み込みユーティリティ型</h1>
 
 	<p><strong>まずこれだけ覚えれば実務の大半は足ります。</strong></p>
@@ -86,7 +86,7 @@
 
 	<h3>組み合わせて使う</h3>
 
-<pre><code>type User = { id: string; name: string; password: string; age?: number };
+<pre><code class="language-typescript">type User = { id: string; name: string; password: string; age?: number };
 
 // 外部に返す形（password を除く）
 type PublicUser = Omit&lt;User, "password"&gt;;
@@ -98,9 +98,9 @@ type UserPatch = Partial&lt;Omit&lt;User, "id"&gt;&gt;;
 async function loadUser(): Promise&lt;PublicUser&gt; { /* ... */ }
 type Loaded = Awaited&lt;ReturnType&lt;typeof loadUser&gt;&gt;;     // PublicUser</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong><code>Readonly&lt;T&gt;</code> は1段階しか効きません。</strong></p>
-<pre><code>type Config = Readonly&lt;{ db: { host: string } }&gt;;
+<pre><code class="language-typescript">type Config = Readonly&lt;{ db: { host: string } }&gt;;
 const c: Config = { db: { host: "localhost" } };
 
 c.db = { host: "x" };      // エラー（1段階目は守られる）
@@ -110,12 +110,12 @@ c.db.host = "x";           // 通ってしまう（2段階目は守られない�
 </section>
 
 <!-- ============ 2 ============ -->
-<section class="ch02" id="c2">
+<section class="ch02" id="ch02">
 	<h1>A4.2 Mapped Types — キーを回す</h1>
 
 	<h2>基本の形</h2>
 
-<pre><code>type MyReadonly&lt;T&gt; = {
+<pre><code class="language-typescript">type MyReadonly&lt;T&gt; = {
 	readonly [K in keyof T]: T[K];
 };</code></pre>
 
@@ -138,7 +138,7 @@ c.db.host = "x";           // 通ってしまう（2段階目は守られない�
 
 	<h3>標準のユーティリティ型はこれで書かれている</h3>
 
-<pre><code>type Partial&lt;T&gt;  = { [K in keyof T]?: T[K] };
+<pre><code class="language-typescript">type Partial&lt;T&gt;  = { [K in keyof T]?: T[K] };
 type Required&lt;T&gt; = { [K in keyof T]-?: T[K] };      // ? を外す
 type Readonly&lt;T&gt; = { readonly [K in keyof T]: T[K] };
 type Pick&lt;T, K extends keyof T&gt; = { [P in K]: T[P] };
@@ -146,7 +146,7 @@ type Record&lt;K extends keyof any, V&gt; = { [P in K]: V };</code></pre>
 
 	<h3>キー名を変換する</h3>
 
-<pre><code>type Getters&lt;T&gt; = {
+<pre><code class="language-typescript">type Getters&lt;T&gt; = {
 	[K in keyof T as `get${Capitalize&lt;string &amp; K&gt;}`]: () =&gt; T[K];
 };
 
@@ -156,7 +156,7 @@ type UserGetters = Getters&lt;User&gt;;
 
 	<h3>値の型でキーを絞る</h3>
 
-<pre><code>// 関数のプロパティだけを抜き出す
+<pre><code class="language-typescript">// 関数のプロパティだけを抜き出す
 type FunctionKeys&lt;T&gt; = {
 	[K in keyof T]: T[K] extends (...args: never[]) =&gt; unknown ? K : never;
 }[keyof T];
@@ -164,19 +164,19 @@ type FunctionKeys&lt;T&gt; = {
 type Api = { load(): void; name: string; save(): void };
 type Methods = FunctionKeys&lt;Api&gt;;      // "load" | "save"</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-tip">
 		<p><strong><code>{ ... }[keyof T]</code> という形を覚えてください。</strong></p>
 		<p>「各キーに対して型を作り、最後に全部を union にする」という意味です。<code>never</code> は union の中で<strong>消える</strong>ため、条件に合わないキーが除かれます。<strong>この形はライブラリの型定義で頻出します。</strong></p>
 	</div>
 </section>
 
 <!-- ============ 3 ============ -->
-<section class="ch03" id="c3">
+<section class="ch03" id="ch03">
 	<h1>A4.3 Conditional Types と infer</h1>
 
 	<h2>型の if 文</h2>
 
-<pre><code>type IsString&lt;T&gt; = T extends string ? "はい" : "いいえ";
+<pre><code class="language-typescript">type IsString&lt;T&gt; = T extends string ? "はい" : "いいえ";
 
 type A = IsString&lt;"abc"&gt;;      // "はい"
 type B = IsString&lt;123&gt;;        // "いいえ"</code></pre>
@@ -185,7 +185,7 @@ type B = IsString&lt;123&gt;;        // "いいえ"</code></pre>
 
 	<h2>union は分配される</h2>
 
-<pre><code>type ToArray&lt;T&gt; = T extends unknown ? T[] : never;
+<pre><code class="language-typescript">type ToArray&lt;T&gt; = T extends unknown ? T[] : never;
 
 type R = ToArray&lt;string | number&gt;;
 // string[] | number[]   （(string | number)[] ではない）</code></pre>
@@ -193,7 +193,7 @@ type R = ToArray&lt;string | number&gt;;
 	<div class="callout">
 		<p><strong>型引数が裸の union だと、1つずつに分配されます。</strong></p>
 		<p>これが <code>Exclude</code> や <code>NonNullable</code> の仕組みです。</p>
-<pre><code>type Exclude&lt;T, U&gt; = T extends U ? never : T;
+<pre><code class="language-typescript">type Exclude&lt;T, U&gt; = T extends U ? never : T;
 
 type S = Exclude&lt;"a" | "b" | "c", "b"&gt;;
 // "a" | never | "c"  →  never は消えるので "a" | "c"</code></pre>
@@ -202,7 +202,7 @@ type S = Exclude&lt;"a" | "b" | "c", "b"&gt;;
 
 	<h2>infer — 型の一部を取り出す</h2>
 
-<pre><code>type ElementOf&lt;T&gt; = T extends (infer U)[] ? U : never;
+<pre><code class="language-typescript">type ElementOf&lt;T&gt; = T extends (infer U)[] ? U : never;
 
 type E = ElementOf&lt;string[]&gt;;      // string</code></pre>
 
@@ -210,13 +210,13 @@ type E = ElementOf&lt;string[]&gt;;      // string</code></pre>
 
 	<h3>標準の型もこれで書かれている</h3>
 
-<pre><code>type ReturnType&lt;T&gt; = T extends (...args: never[]) =&gt; infer R ? R : never;
+<pre><code class="language-typescript">type ReturnType&lt;T&gt; = T extends (...args: never[]) =&gt; infer R ? R : never;
 type Parameters&lt;T&gt; = T extends (...args: infer P) =&gt; unknown ? P : never;
 type Awaited&lt;T&gt; = T extends Promise&lt;infer U&gt; ? Awaited&lt;U&gt; : T;   // 再帰する</code></pre>
 
 	<h3>実務で書く例</h3>
 
-<pre><code>// 判別可能ユニオンから特定の1つを取り出す
+<pre><code class="language-typescript">// 判別可能ユニオンから特定の1つを取り出す
 type Shape =
 	| { kind: "circle"; radius: number }
 	| { kind: "rect"; width: number; height: number };
@@ -229,26 +229,26 @@ function area(s: ShapeOf&lt;"circle"&gt;): number {
 	return Math.PI * s.radius ** 2;
 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>ここまでが実用の範囲です。</strong></p>
 		<p>これ以上（型レベルでの再帰・文字列の分解・算術）は、<strong>ライブラリを書く人の領域</strong>です。アプリケーションのコードで必要になることはほとんどありません。読めれば十分です。</p>
 	</div>
 </section>
 
 <!-- ============ 4 ============ -->
-<section class="ch04" id="c4">
+<section class="ch04" id="ch04">
 	<h1>A4.4 テンプレートリテラル型</h1>
 
 	<h2>文字列を型として組み立てる</h2>
 
-<pre><code>type Prefixed = `user-${string}`;
+<pre><code class="language-typescript">type Prefixed = `user-${string}`;
 
 const a: Prefixed = "user-001";      // OK
 const b: Prefixed = "order-001";     // エラー TS2322</code></pre>
 
 	<h2>union と組み合わせると展開される</h2>
 
-<pre><code>type Lang = "ja" | "en";
+<pre><code class="language-typescript">type Lang = "ja" | "en";
 type Page = "home" | "about";
 
 type Path = `/${Lang}/${Page}`;
@@ -272,7 +272,7 @@ type Path = `/${Lang}/${Page}`;
 
 	<h2>実務で見かける例</h2>
 
-<pre><code>// イベント名の規約を型で表す
+<pre><code class="language-typescript">// イベント名の規約を型で表す
 type EventName = `on${Capitalize&lt;"click" | "focus"&gt;}`;
 // "onClick" | "onFocus"
 
@@ -283,14 +283,14 @@ type PublicEnvKey = `PUBLIC_${Uppercase&lt;string&gt;}`;
 type Margin = `margin${"" | "Top" | "Right" | "Bottom" | "Left"}`;
 // "margin" | "marginTop" | "marginRight" | "marginBottom" | "marginLeft"</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong>組み合わせの数に注意してください。</strong></p>
 		<p>union どうしを掛け合わせると<strong>組み合わせの数だけ型が生成されます。</strong>10 × 10 × 10 なら 1000 通りです。数が多すぎると <strong>TypeScript が「複雑すぎる」というエラーを出し、エディタも遅くなります。</strong></p>
 	</div>
 
 	<h2>infer と組み合わせて分解する</h2>
 
-<pre><code>type Split&lt;S extends string, D extends string&gt; =
+<pre><code class="language-typescript">type Split&lt;S extends string, D extends string&gt; =
 	S extends `${infer Head}${D}${infer Tail}`
 		? [Head, ...Split&lt;Tail, D&gt;]
 		: [S];

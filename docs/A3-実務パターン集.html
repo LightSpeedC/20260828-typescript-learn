@@ -50,21 +50,21 @@
 <div class="toc">
 	<h2>パターン一覧</h2>
 	<ol>
-		<li class="ch01"><a href="#c1">JSON を読んで検証する</a></li>
-		<li class="ch02"><a href="#c2">環境変数を型付きで読む</a></li>
-		<li class="ch03"><a href="#c3">API クライアント</a></li>
-		<li class="ch04"><a href="#c4">CLI 引数を解析する</a></li>
-		<li class="ch05"><a href="#c5">ファイル操作とエラー処理</a></li>
+		<li class="ch01"><a href="#ch01">JSON を読んで検証する</a></li>
+		<li class="ch02"><a href="#ch02">環境変数を型付きで読む</a></li>
+		<li class="ch03"><a href="#ch03">API クライアント</a></li>
+		<li class="ch04"><a href="#ch04">CLI 引数を解析する</a></li>
+		<li class="ch05"><a href="#ch05">ファイル操作とエラー処理</a></li>
 	</ol>
 </div>
 
 <!-- ============ 1 ============ -->
-<section class="ch01" id="c1">
+<section class="ch01" id="ch01">
 	<h1>A3.1 JSON を読んで検証する</h1>
 
 	<p><strong>外部から来るデータは、型を書いただけでは守られません。</strong>受け口で検証します。</p>
 
-<pre><code>// load-json.ts
+<pre><code class="language-typescript">// load-json.ts
 import { readFileSync } from "node:fs";
 
 type Result&lt;T, E = Error&gt; = { ok: true; value: T } | { ok: false; error: E };
@@ -189,7 +189,7 @@ export function loadSales(path: string): Result&lt;Sale[]&gt; {
 
 	<p>プロパティが増えると手書きは維持できません。<strong>実務では zod などを使います。</strong></p>
 
-<pre><code>import { z } from "zod";
+<pre><code class="language-typescript">import { z } from "zod";
 
 const SaleSchema = z.object({
 	date: z.string(),
@@ -208,12 +208,12 @@ if (!result.success) {
 </section>
 
 <!-- ============ 2 ============ -->
-<section class="ch02" id="c2">
+<section class="ch02" id="ch02">
 	<h1>A3.2 環境変数を型付きで読む</h1>
 
 	<p><code>process.env.X</code> の型は <code>string | undefined</code> です。<strong>起動時にまとめて検証</strong>し、以降は型の付いた値だけを使います。</p>
 
-<pre><code>// env.ts
+<pre><code class="language-typescript">// env.ts
 function required(name: string): string {
 	const v = process.env[name];
 	if (v === undefined || v === "") {
@@ -243,7 +243,7 @@ export const ENV = {
 	// databaseUrl: required("DATABASE_URL"),
 } as const;</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong>アプリの奥で <code>process.env</code> を直接読まないでください。</strong></p>
 		<p>読む場所が散らばると、<strong>どの環境変数が必要なのか分からなくなります。</strong>この <code>env.ts</code> を1か所に置き、<strong>起動時に落とす</strong>ようにすると、設定漏れが実行直後に分かります。</p>
 		<p><code>process.env.PORT!</code> のように <code>!</code> で黙らせるのは<strong>最悪の対処</strong>です（<a class="doclink doc06" href="06-any-unknown-アサーション.html">06.4</a>）。未設定なら <code>undefined</code> のまま先に進み、原因の分からないエラーになります。</p>
@@ -251,12 +251,12 @@ export const ENV = {
 </section>
 
 <!-- ============ 3 ============ -->
-<section class="ch03" id="c3">
+<section class="ch03" id="ch03">
 	<h1>A3.3 API クライアント</h1>
 
 	<p><code>fetch</code> の戻り値も検証が要ります。<strong><code>response.json()</code> は <code>any</code> を返します。</strong></p>
 
-<pre><code>// api.ts
+<pre><code class="language-typescript">// api.ts
 type Result&lt;T, E = Error&gt; = { ok: true; value: T } | { ok: false; error: E };
 
 type ApiError =
@@ -288,7 +288,7 @@ export async function getJson&lt;T&gt;(
 
 	<h3>使う側</h3>
 
-<pre><code>type User = { id: string; name: string };
+<pre><code class="language-typescript">type User = { id: string; name: string };
 
 function isUser(v: unknown): v is User {
 	if (typeof v !== "object" || v === null) return false;
@@ -307,16 +307,16 @@ if (r.ok) {
 	}
 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong>型引数 <code>&lt;T&gt;</code> だけを渡す設計にしないでください。</strong></p>
-<pre><code>// 危険 — 検証していないのに型が付く
+<pre><code class="language-typescript">// 危険 — 検証していないのに型が付く
 const user = await getJson&lt;User&gt;(url);</code></pre>
 		<p>これは <code>as User</code> と同じです（<a class="doclink doc09" href="09-ジェネリクス.html">09.3</a>）。<strong>検証関数を引数で受け取る</strong>形にすると、型と検証がセットになります。</p>
 	</div>
 
 	<h3>タイムアウトを付ける</h3>
 
-<pre><code>const controller = new AbortController();
+<pre><code class="language-typescript">const controller = new AbortController();
 const timer = setTimeout(() =&gt; controller.abort(), 5000);
 try {
 	const res = await fetch(url, { signal: controller.signal });
@@ -327,12 +327,12 @@ try {
 </section>
 
 <!-- ============ 4 ============ -->
-<section class="ch04" id="c4">
+<section class="ch04" id="ch04">
 	<h1>A3.4 CLI 引数を解析する</h1>
 
 	<p>Node には <code>parseArgs</code> が標準で入っています。<strong>ライブラリを足す必要はありません。</strong></p>
 
-<pre><code>// cli.ts
+<pre><code class="language-typescript">// cli.ts
 import { parseArgs } from "node:util";
 
 const { values, positionals } = parseArgs({
@@ -358,22 +358,22 @@ if (!Number.isInteger(count) || count &lt; 1) {
 
 console.log({ input: values.input, verbose: values.verbose, count, positionals });</code></pre>
 
-<pre><code>$ npx tsx cli.ts --input data.json -v --count 3 extra
+<pre><code class="language-shell">$ npx tsx cli.ts --input data.json -v --count 3 extra
 { input: 'data.json', verbose: true, count: 3, positionals: [ 'extra' ] }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong><code>parseArgs</code> は数値型を扱えません。</strong></p>
 		<p><code>type</code> に指定できるのは <code>"string"</code> と <code>"boolean"</code> だけです。<strong>数値は文字列で受けて、自分で変換・検証します。</strong>ここで検証しておくと、以降のコードは数値として扱えます。</p>
 	</div>
 </section>
 
 <!-- ============ 5 ============ -->
-<section class="ch05" id="c5">
+<section class="ch05" id="ch05">
 	<h1>A3.5 ファイル操作とエラー処理</h1>
 
 	<h3>存在確認は「読んでみる」</h3>
 
-<pre><code>import { readFile } from "node:fs/promises";
+<pre><code class="language-typescript">import { readFile } from "node:fs/promises";
 
 // 悪い例 — 確認と読み込みの間に状態が変わりうる
 // if (existsSync(path)) { const text = await readFile(path, "utf8"); }
@@ -393,7 +393,7 @@ function isNotFound(e: unknown): boolean {
 		(e as { code?: unknown }).code === "ENOENT";
 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>Node のエラーは <code>code</code> プロパティを持ちます。</strong></p>
 		<p><code>Error</code> の型定義には <code>code</code> がないため、<strong>そのままでは読めません。</strong>上のように型ガードを書くか、<code>NodeJS.ErrnoException</code> を使います。<strong>「エラーの種類で分岐する」ときは <code>code</code> を見ます</strong>（メッセージ文字列で判定しない）。</p>
 	</div>
@@ -416,7 +416,7 @@ function isNotFound(e: unknown): boolean {
 
 	<h3>書き込みは一時ファイル経由</h3>
 
-<pre><code>import { writeFile, rename } from "node:fs/promises";
+<pre><code class="language-typescript">import { writeFile, rename } from "node:fs/promises";
 
 // 書き込み中に落ちても、元のファイルが壊れない
 async function writeAtomic(path: string, text: string): Promise&lt;void&gt; {
@@ -427,14 +427,14 @@ async function writeAtomic(path: string, text: string): Promise&lt;void&gt; {
 
 	<h3>エラーの原因を保つ</h3>
 
-<pre><code>try {
+<pre><code class="language-typescript">try {
 	await readFile(path, "utf8");
 } catch (e) {
 	// cause を渡すと、元のエラーが失われない
 	throw new Error(`設定ファイルを読めません: ${path}`, { cause: e });
 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong><code>{ cause: e }</code> は必ず付けてください。</strong></p>
 		<p>付けないと<strong>元のエラーの情報（<code>code</code>・スタックトレース）が失われます。</strong>「設定ファイルを読めません」とだけ言われても、権限の問題なのか存在しないのか分かりません。</p>
 	</div>

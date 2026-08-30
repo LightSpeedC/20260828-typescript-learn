@@ -49,20 +49,20 @@
 <div class="toc">
 	<h2>この章の内容</h2>
 	<ol>
-		<li class="ch01"><a href="#c1">引数と戻り値</a></li>
-		<li class="ch02"><a href="#c2">省略可能引数とデフォルト値</a></li>
-		<li class="ch03"><a href="#c3">オーバーロード</a></li>
-		<li class="ch04"><a href="#c4">コールバックの型</a></li>
+		<li class="ch01"><a href="#ch01">引数と戻り値</a></li>
+		<li class="ch02"><a href="#ch02">省略可能引数とデフォルト値</a></li>
+		<li class="ch03"><a href="#ch03">オーバーロード</a></li>
+		<li class="ch04"><a href="#ch04">コールバックの型</a></li>
 	</ol>
 </div>
 
 <!-- ============ 1 ============ -->
-<section class="ch01" id="c1">
+<section class="ch01" id="ch01">
 	<h1>07.1 引数と戻り値</h1>
 
 	<h2>書き方</h2>
 
-<pre><code>// 関数宣言
+<pre><code class="language-typescript">// 関数宣言
 function add(a: number, b: number): number {
 	return a + b;
 }
@@ -97,7 +97,7 @@ const mul: BinaryOp = (a, b) =&gt; a * b;      // 引数の型は推論される
 	</table>
 	</div>
 
-<pre><code>// 書いておくと、実装ミスがこの関数の中で捕まる
+<pre><code class="language-typescript">// 書いておくと、実装ミスがこの関数の中で捕まる
 function findName(id: string): string {
 	const users: Record&lt;string, string&gt; = { "1": "Alice" };
 	return users[id];
@@ -111,7 +111,7 @@ function findName(id: string): string {
 
 	<h2>void と undefined</h2>
 
-<pre><code>function log(msg: string): void {
+<pre><code class="language-typescript">function log(msg: string): void {
 	console.log(msg);
 }</code></pre>
 
@@ -128,7 +128,7 @@ function findName(id: string): string {
 	</table>
 	</div>
 
-<pre><code>function fail(message: string): never {
+<pre><code class="language-typescript">function fail(message: string): never {
 	throw new Error(message);
 }</code></pre>
 
@@ -136,12 +136,12 @@ function findName(id: string): string {
 </section>
 
 <!-- ============ 2 ============ -->
-<section class="ch02" id="c2">
+<section class="ch02" id="ch02">
 	<h1>07.2 省略可能引数とデフォルト値</h1>
 
 	<h2>3つの書き方</h2>
 
-<pre><code>// ① 省略可能（undefined になりうる）
+<pre><code class="language-typescript">// ① 省略可能（undefined になりうる）
 function greet1(name: string, title?: string) {
 	return title ? `${title} ${name}` : name;
 }
@@ -156,17 +156,17 @@ function join(sep: string, ...parts: string[]) {
 	return parts.join(sep);
 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>省略可能引数は末尾にしか置けません。</strong></p>
 		<p><code>function f(a?: string, b: number)</code> はエラーです。JavaScript の引数は位置で決まるため、<strong>途中を飛ばして渡せない</strong>ためです。引数が増えてきたら<strong>オブジェクトで受け取る</strong>形に変えてください。</p>
-<pre><code>function createUser(opts: { name: string; age?: number; email?: string }) { /* ... */ }
+<pre><code class="language-typescript">function createUser(opts: { name: string; age?: number; email?: string }) { /* ... */ }
 
 createUser({ name: "Alice", email: "a@example.com" });   // 順序に縛られない</code></pre>
 	</div>
 
 	<h2>デフォルト値があると型が変わる</h2>
 
-<pre><code>function f(title = "様") {
+<pre><code class="language-typescript">function f(title = "様") {
 	// title の型は string（string | undefined ではない）
 	return title.length;
 }
@@ -176,7 +176,7 @@ f(undefined);     // OK — undefined を渡すと既定値が使われる</code
 
 	<h2>動かしてみる</h2>
 
-<pre><code>// args.ts
+<pre><code class="language-typescript">// args.ts
 function greet(name: string, title = "様"): string {
 	return `${title} ${name}`;
 }
@@ -189,21 +189,21 @@ console.log(greet("田中"));
 console.log(greet("Alice", "Ms."));
 console.log(join(" / ", "a", "b", "c"));</code></pre>
 
-<pre><code>$ npx tsx args.ts
+<pre><code class="language-shell">$ npx tsx args.ts
 様 田中
 Ms. Alice
 a / b / c</code></pre>
 </section>
 
 <!-- ============ 3 ============ -->
-<section class="ch03" id="c3">
+<section class="ch03" id="ch03">
 	<h1>07.3 オーバーロード</h1>
 
 	<h2>実装は1つだけ</h2>
 
 	<p>TypeScript のオーバーロードは<strong>「シグネチャを複数書き、実装は1つ」</strong>という形です。</p>
 
-<pre><code>// シグネチャ（呼び出し側から見える形）
+<pre><code class="language-typescript">// シグネチャ（呼び出し側から見える形）
 function parse(input: string): string[];
 function parse(input: number): number[];
 
@@ -228,7 +228,7 @@ const b = parse(5);        // number[]</code></pre>
 
 	<p>オーバーロードは<strong>引数と戻り値の組み合わせが連動するとき</strong>にだけ必要です。</p>
 
-<pre><code>// オーバーロードは不要 — union で書ける
+<pre><code class="language-typescript">// オーバーロードは不要 — union で書ける
 function double(x: number | string): string {
 	return typeof x === "number" ? String(x * 2) : x + x;
 }</code></pre>
@@ -248,14 +248,14 @@ function double(x: number | string): string {
 </section>
 
 <!-- ============ 4 ============ -->
-<section class="ch04" id="c4">
+<section class="ch04" id="ch04">
 	<h1>07.4 コールバックの型</h1>
 
 	<h2>引数は少なくてよい</h2>
 
 	<p><a class="doclink doc05" href="05-構造的型付け.html">05. 構造的型付け</a>で触れたとおり、<strong>要求より引数が少ない関数は渡せます。</strong></p>
 
-<pre><code>const nums = [1, 2, 3];
+<pre><code class="language-typescript">const nums = [1, 2, 3];
 
 nums.map((x) =&gt; x * 2);              // OK
 nums.map((x, i) =&gt; x * i);           // OK — 2つ目も受け取れる
@@ -318,15 +318,15 @@ nums.map((x, i, arr) =&gt; arr.length); // OK — 3つ目まである</code></pr
 
 	<h2>コールバックの戻り値が void のとき</h2>
 
-<pre><code>type Handler = (x: number) =&gt; void;
+<pre><code class="language-typescript">type Handler = (x: number) =&gt; void;
 
 const h: Handler = (x) =&gt; x * 2;     // OK。数値を返しているが通る</code></pre>
 
 	<p><code>void</code> は<strong>「戻り値を使わない」</strong>という意味なので、何を返しても構いません。<strong>ただし呼び出し側は戻り値を使えません。</strong></p>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong>この性質が事故になることがあります。</strong></p>
-<pre><code>const ids: string[] = [];
+<pre><code class="language-typescript">const ids: string[] = [];
 const users = [{ id: "1" }, { id: "2" }];
 
 // forEach のコールバックは void を返す想定
@@ -336,7 +336,7 @@ users.forEach((u) =&gt; ids.push(u.id));   // push は number を返すが、無
 
 	<h2>関数を引数に取る関数を書く</h2>
 
-<pre><code>// callback.ts
+<pre><code class="language-typescript">// callback.ts
 type Mapper&lt;T, U&gt; = (item: T, index: number) =&gt; U;
 
 function mapAll&lt;T, U&gt;(items: T[], fn: Mapper&lt;T, U&gt;): U[] {
@@ -350,7 +350,7 @@ function mapAll&lt;T, U&gt;(items: T[], fn: Mapper&lt;T, U&gt;): U[] {
 console.log(mapAll([1, 2, 3], (n) =&gt; n * 10));
 console.log(mapAll(["a", "b"], (s, i) =&gt; `${i}:${s}`));</code></pre>
 
-<pre><code>$ npx tsx callback.ts
+<pre><code class="language-shell">$ npx tsx callback.ts
 [ 10, 20, 30 ]
 [ '0:a', '1:b' ]</code></pre>
 
@@ -360,7 +360,7 @@ console.log(mapAll(["a", "b"], (s, i) =&gt; `${i}:${s}`));</code></pre>
 
 	<p>コールバック内の <code>this</code> が問題になる場合、<strong>第1引数として <code>this</code> の型を宣言できます。</strong></p>
 
-<pre><code>function handler(this: HTMLElement, event: Event) {
+<pre><code class="language-typescript">function handler(this: HTMLElement, event: Event) {
 	console.log(this.tagName);      // this の型が分かる
 }</code></pre>
 

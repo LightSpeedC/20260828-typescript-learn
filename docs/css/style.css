@@ -175,6 +175,16 @@ tr:nth-child(even) td { background: #fafbfe; }
 
 .callout strong { color: var(--accent, #12224d); }
 
+/* 種別つきの callout。左ボーダーと見出しの色で区別する */
+.callout-tip       { border-left-color: #1d7a3c; }
+.callout-tip strong { color: #1d7a3c; }
+.callout-important { border-left-color: #1e3a8a; }
+.callout-important strong { color: #1e3a8a; }
+.callout-warning   { border-left-color: #b8620a; }
+.callout-warning strong { color: #b8620a; }
+.callout-caution   { border-left-color: #a51f22; }
+.callout-caution strong { color: #a51f22; }
+
 /* ---- バッジ ---- */
 
 .badge {

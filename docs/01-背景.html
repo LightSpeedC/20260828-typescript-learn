@@ -49,22 +49,22 @@
 <div class="toc">
 	<h2>この章の内容</h2>
 	<ol>
-		<li class="ch01"><a href="#c1">JavaScript の何が問題だったか</a></li>
-		<li class="ch02"><a href="#c2">TypeScript は「検査して、型を消す」だけ</a></li>
-		<li class="ch03"><a href="#c3">Java・C# のコンパイルとの違い</a></li>
-		<li class="ch04"><a href="#c4">型を付ける他の選択肢</a></li>
+		<li class="ch01"><a href="#ch01">JavaScript の何が問題だったか</a></li>
+		<li class="ch02"><a href="#ch02">TypeScript は「検査して、型を消す」だけ</a></li>
+		<li class="ch03"><a href="#ch03">Java・C# のコンパイルとの違い</a></li>
+		<li class="ch04"><a href="#ch04">型を付ける他の選択肢</a></li>
 	</ol>
 </div>
 
 <!-- ============ 1 ============ -->
-<section class="ch01" id="c1">
+<section class="ch01" id="ch01">
 	<h1>01.1 JavaScript の何が問題だったか</h1>
 
 	<h2>実行するまで壊れていることが分からない</h2>
 
 	<p>JavaScript には、書いた時点で間違いを教えてくれる仕組みがありません。次のコードは<strong>エラーを出さずに動きます</strong>。</p>
 
-<pre><code>// JavaScript
+<pre><code class="language-typescript">// JavaScript
 function greet(user) {
 	return `Hello, ${user.name}`;
 }
@@ -75,7 +75,7 @@ console.log(greet({ namae: "Alice" }));   // "Hello, undefined"</code></pre>
 
 	<p>同じコードに型を付けると、実行する前に止まります。</p>
 
-<pre><code>// TypeScript
+<pre><code class="language-typescript">// TypeScript
 type User = { name: string };
 
 function greet(user: User) {
@@ -123,7 +123,7 @@ console.log(greet({ namae: "Alice" }));
 </section>
 
 <!-- ============ 2 ============ -->
-<section class="ch02" id="c2">
+<section class="ch02" id="ch02">
 	<h1>01.2 TypeScript は「検査して、型を消す」だけ</h1>
 
 	<h2>tsc がやっていること</h2>
@@ -186,7 +186,7 @@ console.log(greet({ namae: "Alice" }));
 
 	<p>次の <code>.ts</code> をコンパイルすると、</p>
 
-<pre><code>// greet.ts
+<pre><code class="language-typescript">// greet.ts
 type User = { name: string; age: number };
 
 export function greet(user: User): string {
@@ -195,14 +195,14 @@ export function greet(user: User): string {
 
 	<p>出力される <code>.js</code> はこれだけです。</p>
 
-<pre><code>// greet.js — 型に関する記述がすべて消えている
+<pre><code class="language-typescript">// greet.js — 型に関する記述がすべて消えている
 export function greet(user) {
 	return `Hello, ${user.name}`;
 }</code></pre>
 
 	<p><code>type User</code> の定義も、引数の <code>: User</code> も、戻り値の <code>: string</code> も残りません。<strong>型は開発中にだけ存在する情報</strong>です。</p>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>この一点が、以降のすべての章に効いてきます。</strong></p>
 		<p>型が実行時に消えるため、<strong>外から入ってくる値（JSON・環境変数・API のレスポンス）が型どおりである保証はどこにもありません。</strong>型を書いても、実行時の検証は別途必要です。この扱いは <a class="doclink doc11" href="11-非同期とエラー処理.html">11. 非同期とエラー処理</a> と <a class="doclink doc15" href="A3-実務パターン集.html">A3. 実務パターン集</a> で具体的に扱います。</p>
 	</div>
@@ -211,7 +211,7 @@ export function greet(user) {
 
 	<p>意外に思われる点ですが、<strong><code>tsc</code> は型エラーを報告しても JavaScript の出力は行います</strong>（既定の設定の場合）。型検査と出力は独立した処理だからです。</p>
 
-<pre><code>$ npx tsc greet.ts
+<pre><code class="language-shell">$ npx tsc greet.ts
 greet.ts:7:21 - error TS2353: Object literal may only specify known properties,
                               and 'namae' does not exist in type 'User'.
 
@@ -229,23 +229,23 @@ greet.js  greet.ts     ← エラーがあっても .js は出力されている
 
 	<p><code>tsx</code> を使うと、コンパイルの手順を意識せずに <code>.ts</code> をそのまま実行できます。</p>
 
-<pre><code>// hello.ts
+<pre><code class="language-typescript">// hello.ts
 const name: string = "TypeScript";
 console.log(`Hello, ${name}!`);</code></pre>
 
-<pre><code>$ npx tsx hello.ts
+<pre><code class="language-shell">$ npx tsx hello.ts
 Hello, TypeScript!</code></pre>
 
 	<p><span class="badge b-strip">Node型ストリップ</span> 新しい Node であれば、<code>tsx</code> を使わずそのまま実行することもできます。Node が型注釈を取り除いてから実行するためです。</p>
 
-<pre><code>$ node hello.ts
+<pre><code class="language-shell">$ node hello.ts
 Hello, TypeScript!</code></pre>
 
 	<p>どちらの方法にも制約と使い分けがあります。詳細は <a class="doclink doc02" href="02-実行環境.html">02. 実行環境</a> で扱います。</p>
 </section>
 
 <!-- ============ 3 ============ -->
-<section class="ch03" id="c3">
+<section class="ch03" id="ch03">
 	<h1>01.3 Java・C# のコンパイルとの違い</h1>
 
 	<h2>「コンパイル」という同じ言葉が指すものが違う</h2>
@@ -270,7 +270,7 @@ Hello, TypeScript!</code></pre>
 	<div class="callout">
 		<p><strong>Java・C# から来た人へ</strong></p>
 		<p>Java の <code>instanceof</code> や C# の <code>is</code> にあたる判定を、<strong>TypeScript の <code>interface</code> に対しては書けません。</strong><code>interface</code> は実行時に存在しないためです。</p>
-<pre><code>interface User { name: string }
+<pre><code class="language-typescript">interface User { name: string }
 
 // 書けない — User は実行時に存在しない
 // if (x instanceof User) { ... }
@@ -294,7 +294,7 @@ Hello, TypeScript!</code></pre>
 </section>
 
 <!-- ============ 4 ============ -->
-<section class="ch04" id="c4">
+<section class="ch04" id="ch04">
 	<h1>01.4 型を付ける他の選択肢</h1>
 
 	<h2>JavaScript に型を付ける方法は1つではない</h2>
@@ -358,7 +358,7 @@ Hello, TypeScript!</code></pre>
 
 	<p><code>.js</code> のままコメントで型を書き、<code>tsc</code> に検査だけさせる方法です。<strong>ビルドの手順が増えない</strong>のが利点です。</p>
 
-<pre><code>// greet.js — 拡張子は .js のまま
+<pre><code class="language-typescript">// greet.js — 拡張子は .js のまま
 /**
  * @param {{ name: string }} user
  * @returns {string}

@@ -240,7 +240,7 @@
 
 	<p><code>tsc</code> のエラーは<strong>既定で英語</strong>です。実際に出力される英語をそのまま載せ、日本語訳を添えます。</p>
 
-<pre><code>// error TS2353: Object literal may only specify known properties,
+<pre><code class="language-typescript">// error TS2353: Object literal may only specify known properties,
 //               and 'namae' does not exist in type 'User'.
 //
 // 訳: オブジェクト リテラルは既知のプロパティのみ指定できます。
@@ -736,7 +736,7 @@
 
 	<h2>ディレクトリ構成</h2>
 
-<pre><code>typescript-learn/
+<pre><code class="language-typescript">typescript-learn/
 ├─ index.html              README.html へのリダイレクト
 ├─ README.html             原本（目次・約束事・逆引き入口）
 ├─ README.md               生成物
@@ -781,7 +781,7 @@
 	</table>
 	</div>
 
-<pre><code># 検証用プロジェクトの作り方
+<pre><code class="language-typescript"># 検証用プロジェクトの作り方
 cd tmp
 npm init -y
 npm i -D typescript tsx
@@ -790,13 +790,13 @@ npx tsc --version          # バージョンを実測する
 npx tsc --noEmit ファイル名.ts   # 型エラーの実物を得る
 npx tsx ファイル名.ts            # 実行結果の実物を得る</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>バージョンは必ず実測します。</strong></p>
 		<p>この構成案を書いた時点では TypeScript 5.x 系を想定していましたが、<strong>実際の環境は 7.0.2 でした。</strong>想定と実機は食い違います。<strong>動作確認環境は README に明記</strong>し、実測した値を書きます。</p>
 		<p>本資料は <strong>TypeScript 7.0.2 と 5.9.3 の両方で検証</strong>しました。エラーメッセージ・<code>--pretty</code> の表示形式・出力される JavaScript のいずれにも差はありません。実行環境は <strong>Node.js 26 系</strong>を対象とします。</p>
 	</div>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong>検証で出たエラーが、書いたコードのものとは限りません。</strong></p>
 		<p>検証中、<strong>プロジェクトの親ディレクトリにある <code>node_modules\@types\node</code> を <code>tsc</code> が拾い</strong>、無関係な型定義エラーが6件出ました。TypeScript のバージョン差だと誤認しかけましたが、原因は環境でした。<strong>自分のファイル名が行頭にないエラーは、まず環境を疑います。</strong></p>
 	</div>
@@ -835,12 +835,12 @@ npx tsx ファイル名.ts            # 実行結果の実物を得る</code></p
 	</table>
 	</div>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong>この2つは CSS と SVG の中にあるため、本文を読み返しても見つかりません。</strong></p>
 		<p>目次の資料番号を直し忘れると、02 の目次が <code>01.1</code>〜と表示されます。<strong>本文の見出しは <code>02.1</code> なので、目次と本文で番号が食い違います。</strong>SVG の id は、重複しても片方の図が正しく表示されることがあり、崩れて初めて気づきます。<strong>機械的に確認します。</strong></p>
 	</div>
 
-<pre><code># 目次の資料番号がファイル名の番号と一致しているか
+<pre><code class="language-typescript"># 目次の資料番号がファイル名の番号と一致しているか
 Select-String -Path docs\*.html -Pattern 'content: "([0-9A]\w)\." counter'
 
 # SVG の defs id に、そのファイルの番号が入っているか

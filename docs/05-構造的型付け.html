@@ -49,22 +49,22 @@
 <div class="toc">
 	<h2>この章の内容</h2>
 	<ol>
-		<li class="ch01"><a href="#c1">形が同じなら同じ型として通る</a></li>
-		<li class="ch02"><a href="#c2">余剰プロパティチェック</a></li>
-		<li class="ch03"><a href="#c3">クラスも形で判定される</a></li>
-		<li class="ch04"><a href="#c4">意図的に区別する — ブランド型</a></li>
+		<li class="ch01"><a href="#ch01">形が同じなら同じ型として通る</a></li>
+		<li class="ch02"><a href="#ch02">余剰プロパティチェック</a></li>
+		<li class="ch03"><a href="#ch03">クラスも形で判定される</a></li>
+		<li class="ch04"><a href="#ch04">意図的に区別する — ブランド型</a></li>
 	</ol>
 </div>
 
 <!-- ============ 1 ============ -->
-<section class="ch01" id="c1">
+<section class="ch01" id="ch01">
 	<h1>05.1 形が同じなら同じ型として通る</h1>
 
 	<h2>名前は見ていない</h2>
 
 	<p>TypeScript は<strong>型の名前を見ません。</strong>持っているプロパティの形だけを見ます。</p>
 
-<pre><code>type User = { name: string };
+<pre><code class="language-typescript">type User = { name: string };
 type Animal = { name: string };
 
 const a: User = { name: "Alice" };
@@ -142,7 +142,7 @@ const b: Animal = a;              // 通る。形が同じだから</code></pre>
 
 	<p>判定の基準は<strong>「受け取る側が要求するものを、渡す側が持っているか」</strong>です。余分に持っていても通ります。</p>
 
-<pre><code>type Named = { name: string };
+<pre><code class="language-typescript">type Named = { name: string };
 
 const user = { name: "Alice", age: 30, email: "a@example.com" };
 const n: Named = user;            // 通る。name を持っているから</code></pre>
@@ -155,7 +155,7 @@ const n: Named = user;            // 通る。name を持っているから</cod
 
 	<h2>関数も形で判定される</h2>
 
-<pre><code>type Handler = (x: number) => void;
+<pre><code class="language-typescript">type Handler = (x: number) => void;
 
 const f: Handler = (x) => console.log(x);          // OK
 const g: Handler = () => console.log("hi");        // OK — 引数を使わなくてよい
@@ -165,14 +165,14 @@ const h: Handler = (x: number, y: number) => {};   // エラー — 引数が多
 </section>
 
 <!-- ============ 2 ============ -->
-<section class="ch02" id="c2">
+<section class="ch02" id="ch02">
 	<h1>05.2 余剰プロパティチェック</h1>
 
 	<h2>直接書いたときだけ厳しくなる</h2>
 
 	<p>前の節で「余分に持っていても通る」と書きましたが、<strong>例外があります。</strong></p>
 
-<pre><code>type User = { name: string };
+<pre><code class="language-typescript">type User = { name: string };
 
 // ① 変数を経由する → 通る
 const obj = { name: "Alice", age: 30 };
@@ -262,7 +262,7 @@ const b: User = { name: "Alice", age: 30 };
 
 	<h2>意図的に余分な値を渡したいとき</h2>
 
-<pre><code>type User = { name: string };
+<pre><code class="language-typescript">type User = { name: string };
 
 // ① 変数に入れてから渡す（最も素直）
 const payload = { name: "Alice", age: 30 };
@@ -278,12 +278,12 @@ type Loose = { name: string; [key: string]: unknown };</code></pre>
 </section>
 
 <!-- ============ 3 ============ -->
-<section class="ch03" id="c3">
+<section class="ch03" id="ch03">
 	<h1>05.3 クラスも形で判定される</h1>
 
 	<h2>implements を書かなくても互換</h2>
 
-<pre><code>interface Logger {
+<pre><code class="language-typescript">interface Logger {
 	log(message: string): void;
 }
 
@@ -300,7 +300,7 @@ const l: Logger = new ConsoleLogger();     // 通る</code></pre>
 		<p><strong>Java・C# から来た人へ</strong></p>
 		<p>Java なら <code>class ConsoleLogger implements Logger</code> と書かなければコンパイルが通りません。TypeScript では<strong>書かなくても通ります。</strong></p>
 		<p>ただし <code>implements</code> を書く意味はあります。<strong>書いておくと、クラス側の実装が要件を満たさなくなったときに、クラスの定義位置でエラーになります。</strong>書かない場合、エラーが出るのは「代入しようとした場所」で、原因から離れた位置になります。</p>
-<pre><code>class ConsoleLogger implements Logger {   // 書いておくと、ここで守られる
+<pre><code class="language-typescript">class ConsoleLogger implements Logger {   // 書いておくと、ここで守られる
 	log(message: string) { console.log(message); }
 }</code></pre>
 	</div>
@@ -309,7 +309,7 @@ const l: Logger = new ConsoleLogger();     // 通る</code></pre>
 
 	<p>クラスに <code>private</code> なメンバーがあると、<strong>同じ形でも互換になりません。</strong></p>
 
-<pre><code>class A { private secret = 1; }
+<pre><code class="language-typescript">class A { private secret = 1; }
 class B { private secret = 1; }
 
 let a: A = new A();
@@ -326,14 +326,14 @@ a = b;
 </section>
 
 <!-- ============ 4 ============ -->
-<section class="ch04" id="c4">
+<section class="ch04" id="ch04">
 	<h1>05.4 意図的に区別する — ブランド型</h1>
 
 	<h2>形が同じだと混ざる</h2>
 
 	<p>構造的型付けの弱点は、<strong>意味が違うのに形が同じ値を取り違えられる</strong>ことです。</p>
 
-<pre><code>type UserId = string;
+<pre><code class="language-typescript">type UserId = string;
 type OrderId = string;
 
 function getUser(id: UserId) { /* ... */ }
@@ -345,7 +345,7 @@ getUser(orderId);            // 通ってしまう。どちらも string だか�
 
 	<p><strong>実体のないプロパティを足して、形を意図的にずらします。</strong></p>
 
-<pre><code>type UserId = string &amp; { readonly __brand: "UserId" };
+<pre><code class="language-typescript">type UserId = string &amp; { readonly __brand: "UserId" };
 type OrderId = string &amp; { readonly __brand: "OrderId" };
 
 function getUser(id: UserId) { /* ... */ }
@@ -366,7 +366,7 @@ getUser(orderId);
 
 	<p><code>as</code> を書く場所を1か所に閉じ込めると、検証も一緒に行えます。</p>
 
-<pre><code>// branded.ts
+<pre><code class="language-typescript">// branded.ts
 type UserId = string &amp; { readonly __brand: "UserId" };
 
 function toUserId(s: string): UserId {
@@ -385,13 +385,13 @@ try {
 	console.log((e as Error).message);
 }</code></pre>
 
-<pre><code>$ npx tsx branded.ts
+<pre><code class="language-shell">$ npx tsx branded.ts
 user-001
 UserId の形式が不正です: order-123</code></pre>
 
 	<p>この形は <a class="doclink doc14" href="A2-型レシピ集.html">A2. 型レシピ集</a> にも収めています。</p>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>使いどころを絞ってください。</strong></p>
 		<p>すべての <code>string</code> をブランド型にすると、変換だらけで読みにくくなります。<strong>取り違えると実害が出るもの</strong>（ID の種類、検証済み／未検証の文字列、単位の違う数値）に限って使います。</p>
 	</div>

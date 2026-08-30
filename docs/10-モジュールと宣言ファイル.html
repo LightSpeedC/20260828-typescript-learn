@@ -49,20 +49,20 @@
 <div class="toc">
 	<h2>この章の内容</h2>
 	<ol>
-		<li class="ch01"><a href="#c1">import と export</a></li>
-		<li class="ch02"><a href="#c2">ESM と CJS</a></li>
-		<li class="ch03"><a href="#c3">.d.ts と @types</a></li>
-		<li class="ch04"><a href="#c4">型定義がないライブラリ</a></li>
+		<li class="ch01"><a href="#ch01">import と export</a></li>
+		<li class="ch02"><a href="#ch02">ESM と CJS</a></li>
+		<li class="ch03"><a href="#ch03">.d.ts と @types</a></li>
+		<li class="ch04"><a href="#ch04">型定義がないライブラリ</a></li>
 	</ol>
 </div>
 
 <!-- ============ 1 ============ -->
-<section class="ch01" id="c1">
+<section class="ch01" id="ch01">
 	<h1>10.1 import と export</h1>
 
 	<h2>基本形</h2>
 
-<pre><code>// lib.ts
+<pre><code class="language-typescript">// lib.ts
 export const greet = (name: string) =&gt; `Hello, ${name}`;
 export type User = { name: string };
 
@@ -73,7 +73,7 @@ import { greet, type User } from "./lib.ts";</code></pre>
 
 	<p>型は実行時に消えるため、<strong>型だけを import している場合、その行ごと消えます。</strong>明示すると意図が伝わり、消えることも保証されます。</p>
 
-<pre><code>import type { User } from "./types.ts";        // 型だけ。実行時には消える
+<pre><code class="language-typescript">import type { User } from "./types.ts";        // 型だけ。実行時には消える
 import { greet, type User } from "./lib.ts";   // 値と型を混ぜる書き方</code></pre>
 
 	<div class="callout">
@@ -83,7 +83,7 @@ import { greet, type User } from "./lib.ts";   // 値と型を混ぜる書き方
 
 	<h2>default export は避ける</h2>
 
-<pre><code>// 名前付き export（推奨）
+<pre><code class="language-typescript">// 名前付き export（推奨）
 export const greet = () =&gt; {};
 import { greet } from "./lib.ts";
 
@@ -106,7 +106,7 @@ import whateverName from "./lib.ts";     // 名前を自由に付けられてし
 </section>
 
 <!-- ============ 2 ============ -->
-<section class="ch02" id="c2">
+<section class="ch02" id="ch02">
 	<h1>10.2 ESM と CJS</h1>
 
 	<h2>2つのモジュール方式がある</h2>
@@ -125,7 +125,7 @@ import whateverName from "./lib.ts";     // 名前を自由に付けられてし
 
 	<h2>どちらで動くかは package.json が決める</h2>
 
-<pre><code>{
+<pre><code class="language-json">{
 	"type": "module"      // ← ESM。省略すると CJS
 }</code></pre>
 
@@ -183,11 +183,11 @@ import whateverName from "./lib.ts";     // 名前を自由に付けられてし
 
 	<h3>実際の違い</h3>
 
-<pre><code>// main-dirname.ts
+<pre><code class="language-typescript">// main-dirname.ts
 console.log(typeof __dirname === "undefined" ? "__dirname は使えない" : "__dirname は使える");
 console.log(typeof require === "undefined" ? "require は使えない" : "require は使える");</code></pre>
 
-<pre><code>$ node main-dirname.ts               # package.json に type がない場合
+<pre><code class="language-shell">$ node main-dirname.ts               # package.json に type がない場合
 __dirname は使える
 require は使える
 
@@ -198,7 +198,7 @@ require は使えない</code></pre>
 	<div class="callout">
 		<p><strong>ESM では <code>__dirname</code>・<code>__filename</code>・<code>require</code> が存在しません。</strong></p>
 		<p>代わりに <code>import.meta.dirname</code>（Node 20.11 以降）を使います。</p>
-<pre><code>const dir = import.meta.dirname;      // ESM でのファイルの場所</code></pre>
+<pre><code class="language-typescript">const dir = import.meta.dirname;      // ESM でのファイルの場所</code></pre>
 	</div>
 
 	<h2>よく出るエラーと原因</h2>
@@ -222,11 +222,11 @@ require は使えない</code></pre>
 
 	<p><span class="badge b-esm">ESM</span> <strong>ESM では拡張子の省略ができません。</strong>しかも書くのは<strong>出力後の拡張子</strong>です。</p>
 
-<pre><code>import { greet } from "./lib";        // ESM では動かない
+<pre><code class="language-typescript">import { greet } from "./lib";        // ESM では動かない
 import { greet } from "./lib.js";     // ← .ts を書いても .js と書く（出力後の名前）
 import { greet } from "./lib.ts";     // Node で直接 .ts を実行する場合はこちら</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong>ここが混乱の元です。</strong></p>
 		<p><code>tsc</code> でコンパイルして実行する場合、<code>lib.ts</code> は <code>lib.js</code> になります。<strong><code>import</code> のパスは書き換えられない</strong>ため、最初から <code>.js</code> と書く必要があります。</p>
 		<p>一方、<a class="doclink doc02" href="02-実行環境.html">Node の型ストリップ</a>や <code>tsx</code> で <code>.ts</code> を直接実行する場合は <code>.ts</code> と書きます。<strong>どちらの運用にするかを最初に決めてください。</strong>混ぜると必ず事故ります。</p>
@@ -234,7 +234,7 @@ import { greet } from "./lib.ts";     // Node で直接 .ts を実行する場�
 
 	<h2>default export の食い違い</h2>
 
-<pre><code>// CJS のライブラリ
+<pre><code class="language-typescript">// CJS のライブラリ
 module.exports = function foo() {};
 
 // ESM から使う
@@ -243,7 +243,7 @@ import * as foo from "some-cjs-lib";  // foo.default になることがある</c
 
 	<p><span class="badge b-esm">ESM</span><span class="badge b-cjs">CJS</span> <code>module.exports</code> と <code>export default</code> は<strong>別の仕組み</strong>です。Node とバンドラで解釈が異なることもあります。</p>
 
-<pre><code>{
+<pre><code class="language-json">{
 	"compilerOptions": {
 		"esModuleInterop": true        // 相互運用を助ける（既定で有効なことが多い）
 	}
@@ -253,12 +253,12 @@ import * as foo from "some-cjs-lib";  // foo.default になることがある</c
 </section>
 
 <!-- ============ 3 ============ -->
-<section class="ch03" id="c3">
+<section class="ch03" id="ch03">
 	<h1>10.3 .d.ts と @types</h1>
 
 	<h2>.d.ts は型だけを書くファイル</h2>
 
-<pre><code>// lib.d.ts — 実装はなく、形だけを宣言する
+<pre><code class="language-typescript">// lib.d.ts — 実装はなく、形だけを宣言する
 export declare function greet(name: string): string;
 export declare const VERSION: string;</code></pre>
 
@@ -283,36 +283,36 @@ export declare const VERSION: string;</code></pre>
 
 	<p><span class="badge b-ts7">TS7</span> <a class="doclink doc02" href="02-実行環境.html">02. 実行環境</a>で触れたとおり、<strong><code>@types/*</code> を入れるだけでは読み込まれません。</strong></p>
 
-<pre><code>{
+<pre><code class="language-json">{
 	"compilerOptions": {
 		"types": ["node"]        // ← 使うものを列挙する
 	}
 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong><code>types</code> を書くと、書いたものだけが読まれます。</strong></p>
 		<p><code>@types/node</code> と <code>@types/jest</code> の両方を使うなら <code>["node", "jest"]</code> と書きます。<strong>1つだけ書くと、もう一方が読まれなくなります。</strong></p>
 	</div>
 </section>
 
 <!-- ============ 4 ============ -->
-<section class="ch04" id="c4">
+<section class="ch04" id="ch04">
 	<h1>10.4 型定義がないライブラリ</h1>
 
 	<h2>まず @types を探す</h2>
 
-<pre><code>$ npm i -D @types/ライブラリ名</code></pre>
+<pre><code class="language-shell">$ npm i -D @types/ライブラリ名</code></pre>
 
 	<p>見つからなければ、次の3つから選びます。</p>
 
 	<h2>① 最小限の .d.ts を自分で書く</h2>
 
-<pre><code>// types/legacy-lib.d.ts
+<pre><code class="language-typescript">// types/legacy-lib.d.ts
 declare module "legacy-lib" {
 	export function doSomething(input: string): number;
 }</code></pre>
 
-<pre><code>{
+<pre><code class="language-json">{
 	"compilerOptions": {
 		"typeRoots": ["./node_modules/@types", "./types"]
 	},
@@ -323,13 +323,13 @@ declare module "legacy-lib" {
 
 	<h2>② any として受け入れる（暫定）</h2>
 
-<pre><code>// types/legacy-lib.d.ts
+<pre><code class="language-typescript">// types/legacy-lib.d.ts
 declare module "legacy-lib";      // すべて any になる</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-warning">
 		<p><strong>これは <code>any</code> の伝播を招きます。</strong></p>
 		<p>そのライブラリから来る値がすべて <code>any</code> になり、<strong>下流の検査が無効化されます</strong>（<a class="doclink doc06" href="06-any-unknown-アサーション.html">06</a>）。使うなら<strong>受け口で <code>unknown</code> に変換</strong>してください。</p>
-<pre><code>import { doSomething } from "legacy-lib";
+<pre><code class="language-typescript">import { doSomething } from "legacy-lib";
 
 // any のまま使わず、受け口で unknown にする
 const result: unknown = doSomething("x");
@@ -342,7 +342,7 @@ if (typeof result === "number") {
 
 	<p><strong>実務で最も勧められる形です。</strong>型のない世界を1ファイルに閉じ込めます。</p>
 
-<pre><code>// src/legacy-wrapper.ts — ここだけが型のない世界に触れる
+<pre><code class="language-typescript">// src/legacy-wrapper.ts — ここだけが型のない世界に触れる
 import * as legacy from "legacy-lib";
 
 export function doSomething(input: string): number {

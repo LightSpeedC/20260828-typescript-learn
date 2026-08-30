@@ -50,16 +50,16 @@
 <div class="toc">
 	<h2>この章の内容</h2>
 	<ol>
-		<li class="ch01"><a href="#c1">動かす方法は4つある</a></li>
-		<li class="ch02"><a href="#c2">tsc — 検査する道具</a></li>
-		<li class="ch03"><a href="#c3">その場で実行する — tsx・node・bun・deno</a></li>
-		<li class="ch04"><a href="#c4">npm と型定義（@types）</a></li>
-		<li class="ch05"><a href="#c5">エディタと言語サーバ</a></li>
+		<li class="ch01"><a href="#ch01">動かす方法は4つある</a></li>
+		<li class="ch02"><a href="#ch02">tsc — 検査する道具</a></li>
+		<li class="ch03"><a href="#ch03">その場で実行する — tsx・node・bun・deno</a></li>
+		<li class="ch04"><a href="#ch04">npm と型定義（@types）</a></li>
+		<li class="ch05"><a href="#ch05">エディタと言語サーバ</a></li>
 	</ol>
 </div>
 
 <!-- ============ 1 ============ -->
-<section class="ch01" id="c1">
+<section class="ch01" id="ch01">
 	<h1>02.1 動かす方法は4つある</h1>
 
 	<h2>「検査する」と「実行する」は別の仕事</h2>
@@ -82,7 +82,7 @@
 	</table>
 	</div>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>実行できたことは、型が正しいことを意味しません。</strong></p>
 		<p><code>tsx</code> も <code>node</code> も型注釈を<strong>捨てるだけ</strong>で、内容を見ていません。型エラーがあっても平然と動きます。<strong>検査は <code>tsc</code> かエディタが行います。</strong>この分担を混同すると、「動いているのにビルドが通らない」という状況の理由が分からなくなります。</p>
 	</div>
@@ -172,7 +172,7 @@
 
 	<p>この資料に出てくるコード例は、<code>docs/samples/</code> に実ファイルとして置いてあります。<strong>写経せずに動かしたい場合はこちらを使ってください。</strong></p>
 
-<pre><code>$ cd docs/samples
+<pre><code class="language-shell">$ cd docs/samples
 $ npm i
 
 $ npx tsx 04-null-check.ts    # 個別に実行する
@@ -182,14 +182,14 @@ $ npx tsc                     # 全ファイルをまとめて型検査する</c
 </section>
 
 <!-- ============ 2 ============ -->
-<section class="ch02" id="c2">
+<section class="ch02" id="ch02">
 	<h1>02.2 tsc — 検査する道具</h1>
 
 	<h2>導入する</h2>
 
 	<p>プロジェクトごとに入れます。グローバルに入れると、プロジェクトごとにバージョンを変えられません。</p>
 
-<pre><code>$ npm init -y
+<pre><code class="language-shell">$ npm init -y
 $ npm i -D typescript tsx
 
 $ npx tsc --version
@@ -199,7 +199,7 @@ Version 7.0.2</code></pre>
 
 	<p><code>tsc</code> は既定で JavaScript を出力します。<strong>検査だけしたいときは <code>--noEmit</code></strong> を付けます。</p>
 
-<pre><code>$ npx tsc --noEmit greet.ts
+<pre><code class="language-shell">$ npx tsc --noEmit greet.ts
 greet.ts:7:21 - error TS2353: Object literal may only specify known properties,
                               and 'namae' does not exist in type 'User'.
 
@@ -214,14 +214,14 @@ Found 1 error in greet.ts:7</code></pre>
 
 	<p><span class="badge b-ts7">TS7</span> <code>tsconfig.json</code> がある状態でコマンドラインにファイル名を指定すると、<strong><code>tsconfig.json</code> は読み込まれません。</strong>TypeScript 7 はこれをエラーで教えてくれます。</p>
 
-<pre><code>$ npx tsc --noEmit fs-test.ts
+<pre><code class="language-shell">$ npx tsc --noEmit fs-test.ts
 error TS5112: tsconfig.json is present but will not be loaded if files are
               specified on commandline. Use '--ignoreConfig' to skip this error.
 
 訳: tsconfig.json がありますが、コマンドラインでファイルを指定すると読み込まれません。
     このエラーを飛ばすには '--ignoreConfig' を使ってください。</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>この挙動は TypeScript 5 系でも同じですが、警告が出ません。</strong></p>
 		<p>5 系では黙って <code>tsconfig.json</code> を無視するため、<strong>「設定したはずのオプションが効かない」</strong>という形で現れます。プロジェクト全体を検査するときは、<strong>ファイル名を指定せず <code>npx tsc</code> だけ</strong>を実行してください。</p>
 	</div>
@@ -230,25 +230,25 @@ error TS5112: tsconfig.json is present but will not be loaded if files are
 
 	<p><code>tsconfig.json</code> の雛形は次のコマンドで作れます。中身は <a class="doclink doc03" href="03-tsconfig.html">03. tsconfig</a> で扱います。</p>
 
-<pre><code>$ npx tsc --init</code></pre>
+<pre><code class="language-shell">$ npx tsc --init</code></pre>
 </section>
 
 <!-- ============ 3 ============ -->
-<section class="ch03" id="c3">
+<section class="ch03" id="ch03">
 	<h1>02.3 その場で実行する — tsx・node・bun・deno</h1>
 
 	<h2>tsx — 制約が少ない</h2>
 
 	<p><code>tsx</code> は型注釈を取り除いて実行します。<strong>この資料のコード例はすべて <code>tsx</code> で動きます。</strong></p>
 
-<pre><code>$ npx tsx hello.ts
+<pre><code class="language-shell">$ npx tsx hello.ts
 Hello, TypeScript!</code></pre>
 
 	<h2>node — 道具を増やさずに動かす</h2>
 
 	<p><span class="badge b-strip">Node型ストリップ</span> 新しい Node は <code>.ts</code> をそのまま実行できます。型注釈を取り除いてから実行する仕組み（type stripping）が入っているためです。</p>
 
-<pre><code>$ node --version
+<pre><code class="language-shell">$ node --version
 v26.8.1
 
 $ node hello.ts
@@ -258,12 +258,12 @@ Hello, TypeScript!</code></pre>
 
 	<p>Node の型ストリップは<strong>「取り除く」だけで、変換はしません。</strong>そのため、<strong>JavaScript のコードを生成する必要がある構文は使えません。</strong></p>
 
-<pre><code>// enum-test.ts
+<pre><code class="language-typescript">// enum-test.ts
 enum Color { Red, Green, Blue }
 const c: Color = Color.Green;
 console.log(Color[c]);</code></pre>
 
-<pre><code>$ node enum-test.ts
+<pre><code class="language-shell">$ node enum-test.ts
 SyntaxError [ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX]:
   TypeScript enum is not supported in strip-only mode
 
@@ -271,12 +271,12 @@ SyntaxError [ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX]:
 
 	<p><code>enum</code> は型ではなく<strong>実行時のオブジェクトを生成する</strong>ため、取り除くだけでは成立しません。同じ理由で、クラスの<strong>パラメータプロパティ</strong>も使えません。</p>
 
-<pre><code>// param-prop.ts
+<pre><code class="language-typescript">// param-prop.ts
 class User {
 	constructor(public name: string) {}   // ← public が代入コードを生む
 }</code></pre>
 
-<pre><code>$ node param-prop.ts
+<pre><code class="language-shell">$ node param-prop.ts
 SyntaxError [ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX]:
   TypeScript parameter property is not supported in strip-only mode
 
@@ -305,7 +305,7 @@ SyntaxError [ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX]:
 
 	<p>Node 以外の処理系も <code>.ts</code> をそのまま実行できます。</p>
 
-<pre><code>$ bun --version
+<pre><code class="language-shell">$ bun --version
 1.4.0
 $ bun run hello.ts
 Hello, TypeScript!
@@ -319,7 +319,7 @@ Hello, TypeScript!</code></pre>
 </section>
 
 <!-- ============ 4 ============ -->
-<section class="ch04" id="c4">
+<section class="ch04" id="ch04">
 	<h1>02.4 npm と型定義（@types）</h1>
 
 	<h2>型定義はライブラリとは別に配られることがある</h2>
@@ -394,11 +394,11 @@ Hello, TypeScript!</code></pre>
 
 	<p><code>node:fs</code> のような標準モジュールも、<strong>型定義は別途入れます</strong>。入れないとこうなります。</p>
 
-<pre><code>// fs-test.ts
+<pre><code class="language-typescript">// fs-test.ts
 import { readFileSync } from "node:fs";
 const s = readFileSync("package.json", "utf8");</code></pre>
 
-<pre><code>$ npx tsc
+<pre><code class="language-shell">$ npx tsc
 fs-test.ts(1,30): error TS2591: Cannot find name 'node:fs'.
   Do you need to install type definitions for node?
   Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
@@ -406,13 +406,13 @@ fs-test.ts(1,30): error TS2591: Cannot find name 'node:fs'.
 訳: 'node:fs' という名前が見つかりません。node の型定義を入れる必要がありますか。
     `npm i --save-dev @types/node` を実行し、tsconfig の types に 'node' を追加してください。</code></pre>
 
-<pre><code>$ npm i -D @types/node</code></pre>
+<pre><code class="language-shell">$ npm i -D @types/node</code></pre>
 
 	<h2>TypeScript 7 では types への明示が必要</h2>
 
 	<p><span class="badge b-ts7">TS7</span> <strong><code>@types/node</code> を入れるだけでは足りません。</strong><code>tsconfig.json</code> の <code>types</code> に <code>"node"</code> を書く必要があります。</p>
 
-<pre><code>{
+<pre><code class="language-json">{
 	"compilerOptions": {
 		"target": "es2022",
 		"module": "nodenext",
@@ -422,7 +422,7 @@ fs-test.ts(1,30): error TS2591: Cannot find name 'node:fs'.
 	}
 }</code></pre>
 
-	<div class="callout">
+	<div class="callout callout-important">
 		<p><strong>TypeScript 5 系では <code>types</code> を書かなくても通ります。</strong></p>
 		<p>5 系は <code>node_modules/@types/</code> 配下を<strong>自動で読み込んで</strong>いました。7 では明示が必要です。<strong>「5 では通っていたコードが 7 で TS2591 になる」</strong>のはこれが原因です。エラーメッセージ自身が <code>types</code> への追加を促しているので、指示どおりに直せば解決します。</p>
 	</div>
@@ -431,11 +431,11 @@ fs-test.ts(1,30): error TS2591: Cannot find name 'node:fs'.
 
 	<p>型定義は<strong>開発中にしか使いません</strong>（実行時には消えているため）。<code>-D</code>（<code>--save-dev</code>）で入れます。</p>
 
-<pre><code>$ npm i -D typescript tsx @types/node</code></pre>
+<pre><code class="language-shell">$ npm i -D typescript tsx @types/node</code></pre>
 </section>
 
 <!-- ============ 5 ============ -->
-<section class="ch05" id="c5">
+<section class="ch05" id="ch05">
 	<h1>02.5 エディタと言語サーバ</h1>
 
 	<h2>波線を出しているのは tsc ではない</h2>
@@ -460,7 +460,7 @@ fs-test.ts(1,30): error TS2591: Cannot find name 'node:fs'.
 	</table>
 	</div>
 
-	<div class="callout">
+	<div class="callout callout-tip">
 		<p><strong>VS Code のバージョンをプロジェクトのものに合わせます。</strong></p>
 		<p><code>.ts</code> を開いた状態で、コマンドパレットから <code>TypeScript: Select TypeScript Version</code> →「Use Workspace Version」を選びます。これをしないと、<strong>チーム内で人によってエラーの出方が変わります</strong>。</p>
 	</div>
@@ -469,7 +469,7 @@ fs-test.ts(1,30): error TS2591: Cannot find name 'node:fs'.
 
 	<p>この先の章を読む前に、次の3つが通ることを確かめてください。</p>
 
-<pre><code>$ node --version                    # LTS 以降であること
+<pre><code class="language-shell">$ node --version                    # LTS 以降であること
 $ npx tsx --version                 # 実行できること
 $ npx tsc --noEmit                  # 検査が動くこと</code></pre>
 
