@@ -50,7 +50,15 @@
 	/* tsc のエラー行。行頭からの「error TSxxxx:」を含む行全体を赤にする */
 	var ERR_RE = /^.*\berror TS\d+:.*$/gm;
 
-	function detect(text) {
+	/** class="language-xxx" があればそれに従う。無ければ中身から推定する */
+	function detect(code, text) {
+		var m = /language-(\w+)/.exec(code.className || '');
+		if (m) {
+			var lang = m[1].toLowerCase();
+			if (lang === 'shell' || lang === 'bash' || lang === 'sh' || lang === 'console' || lang === 'batch') return 'sh';
+			if (lang === 'json') return 'json';
+			return 'ts';
+		}
 		if (/^\s*[$]/m.test(text)) return 'sh';
 		if (/^\s*[{[]/.test(text) && /"[^"]*"\s*:/.test(text)) return 'json';
 		return 'ts';
@@ -123,7 +131,7 @@
 			var text = code.textContent;
 			if (!text) continue;
 
-			var kind = detect(text);
+			var kind = detect(code, text);
 			var html;
 			if (kind === 'sh') html = highlightSh(text);
 			else if (kind === 'json') html = highlightJson(text);
