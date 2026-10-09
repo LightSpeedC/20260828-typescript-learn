@@ -338,6 +338,21 @@ tr:nth-child(even) td { background: #fafbfe; }
 <div class="callout callout-important">
 <p><strong>注記は <code>data-run</code> を付けるコードにだけ書く。</strong>型エラーは注記ではなく、エラー番号（<code>TS2345</code> 等）で照合する。既存の <code>$ npx tsx</code> の結果ブロックと内容が重なるものは、手順 4 で残すか消すかを決める。</p>
 </div>
+
+<h2>変換器の実測（手順 2・2026-10-09）</h2>
+<div class="tablewrap">
+<table>
+<thead><tr><th>項目</th><th>値</th></tr></thead>
+<tbody>
+<tr><td><code>lib/typescript.js</code></td><td class="num">9,112,572 バイト（gzip 後 1,646,996 バイト）</td></tr>
+<tr><td>型検査に要る <code>lib.es*.d.ts</code></td><td class="num">89 本 575,031 バイト</td></tr>
+<tr><td>読込（Node v26.10.0）</td><td class="num">146〜161 ms</td></tr>
+<tr><td>型検査＋変換 1 回目</td><td class="num">294〜1,101 ms</td></tr>
+<tr><td>型検査＋変換 2 回目以降</td><td class="num">141〜147 ms</td></tr>
+</tbody>
+</table>
+</div>
+<p>3 行のコード（<code>greet(1)</code> を含む）で <code>TS2345</code> が出ることも確かめた。ブラウザでの時間は未実測で、手順 3 で測る。<code>console</code> の型は <code>lib.dom.d.ts</code> を読まずに、1 行の宣言で足りた。</p>
 </section>
 <section class="ch03" id="ch03">
 <h1>作るもの</h1>
@@ -365,7 +380,7 @@ tr:nth-child(even) td { background: #fafbfe; }
 <h2>手順</h2>
 <ol>
 <li>1〜5 を決める（済）</li>
-<li>変換器の大きさと読込時間を実測し、ここに書く</li>
+<li>変換器の大きさと読込時間を実測し、ここに書く（済）</li>
 <li><code>runner.js</code> と Worker を作り、1 章分（07 章）で試す</li>
 <li>全資料のコードを調べ、<code>data-run</code> を付けるものを一覧にする。結果ブロックの扱いもここで決める</li>
 <li>付けたものに <code>// =&gt; 値</code> の注記を書き、注記を照合するテストを作る</li>
