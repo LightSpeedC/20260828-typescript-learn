@@ -1,0 +1,386 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>計画 p261009-01 — サンプルコードをページ上で実行できるようにする</title>
+<style>
+/*
+ * notes/ 配下は単独の HTML にする。外部ファイルを参照しない。
+ * この 1 ファイルをコピーするだけで同じ見た目になる。
+ * docs/css/style.css からこの文書が使う分だけを取り込んでいる。
+ */
+
+:root {
+	--navy1: #12224d;
+	--navy2: #2f5fbf;
+	--ink: #1c2330;
+	--ink-soft: #4a5568;
+	--line: #d9dfe8;
+	--code-bg: #f4f6fa;
+	--accent: var(--navy1, #12224d);
+	--accent2: var(--navy2, #2f5fbf);
+	--soft: #f2f5fb;
+	--link: #1a4fa0;
+}
+
+* { box-sizing: border-box; }
+
+body {
+	margin: 0;
+	font-family: "Segoe UI", "Yu Gothic UI", "Meiryo", sans-serif;
+	font-size: 15.5px;
+	line-height: 1.85;
+	color: var(--ink, #1c2330);
+	background: #fff;
+}
+
+/* ---- タイトルバー ---- */
+
+.titlebar {
+	background: linear-gradient(135deg, var(--navy1, #12224d), var(--navy2, #2f5fbf));
+	color: #fff;
+	padding: 34px 30px 30px;
+}
+
+.titlebar .inner { max-width: 1600px; margin: 0 auto; }
+.titlebar h1 { font-size: 1.85em; margin: 0 0 8px; color: #fff; }
+.titlebar .lead { margin: 0 0 10px; font-size: 0.98em; color: #dbe4f7; }
+.titlebar .date { margin: 0; font-size: 0.88em; color: #c6d4ee; }
+.titlebar code { background: rgba(255,255,255,0.16); color: #fff; border: none; }
+
+/* ---- 本文 ---- */
+
+.wrap { max-width: 1600px; margin: 0 auto; padding: 0 30px; }
+
+section {
+	padding: 4px 26px 26px;
+	margin: 34px 0;
+	border-radius: 12px;
+	background: linear-gradient(180deg, var(--soft, #f2f5fb), #fff 320px);
+}
+
+section h1 {
+	font-size: 1.42em;
+	color: #fff;
+	background: linear-gradient(100deg, var(--accent, #12224d), var(--accent2, #2f5fbf));
+	padding: 14px 20px;
+	margin: 26px 0 20px;
+	border-radius: 8px;
+	box-shadow: 0 4px 14px rgba(20,30,60,0.22);
+}
+
+section h1 code { background: rgba(255,255,255,0.16); color: #fff; border: none; }
+
+h2 {
+	font-size: 1.14em;
+	color: var(--accent, #12224d);
+	border-left: 6px solid var(--accent, #12224d);
+	background: linear-gradient(90deg, var(--soft, #f2f5fb), #fff);
+	padding: 6px 12px;
+	margin: 30px 0 12px;
+	border-radius: 0 6px 6px 0;
+}
+
+p { margin: 10px 0; }
+
+/* 本文中のリンク — 背景を持たないので文字色を明示する */
+.wrap a { color: var(--link, #1a4fa0); }
+
+/* ---- コード ---- */
+
+code {
+	background: var(--code-bg, #f4f6fa);
+	border: 1px solid var(--line, #d9dfe8);
+	color: #17335f;
+	border-radius: 4px;
+	padding: 1px 5px;
+	font-family: "Cascadia Mono", "Consolas", monospace;
+	font-size: 0.92em;
+}
+
+pre {
+	background: var(--code-bg, #f4f6fa);
+	color: var(--ink, #1c2330);
+	border: 1px solid var(--line, #d9dfe8);
+	border-left: 5px solid var(--accent2, #2f5fbf);
+	border-radius: 0 8px 8px 0;
+	padding: 13px 16px;
+	overflow-x: auto;
+	line-height: 1.65;
+}
+
+pre code { background: none; border: none; padding: 0; color: inherit; }
+
+/* ---- 表 ---- */
+
+.tablewrap { overflow-x: auto; margin: 14px 0; }
+
+table {
+	border-collapse: collapse;
+	width: 100%;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 2px 8px rgba(20,30,60,0.10);
+	font-size: 0.96em;
+}
+
+th {
+	background: linear-gradient(100deg, var(--accent, #12224d), var(--accent2, #2f5fbf));
+	color: #fff;
+	text-align: left;
+	padding: 9px 12px;
+	white-space: nowrap;
+}
+
+th code { background: rgba(255,255,255,0.16); color: #fff; border: none; }
+
+td { padding: 9px 12px; border-bottom: 1px solid var(--line, #d9dfe8); vertical-align: top; }
+
+tr:nth-child(even) td { background: #fafbfe; }
+
+.nowrap { white-space: nowrap; }
+.num { text-align: right; white-space: nowrap; }
+
+/* ---- 補足枠 ---- */
+
+.callout {
+	border-left: 6px solid var(--accent, #12224d);
+	background: linear-gradient(180deg, var(--soft, #f2f5fb), #fff);
+	padding: 12px 18px;
+	margin: 18px 0;
+	border-radius: 0 8px 8px 0;
+}
+
+.callout strong { color: var(--accent, #12224d); }
+
+/* 種別つきの callout。左ボーダーと見出しの色で区別する */
+.callout-tip       { border-left-color: #1d7a3c; }
+.callout-tip strong { color: #1d7a3c; }
+.callout-important { border-left-color: #1e3a8a; }
+.callout-important strong { color: #1e3a8a; }
+.callout-warning   { border-left-color: #b8620a; }
+.callout-warning strong { color: #b8620a; }
+
+/* ---- バッジ ---- */
+
+.badge {
+	display: inline-block;
+	color: #fff;
+	border-radius: 4px;
+	padding: 1px 9px;
+	font-size: 0.84em;
+	white-space: nowrap;
+	margin-right: 4px;
+}
+
+.b-ok   { background: linear-gradient(100deg, #1d7a3c, #45b56c); }
+.b-none { background: linear-gradient(100deg, #5a6472, #97a1ae); }
+.b-warn { background: linear-gradient(100deg, #b8620a, #f0a548); }
+
+/* ---- 到達点 ---- */
+
+.goal {
+	border-left: 6px solid var(--navy1, #12224d);
+	background: linear-gradient(180deg, #f2f5fb, #fff);
+	padding: 14px 20px;
+	border-radius: 0 8px 8px 0;
+	margin: 26px 0;
+}
+
+.goal h2 {
+	--accent: var(--navy1, #12224d);
+	--accent2: var(--navy2, #2f5fbf);
+	--soft: #f2f5fb;
+	margin: 0 0 8px;
+	border: none;
+	background: none;
+	padding: 0;
+	font-size: 1.05em;
+}
+
+.goal ul { margin: 0; padding-left: 22px; }
+
+/* ---- 目次 ---- */
+
+.toc { margin: 26px 0 34px; }
+
+.toc h2 {
+	--accent: var(--navy1, #12224d);
+	--accent2: var(--navy2, #2f5fbf);
+	--soft: #f2f5fb;
+	margin-top: 0;
+}
+
+.toc ol {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 0;
+	margin: 14px 0 0;
+}
+
+.toc ol a {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: normal;
+	width: 310px;
+	max-width: 100%;
+	background: linear-gradient(100deg, var(--accent, #12224d), var(--accent2, #2f5fbf));
+	color: #fff;
+	text-decoration: none;
+	border-radius: 6px;
+	padding: 8px 14px;
+	font-size: 0.95em;
+	line-height: 1.45;
+	font-weight: 700;
+}
+
+.toc ol a::before { margin-right: 8px; }
+.toc ol a:hover { filter: brightness(1.12); }
+
+/* ---- この文書だけのもの ---- */
+
+/* 章アクセント（4章 / 刻み 93.3） */
+.ch01 { --accent: hsl(280,78%,25%);   --accent2: hsl(280,58%,55%);   --soft: hsl(280,28%,95%); }
+.ch02 { --accent: hsl(186.7,78%,25%); --accent2: hsl(186.7,58%,55%); --soft: hsl(186.7,28%,95%); }
+.ch03 { --accent: hsl(93.3,78%,25%);  --accent2: hsl(93.3,58%,55%);  --soft: hsl(93.3,28%,95%); }
+.ch04 { --accent: hsl(0,78%,25%);     --accent2: hsl(0,58%,55%);     --soft: hsl(0,28%,95%); }
+
+.toc ol { counter-reset: tocnum; }
+.toc li { counter-increment: tocnum; }
+.toc ol a::before { content: counter(tocnum) "."; }
+</style>
+</head>
+
+<body>
+
+<div class="titlebar">
+	<div class="inner">
+		<h1>計画 p261009-01 — サンプルコードをページ上で実行できるようにする</h1>
+		<p class="lead">jsprimer のように、資料のコードをその場で実行して出力を見られるようにする。変換ライブラリを <code>docs/js/lib/</code> に置き、CDN を使わない</p>
+		<p class="date">📅 作成: 2026-10-09 / 更新: 2026-10-09</p>
+	</div>
+</div>
+
+<div class="wrap">
+
+<div class="toc">
+	<h2>目次</h2>
+	<ol>
+		<li class="ch01"><a href="#ch01">目的と現状</a></li>
+		<li class="ch02"><a href="#ch02">決めたこと</a></li>
+		<li class="ch03"><a href="#ch03">作るもの</a></li>
+		<li class="ch04"><a href="#ch04">進め方と完了条件</a></li>
+	</ol>
+</div>
+
+<section class="ch01" id="ch01">
+<h1>目的と現状</h1>
+
+<h2>目的</h2>
+<p>読者が資料のコードを手元に写さずに試せるようにする。コードの横の「実行」ボタンで、その場で出力（<code>console.log</code>）を表示する。<strong>TypeScript の資料なので、型エラーもその場で見せる</strong>。</p>
+
+<h2>現状（2026-10-09 実測）</h2>
+<div class="tablewrap">
+<table>
+<thead><tr><th>項目</th><th>値</th></tr></thead>
+<tbody>
+<tr><td>資料内のコードブロック</td><td><code>typescript</code> 180 ／ <code>shell</code> 39 ／ <code>json</code> 10</td></tr>
+<tr><td>実行用サンプル</td><td><code>docs/samples/</code> に 13 本（ハンズオン含む）。手元の Node で動かす前提</td></tr>
+<tr><td>資料が対象にする版</td><td>TypeScript 7.0.2 ／ Node v26.10.0</td></tr>
+<tr><td>TypeScript 7 の npm パッケージ</td><td><code>main</code> が無く <code>bin/tsc</code> だけ（<code>npm view</code> で確認）。<strong>ブラウザから呼べる JS の API を持たない</strong></td></tr>
+<tr><td>ページの JS</td><td><code>docs/js/highlight.js</code>（色付け）のみ</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-important">
+<p><strong>ブラウザで動く変換器は、資料の TypeScript 7 と別物になる。</strong>型エラーの文言・検出の細部が資料の記述と食い違う可能性がある（未確認）。食い違いは「進め方」の手順 5・6 のテストで洗い出す。</p>
+</div>
+</section>
+
+<section class="ch02" id="ch02">
+<h1>決めたこと</h1>
+
+<h2>参考にした jsprimer の仕組み</h2>
+<div class="tablewrap">
+<table>
+<thead><tr><th>部分</th><th>jsprimer</th><th>この資料</th></tr></thead>
+<tbody>
+<tr><td class="nowrap">対象の指定</td><td>コードブロックの前に <code>&lt;!-- js-console --&gt;</code> を書いたものだけ</td><td>同じ考え方（<code>data-run</code>）</td></tr>
+<tr><td class="nowrap">実行の場所</td><td>非表示の iframe ＋ <code>postMessage</code>（codemirror-console）</td><td>Web Worker</td></tr>
+<tr><td class="nowrap">編集</td><td>CodeMirror 5 で編集して再実行</td><td><code>textarea</code> で編集して再実行</td></tr>
+<tr><td class="nowrap">変換</td><td>無し（JavaScript をそのまま実行）</td><td>TypeScript 5.9.3 で型検査と変換</td></tr>
+<tr><td class="nowrap">検証</td><td>power-doctest。<code>式; // =&gt; 値</code> の注記をビルド時に比較テストへ変換</td><td>同じ書き方の注記を使う</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>決定（2026-10-09）</h2>
+<div class="tablewrap">
+<table>
+<thead><tr><th>論点</th><th>決定</th><th>理由</th></tr></thead>
+<tbody>
+<tr><td class="nowrap">1. 変換器</td><td>TypeScript 5.9.3 の <code>lib/typescript.js</code> を <code>docs/js/lib/</code> に置く</td><td>型エラーを見せられるのはこれだけ。「実行」を押したときだけ読み込む</td></tr>
+<tr><td class="nowrap">2. 実行の場所</td><td>Web Worker</td><td>無限ループでもページが固まらず、時間切れで止められる</td></tr>
+<tr><td class="nowrap">3. 対象の指定</td><td><code>&lt;pre data-run&gt;</code> を付けたものだけ</td><td>断片・Node 専用の例に動かないボタンを並べない</td></tr>
+<tr><td class="nowrap">4. 編集</td><td><code>textarea</code> に差し替えて編集・再実行できる</td><td>ライブラリを増やさずに「書き換えて試す」を再現する</td></tr>
+<tr><td class="nowrap">5. 検証</td><td>コードに <code>// =&gt; 値</code> の注記を書き、テストで照合する</td><td>結果を貼っていないコードも検証でき、読者には行の横に答えが見える</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-important">
+<p><strong>注記は <code>data-run</code> を付けるコードにだけ書く。</strong>型エラーは注記ではなく、エラー番号（<code>TS2345</code> 等）で照合する。既存の <code>$ npx tsx</code> の結果ブロックと内容が重なるものは、手順 4 で残すか消すかを決める。</p>
+</div>
+</section>
+<section class="ch03" id="ch03">
+<h1>作るもの</h1>
+<div class="tablewrap">
+<table>
+<thead><tr><th>置き場</th><th>中身</th></tr></thead>
+<tbody>
+<tr><td class="nowrap"><code>docs/js/lib/</code></td><td>変換器の本体（1 の結果）と、そのライセンス文。版はファイルの先頭のコメントと <code>docs/ZZ-構成.html</code> に記す</td></tr>
+<tr><td class="nowrap"><code>docs/js/runner.js</code></td><td><code>pre[data-run]</code> にボタンと出力欄を足す。押されたら変換器を読み込み、型エラーと出力を表示する</td></tr>
+<tr><td class="nowrap"><code>docs/js/runner-worker.js</code></td><td>Worker 側。変換したコードを実行し、出力を親へ返す</td></tr>
+<tr><td class="nowrap"><code>docs/css/style.css</code></td><td>ボタン・出力欄・型エラーの見た目</td></tr>
+<tr><td class="nowrap"><code>docs/*.html</code></td><td>対象の <code>pre</code> に <code>data-run</code> を付ける。<code>runner.js</code> を読み込む</td></tr>
+<tr><td class="nowrap"><code>tests/</code></td><td>資料の <code>data-run</code> コードを取り出し、<code>// =&gt; 値</code> の注記を比較に変えて <code>node:test</code> で実行する。型エラーは番号で照合する</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li><strong>ボタンと出力欄は JS が足す</strong>。HTML には置かないので、Markdown には出ない（<code>md-skip</code> は要らない）</li>
+<li><strong>JS が動かないときは今のまま</strong>（コードと貼った実行結果が読める）</li>
+</ul>
+</section>
+
+<section class="ch04" id="ch04">
+<h1>進め方と完了条件</h1>
+<h2>手順</h2>
+<ol>
+<li>1〜5 を決める（済）</li>
+<li>変換器の大きさと読込時間を実測し、ここに書く</li>
+<li><code>runner.js</code> と Worker を作り、1 章分（07 章）で試す</li>
+<li>全資料のコードを調べ、<code>data-run</code> を付けるものを一覧にする。結果ブロックの扱いもここで決める</li>
+<li>付けたものに <code>// =&gt; 値</code> の注記を書き、注記を照合するテストを作る</li>
+<li>ブラウザでも同じ注記が満たされるかを PlayWright 共有環境で確かめる</li>
+</ol>
+<h2>完了条件</h2>
+<ul>
+<li><code>data-run</code> を付けたすべてのコードで、注記の値と型エラー番号がテストで一致する</li>
+<li>CDN を参照していない</li>
+<li>公開 URL で実行できる</li>
+<li><code>check-contrast</code> の指摘が 0 件</li>
+</ul>
+</section>
+
+</div>
+
+</body>
+</html>
