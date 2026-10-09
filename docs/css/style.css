@@ -57,7 +57,7 @@ body {
 
 .wrap { max-width: 1600px; margin: 0 auto; padding: 0 30px; }
 
-.backlink { margin: 22px 0 0; font-size: 0.94em; }
+.backlink { margin: 18px 0 0; font-size: 0.94em; }
 .intro { margin: 26px 0 0; }
 
 section {
@@ -73,7 +73,7 @@ section h1 {
 	background: linear-gradient(100deg, var(--accent, #12224d), var(--accent2, #2f5fbf));
 	padding: 14px 20px;
 	margin: 26px 0 20px;
-	border-radius: 10px;
+	border-radius: 8px;
 	box-shadow: 0 4px 14px rgba(20,30,60,0.22);
 }
 
@@ -269,7 +269,7 @@ tr:nth-child(even) td { background: #fafbfe; }
 	max-width: 100%;
 	color: #fff;
 	text-decoration: none;
-	border-radius: 8px;
+	border-radius: 6px;
 	padding: 8px 14px;
 	font-size: 0.95em;
 	line-height: 1.45;
