@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="package.json の type が ESM と CJS を決める">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(160,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(160,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i3" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(30,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(30,58%,55%)"/>
+				</linearGradient>
+				<marker id="i4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="330" y="16" width="240" height="52" rx="8" fill="url(#i1)"/>
+			<text x="450" y="40" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">package.json</text>
+			<text x="450" y="59" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">"type" の値を見る</text>
+
+			<rect x="40" y="118" width="360" height="150" rx="8" fill="#f2f9f7" stroke="#7aa89e" stroke-width="2"/>
+			<rect x="40" y="118" width="360" height="42" rx="8" fill="url(#i2)"/>
+			<text x="220" y="145" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">ESM　"type": "module"</text>
+
+			<text x="60" y="186" fill="#1c2330" font-size="12.5" font-family="sans-serif">import / export を使う</text>
+			<text x="60" y="208" fill="#1c2330" font-size="12.5" font-family="sans-serif">拡張子の省略ができない</text>
+			<text x="60" y="230" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">__dirname が使えない</text>
+			<text x="60" y="252" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">require が使えない</text>
+
+			<rect x="500" y="118" width="360" height="150" rx="8" fill="#fbf6f0" stroke="#c0a487" stroke-width="2"/>
+			<rect x="500" y="118" width="360" height="42" rx="8" fill="url(#i3)"/>
+			<text x="680" y="145" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">CJS　"type" なし（既定）</text>
+
+			<text x="520" y="186" fill="#1c2330" font-size="12.5" font-family="sans-serif">require / module.exports を使う</text>
+			<text x="520" y="208" fill="#1c2330" font-size="12.5" font-family="sans-serif">拡張子を省略できる</text>
+			<text x="520" y="230" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">__dirname が使える</text>
+			<text x="520" y="252" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">require が使える</text>
+
+			<path d="M400,70 L240,110" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M500,70 L660,110" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+
+			<text x="450" y="290" text-anchor="middle" fill="#4a5568" font-size="12.5" font-family="sans-serif">同じ .ts でも、この設定で使える機能が変わる</text>
+		</svg>

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 280" width="900" height="280" role="img" aria-label="型レベルプログラミングの4つの水準">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(100,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(100,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i3" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i4" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="16" y="26" width="620" height="50" rx="8" fill="url(#i1)"/>
+			<text x="36" y="47" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">水準1　組み込みユーティリティ型</text>
+			<text x="36" y="66" fill="#fff" font-size="12" font-family="sans-serif">Partial・Pick・Omit・Record・ReturnType・Awaited</text>
+			<text x="720" y="56" fill="#1d7a3c" font-size="13" font-family="sans-serif" font-weight="700">書ける必要がある</text>
+
+			<rect x="16" y="86" width="500" height="50" rx="8" fill="url(#i2)"/>
+			<text x="36" y="107" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">水準2　簡単な Mapped Types</text>
+			<text x="36" y="126" fill="#fff" font-size="12" font-family="sans-serif">[K in keyof T]・キー名の変換</text>
+			<text x="720" y="116" fill="#1d7a3c" font-size="13" font-family="sans-serif" font-weight="700">必要になれば書く</text>
+
+			<rect x="16" y="146" width="380" height="50" rx="8" fill="url(#i3)"/>
+			<text x="36" y="167" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">水準3　Conditional Types・infer</text>
+			<text x="36" y="186" fill="#fff" font-size="12" font-family="sans-serif">T extends U ? X : Y</text>
+			<text x="720" y="176" fill="#b8620a" font-size="13" font-family="sans-serif" font-weight="700">読めればよい</text>
+
+			<rect x="16" y="206" width="240" height="50" rx="8" fill="url(#i4)"/>
+			<text x="36" y="227" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">水準4　文字列の型レベル分解</text>
+			<text x="36" y="246" fill="#fff" font-size="12" font-family="sans-serif">Split・再帰・算術</text>
+			<text x="720" y="236" fill="#a51f22" font-size="13" font-family="sans-serif" font-weight="700">読めなくてよい</text>
+
+			<text x="450" y="274" text-anchor="middle" fill="#4a5568" font-size="12.5" font-family="sans-serif">横幅は「実務で使う頻度」。下へ行くほど出番が減る</text>
+		</svg>

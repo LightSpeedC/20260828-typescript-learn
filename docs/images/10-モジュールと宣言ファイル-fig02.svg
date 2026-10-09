@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 280" width="900" height="280" role="img" aria-label="ラッパーで型のない世界を1ファイルに閉じ込める">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i3" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<marker id="i4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			
+			<text x="20" y="28" fill="#a51f22" font-size="13.5" font-family="sans-serif" font-weight="700">ラッパーなし — any が全体に広がる</text>
+
+			<rect x="20" y="42" width="170" height="52" rx="8" fill="url(#i1)"/>
+			<text x="105" y="66" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">型のないライブラリ</text>
+			<text x="105" y="85" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">any</text>
+
+			<rect x="250" y="42" width="140" height="52" rx="8" fill="url(#i1)"/>
+			<text x="320" y="74" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">service.ts</text>
+
+			<rect x="450" y="42" width="140" height="52" rx="8" fill="url(#i1)"/>
+			<text x="520" y="74" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">handler.ts</text>
+
+			<rect x="650" y="42" width="140" height="52" rx="8" fill="url(#i1)"/>
+			<text x="720" y="74" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">main.ts</text>
+
+			<path d="M190,68 L242,68" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M390,68 L442,68" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M590,68 L642,68" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<text x="820" y="72" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">全部 any</text>
+
+			
+			<text x="20" y="158" fill="#1d7a3c" font-size="13.5" font-family="sans-serif" font-weight="700">ラッパーあり — 型のない世界が1ファイルで止まる</text>
+
+			<rect x="20" y="172" width="170" height="52" rx="8" fill="url(#i1)"/>
+			<text x="105" y="196" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">型のないライブラリ</text>
+			<text x="105" y="215" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">any</text>
+
+			<rect x="250" y="164" width="140" height="68" rx="8" fill="url(#i2)"/>
+			<text x="320" y="188" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">wrapper.ts</text>
+			<text x="320" y="206" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">unknown で受けて</text>
+			<text x="320" y="222" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">検証して返す</text>
+
+			<rect x="450" y="172" width="140" height="52" rx="8" fill="url(#i3)"/>
+			<text x="520" y="204" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">handler.ts</text>
+
+			<rect x="650" y="172" width="140" height="52" rx="8" fill="url(#i3)"/>
+			<text x="720" y="204" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">main.ts</text>
+
+			<path d="M190,198 L242,198" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M390,198 L442,198" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M590,198 L642,198" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<text x="820" y="202" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">型が付く</text>
+
+			<text x="450" y="264" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">ライブラリを差し替えるときも、直すのは wrapper.ts だけで済む</text>
+		</svg>

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 250" width="900" height="250" role="img" aria-label="型定義がどこから来るか">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i3" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<marker id="i4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="330" y="14" width="240" height="44" rx="8" fill="#f2f5fb" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="450" y="42" text-anchor="middle" fill="#1c2330" font-size="13.5" font-family="sans-serif" font-weight="600">ライブラリを使いたい</text>
+
+			<rect x="20" y="106" width="266" height="86" rx="8" fill="url(#i1)"/>
+			<text x="153" y="132" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">① ライブラリに同梱</text>
+			<text x="153" y="153" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">何もしなくても型が付く</text>
+			<text x="153" y="173" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">package.json の "types"</text>
+
+			<rect x="317" y="106" width="266" height="86" rx="8" fill="url(#i2)"/>
+			<text x="450" y="132" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">② @types/* を入れる</text>
+			<text x="450" y="153" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">npm i -D @types/node</text>
+			<text x="450" y="173" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">＋ tsconfig の types に列挙</text>
+
+			<rect x="614" y="106" width="266" height="86" rx="8" fill="url(#i3)"/>
+			<text x="747" y="132" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">③ 型定義が存在しない</text>
+			<text x="747" y="153" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">自分で .d.ts を書く</text>
+			<text x="747" y="173" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">またはラッパーで包む</text>
+
+			<path d="M400,60 L180,98" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M450,60 L450,98" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M500,60 L720,98" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+
+			<text x="153" y="216" text-anchor="middle" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">最近のライブラリはこれが多い</text>
+			<text x="450" y="216" text-anchor="middle" fill="#b8620a" font-size="12.5" font-family="sans-serif" font-weight="600">Node の標準 API もここ</text>
+			<text x="747" y="216" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">10 モジュールで扱う</text>
+		</svg>

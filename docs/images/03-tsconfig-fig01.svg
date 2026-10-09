@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 290" width="900" height="290" role="img" aria-label="tsconfig.json が決める3つのこと">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(280,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(280,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i3" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i4" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<marker id="i5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="330" y="16" width="240" height="52" rx="8" fill="url(#i4)"/>
+			<text x="450" y="48" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">tsconfig.json</text>
+
+			<rect x="20" y="128" width="260" height="76" rx="8" fill="url(#i1)"/>
+			<text x="150" y="154" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">検査の厳しさ</text>
+			<text x="150" y="176" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">strict 系</text>
+			<text x="150" y="194" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">危ないコードを弾くか</text>
+
+			<rect x="320" y="128" width="260" height="76" rx="8" fill="url(#i2)"/>
+			<text x="450" y="154" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">出力する JavaScript</text>
+			<text x="450" y="176" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">target ／ lib ／ outDir</text>
+			<text x="450" y="194" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">どの構文・どの標準 API</text>
+
+			<rect x="620" y="128" width="260" height="76" rx="8" fill="url(#i3)"/>
+			<text x="750" y="154" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">import の解決</text>
+			<text x="750" y="176" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">module ／ moduleResolution</text>
+			<text x="750" y="194" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">どのファイルを指すか</text>
+
+			<path d="M400,70 L180,120" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+			<path d="M450,70 L450,120" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+			<path d="M500,70 L720,120" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+
+			<text x="150" y="234" text-anchor="middle" fill="#4a5568" font-size="12.5" font-family="sans-serif">間違えると：危ないコードが通る</text>
+			<text x="450" y="234" text-anchor="middle" fill="#4a5568" font-size="12.5" font-family="sans-serif">間違えると：古い環境で動かない</text>
+			<text x="750" y="234" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">間違えると：モジュールが見つからない</text>
+
+			<rect x="620" y="248" width="260" height="28" rx="6" fill="#fdf0f0" stroke="#e0a0a0"/>
+			<text x="750" y="267" text-anchor="middle" fill="#a51f22" font-size="12" font-family="sans-serif" font-weight="600">実務で最も事故る</text>
+		</svg>

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 290" width="900" height="290" role="img" aria-label="4段階で検出できる範囲が広がる">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i3" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(100,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(100,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i4" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(160,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(160,58%,55%)"/>
+				</linearGradient>
+				<marker id="i5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="16" y="40" width="196" height="76" rx="8" fill="url(#i1)"/>
+			<text x="114" y="66" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">段階1</text>
+			<text x="114" y="88" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">any のまま動かす</text>
+			<text x="114" y="106" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">JSON.parse の戻り値</text>
+
+			<rect x="238" y="40" width="196" height="76" rx="8" fill="url(#i2)"/>
+			<text x="336" y="66" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">段階2</text>
+			<text x="336" y="88" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">型を付ける</text>
+			<text x="336" y="106" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">as Sale[] で仮に通す</text>
+
+			<rect x="460" y="40" width="196" height="76" rx="8" fill="url(#i3)"/>
+			<text x="558" y="66" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">段階3</text>
+			<text x="558" y="88" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">検証を入れる</text>
+			<text x="558" y="106" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">unknown ＋ 型ガード</text>
+
+			<rect x="682" y="40" width="196" height="76" rx="8" fill="url(#i4)"/>
+			<text x="780" y="66" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">段階4</text>
+			<text x="780" y="88" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">エラー処理を整える</text>
+			<text x="780" y="106" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">Result で返す</text>
+
+			<path d="M212,78 L230,78" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+			<path d="M434,78 L452,78" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+			<path d="M656,78 L674,78" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+
+			<text x="20" y="158" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">検出できる範囲</text>
+
+			<rect x="16" y="172" width="196" height="30" rx="5" fill="#fdf0f0" stroke="#e0a0a0"/>
+			<text x="114" y="192" text-anchor="middle" fill="#a51f22" font-size="12" font-family="sans-serif" font-weight="600">何も検出できない</text>
+
+			<rect x="238" y="172" width="418" height="30" rx="5" fill="#fdf6ec" stroke="#e0bd8a"/>
+			<text x="447" y="192" text-anchor="middle" fill="#b8620a" font-size="12" font-family="sans-serif" font-weight="600">打ち間違い（プロパティ名）</text>
+
+			<rect x="460" y="210" width="418" height="30" rx="5" fill="#eef8f0" stroke="#8ac0a0"/>
+			<text x="669" y="230" text-anchor="middle" fill="#1d7a3c" font-size="12" font-family="sans-serif" font-weight="600">データの不備（型・件数）</text>
+
+			<rect x="682" y="248" width="196" height="30" rx="5" fill="#eef8f0" stroke="#8ac0a0"/>
+			<text x="780" y="268" text-anchor="middle" fill="#1d7a3c" font-size="12" font-family="sans-serif" font-weight="600">対処の強制</text>
+		</svg>

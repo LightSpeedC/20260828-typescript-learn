@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" width="900" height="330" role="img" aria-label="名前的型付けと構造的型付けの違い">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(120,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(120,58%,55%)"/>
+				</linearGradient>
+				<marker id="i3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+				<marker id="i4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#a51f22"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			
+			<rect x="20" y="20" width="410" height="52" rx="8" fill="url(#i1)"/>
+			<text x="225" y="42" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">名前的型付け（Java・C#）</text>
+			<text x="225" y="62" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">型の名前が一致しないと互換にならない</text>
+
+			<rect x="40" y="100" width="150" height="74" rx="6" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="115" y="124" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">class User</text>
+			<text x="115" y="146" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">name: String</text>
+
+			<rect x="260" y="100" width="150" height="74" rx="6" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="335" y="124" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">class Animal</text>
+			<text x="335" y="146" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">name: String</text>
+
+			<path d="M195,137 L250,137" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<text x="222" y="128" text-anchor="middle" fill="#a51f22" font-size="17" font-family="sans-serif" font-weight="700">×</text>
+
+			<text x="225" y="202" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">形が同じでも代入できない</text>
+			<text x="225" y="222" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">互換にするには implements や extends が要る</text>
+
+			
+			<rect x="470" y="20" width="410" height="52" rx="8" fill="url(#i2)"/>
+			<text x="675" y="42" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">構造的型付け（TypeScript）</text>
+			<text x="675" y="62" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">形が一致すれば互換になる</text>
+
+			<rect x="490" y="100" width="150" height="74" rx="6" fill="#fff" stroke="#7aa87a" stroke-width="2"/>
+			<text x="565" y="124" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">type User</text>
+			<text x="565" y="146" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">name: string</text>
+
+			<rect x="710" y="100" width="150" height="74" rx="6" fill="#fff" stroke="#7aa87a" stroke-width="2"/>
+			<text x="785" y="124" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">type Animal</text>
+			<text x="785" y="146" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">name: string</text>
+
+			<path d="M645,137 L700,137" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#i3)"/>
+			<text x="672" y="128" text-anchor="middle" fill="#1d7a3c" font-size="15" font-family="sans-serif" font-weight="700">OK</text>
+
+			<text x="675" y="202" text-anchor="middle" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">宣言なしで代入できる</text>
+			<text x="675" y="222" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">互いを知らなくても、形が合えば通る</text>
+
+			<rect x="20" y="250" width="860" height="60" rx="8" fill="#f2f5fb" stroke="#d9dfe8"/>
+			<text x="40" y="274" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">判定の基準</text>
+			<text x="40" y="295" fill="#4a5568" font-size="12.5" font-family="sans-serif">「受け取る側が要求するプロパティを、渡す側がすべて持っているか」だけを見る</text>
+		</svg>

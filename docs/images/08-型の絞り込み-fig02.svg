@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 290" width="900" height="290" role="img" aria-label="never による網羅性チェックの仕組み">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i3" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<marker id="i4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			
+			<text x="20" y="28" fill="#1d7a3c" font-size="13.5" font-family="sans-serif" font-weight="700">すべての分岐を書いた場合</text>
+
+			<rect x="20" y="42" width="150" height="48" rx="8" fill="url(#i1)"/>
+			<text x="95" y="72" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">circle | rect</text>
+
+			<rect x="230" y="42" width="130" height="48" rx="8" fill="url(#i2)"/>
+			<text x="295" y="72" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">case "circle"</text>
+
+			<rect x="410" y="42" width="130" height="48" rx="8" fill="url(#i2)"/>
+			<text x="475" y="72" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">case "rect"</text>
+
+			<rect x="590" y="42" width="150" height="48" rx="8" fill="#fff" stroke="#7aa87a" stroke-width="2"/>
+			<text x="665" y="63" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">default</text>
+			<text x="665" y="81" text-anchor="middle" fill="#1d7a3c" font-size="12" font-family="sans-serif">残りは never</text>
+
+			<path d="M170,66 L222,66" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M360,66 L402,66" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M540,66 L582,66" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+
+			<text x="790" y="70" text-anchor="middle" fill="#1d7a3c" font-size="13" font-family="sans-serif" font-weight="700">通る</text>
+
+			
+			<text x="20" y="150" fill="#a51f22" font-size="13.5" font-family="sans-serif" font-weight="700">union に triangle を足した場合 — 分岐を書き忘れている</text>
+
+			<rect x="20" y="164" width="150" height="48" rx="8" fill="url(#i1)"/>
+			<text x="95" y="186" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif" font-weight="600">circle | rect</text>
+			<text x="95" y="203" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif" font-weight="600">| triangle</text>
+
+			<rect x="230" y="164" width="130" height="48" rx="8" fill="url(#i2)"/>
+			<text x="295" y="194" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">case "circle"</text>
+
+			<rect x="410" y="164" width="130" height="48" rx="8" fill="url(#i2)"/>
+			<text x="475" y="194" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">case "rect"</text>
+
+			<rect x="590" y="164" width="150" height="48" rx="8" fill="url(#i3)"/>
+			<text x="665" y="185" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">default</text>
+			<text x="665" y="203" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">triangle が残る</text>
+
+			<path d="M170,188 L222,188" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M360,188 L402,188" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M540,188 L582,188" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+
+			<text x="790" y="184" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="700">TS2322</text>
+			<text x="790" y="202" text-anchor="middle" fill="#a51f22" font-size="12" font-family="sans-serif" font-weight="600">never に入らない</text>
+
+			<rect x="20" y="238" width="860" height="40" rx="8" fill="#f2f5fb" stroke="#d9dfe8"/>
+			<text x="450" y="263" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">union に種類を足すと、対応が必要な箇所をコンパイラが教えてくれる</text>
+		</svg>

@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 280" width="900" height="280" role="img" aria-label="余剰プロパティチェックは直接書いたときだけ働く">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i3" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<marker id="i4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			
+			<text x="20" y="28" fill="#1d7a3c" font-size="13.5" font-family="sans-serif" font-weight="700">① 変数を経由する — 通る</text>
+
+			<rect x="20" y="42" width="230" height="56" rx="8" fill="url(#i3)"/>
+			<text x="135" y="66" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">const obj = &#123; name, age &#125;</text>
+			<text x="135" y="86" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">いったん変数に入れる</text>
+
+			<rect x="330" y="42" width="180" height="56" rx="8" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="420" y="66" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">形の判定だけ</text>
+			<text x="420" y="86" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">name を持っているか</text>
+
+			<rect x="590" y="42" width="230" height="56" rx="8" fill="url(#i1)"/>
+			<text x="705" y="66" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">const a: User = obj;</text>
+			<text x="705" y="86" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">age が余っていても通る</text>
+
+			<path d="M250,70 L322,70" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M510,70 L582,70" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+
+			
+			<text x="20" y="158" fill="#a51f22" font-size="13.5" font-family="sans-serif" font-weight="700">② オブジェクトリテラルを直接書く — エラー</text>
+
+			<rect x="20" y="172" width="230" height="56" rx="8" fill="url(#i3)"/>
+			<text x="135" y="196" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">&#123; name, age &#125; をその場で</text>
+			<text x="135" y="216" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">変数を経由しない</text>
+
+			<rect x="330" y="172" width="180" height="56" rx="8" fill="#fff" stroke="#e0a0a0" stroke-width="2"/>
+			<text x="420" y="196" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">余剰プロパティ</text>
+			<text x="420" y="216" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">チェックが働く</text>
+
+			<rect x="590" y="172" width="230" height="56" rx="8" fill="url(#i2)"/>
+			<text x="705" y="196" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">error TS2353</text>
+			<text x="705" y="216" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">age は User に存在しない</text>
+
+			<path d="M250,200 L322,200" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M510,200 L582,200" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+
+			<text x="450" y="264" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">同じ形なのに結果が違う。②を厳しくしているのは打ち間違いを見つけるため</text>
+		</svg>

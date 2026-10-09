@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="3種類の読者を1つの資料でカバーする図">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(205,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(205,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(130,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(130,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i3" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i4" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(280,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(280,58%,55%)"/>
+				</linearGradient>
+				<marker id="i5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="20" y="34" width="210" height="58" rx="8" fill="url(#i1)"/>
+			<text x="125" y="60" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">読者A</text>
+			<text x="125" y="80" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif">Node + JavaScript 経験者</text>
+
+			<rect x="20" y="120" width="210" height="58" rx="8" fill="url(#i2)"/>
+			<text x="125" y="146" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">読者B</text>
+			<text x="125" y="166" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif">Java 経験者</text>
+
+			<rect x="20" y="206" width="210" height="58" rx="8" fill="url(#i3)"/>
+			<text x="125" y="232" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">読者C</text>
+			<text x="125" y="252" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif">C# 経験者</text>
+
+			<rect x="330" y="140" width="230" height="66" rx="8" fill="none" stroke="#6b7686" stroke-width="2" stroke-dasharray="6 4"/>
+			<text x="445" y="168" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">補足枠</text>
+			<text x="445" y="189" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">「Java・C# から来た人へ」</text>
+
+			<rect x="650" y="110" width="230" height="86" rx="8" fill="url(#i4)"/>
+			<text x="765" y="142" text-anchor="middle" fill="#fff" font-size="15" font-family="sans-serif" font-weight="600">TypeScript 学習資料</text>
+			<text x="765" y="164" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif">本文は JavaScript 基準</text>
+			<text x="765" y="183" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif">本編12章 ＋ 付録4本</text>
+
+			<path d="M230,63 L640,130" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+			<path d="M230,149 L322,163" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+			<path d="M230,235 L322,190" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+			<path d="M560,173 L640,160" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+
+			<text x="420" y="88" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">そのまま本文へ</text>
+		</svg>

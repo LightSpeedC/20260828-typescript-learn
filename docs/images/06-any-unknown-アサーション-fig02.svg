@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" width="900" height="260" role="img" aria-label="as は型の世界だけを書き換える">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<marker id="i3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<line x1="20" y1="128" x2="880" y2="128" stroke="#c8cedb" stroke-width="1.5" stroke-dasharray="6 4"/>
+			<text x="30" y="34" fill="#4a5568" font-size="12.5" font-family="sans-serif" font-weight="600">型の世界（開発中だけ存在する）</text>
+			<text x="30" y="250" fill="#4a5568" font-size="12.5" font-family="sans-serif" font-weight="600">値の世界（実行時に存在する）</text>
+
+			
+			<rect x="140" y="46" width="200" height="52" rx="8" fill="url(#i1)"/>
+			<text x="240" y="78" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">unknown</text>
+
+			<rect x="470" y="46" width="200" height="52" rx="8" fill="url(#i2)"/>
+			<text x="570" y="70" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">User</text>
+			<text x="570" y="89" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">「User だと思え」</text>
+
+			<path d="M340,72 L462,72" stroke="#a51f22" stroke-width="2.5" fill="none" marker-end="url(#i3)"/>
+			<text x="401" y="62" text-anchor="middle" fill="#a51f22" font-size="13" font-family="sans-serif" font-weight="700">as User</text>
+
+			<text x="740" y="66" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">検査が黙る</text>
+			<text x="740" y="86" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">data.age が number に見える</text>
+
+			
+			<rect x="140" y="160" width="200" height="52" rx="8" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="240" y="184" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">&#123; name: "Alice" &#125;</text>
+			<text x="240" y="203" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">age は存在しない</text>
+
+			<rect x="470" y="160" width="200" height="52" rx="8" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="570" y="184" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">&#123; name: "Alice" &#125;</text>
+			<text x="570" y="203" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">何も変わっていない</text>
+
+			<path d="M340,186 L462,186" stroke="#8a94a4" stroke-width="2" fill="none" stroke-dasharray="5 4" marker-end="url(#i3)"/>
+			<text x="401" y="176" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">値は素通り</text>
+
+			<text x="740" y="180" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">実行時に落ちる</text>
+			<text x="740" y="200" fill="#a51f22" font-size="12" font-family="sans-serif">Cannot read properties of undefined</text>
+		</svg>

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 270" width="900" height="270" role="img" aria-label="コールバックは引数が少なくても渡せる">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<marker id="i3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="20" y="20" width="230" height="90" rx="8" fill="url(#i1)"/>
+			<text x="135" y="46" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">map が渡すもの</text>
+			<text x="135" y="68" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">① 要素　② 添字　③ 配列全体</text>
+			<text x="135" y="90" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">常に3つ渡される</text>
+
+			<rect x="380" y="14" width="380" height="42" rx="8" fill="url(#i2)"/>
+			<text x="570" y="41" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">(x) =&gt; ...　　1つだけ受け取る</text>
+
+			<rect x="380" y="66" width="380" height="42" rx="8" fill="url(#i2)"/>
+			<text x="570" y="93" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">(x, i) =&gt; ...　　2つ受け取る</text>
+
+			<rect x="380" y="118" width="380" height="42" rx="8" fill="url(#i2)"/>
+			<text x="570" y="145" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">(x, i, arr) =&gt; ...　　3つ受け取る</text>
+
+			<rect x="380" y="170" width="380" height="42" rx="8" fill="#fff" stroke="#a51f22" stroke-width="2"/>
+			<text x="570" y="197" text-anchor="middle" fill="#a51f22" font-size="13" font-family="sans-serif" font-weight="600">(x, i, arr, extra) =&gt; ...　　4つ目はエラー</text>
+
+			<path d="M250,60 L372,35" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#i3)"/>
+			<path d="M250,68 L372,87" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#i3)"/>
+			<path d="M250,80 L372,139" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#i3)"/>
+			<path d="M250,92 L372,191" stroke="#a51f22" stroke-width="2" fill="none" marker-end="url(#i3)"/>
+
+			<text x="810" y="42" text-anchor="middle" fill="#1d7a3c" font-size="13" font-family="sans-serif" font-weight="700">OK</text>
+			<text x="810" y="94" text-anchor="middle" fill="#1d7a3c" font-size="13" font-family="sans-serif" font-weight="700">OK</text>
+			<text x="810" y="146" text-anchor="middle" fill="#1d7a3c" font-size="13" font-family="sans-serif" font-weight="700">OK</text>
+			<text x="810" y="198" text-anchor="middle" fill="#a51f22" font-size="13" font-family="sans-serif" font-weight="700">×</text>
+
+			<text x="450" y="248" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">少ない分には通る。多い分は「渡されない値」を要求するのでエラーになる</text>
+		</svg>

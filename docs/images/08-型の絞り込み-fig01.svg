@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="判別可能ユニオンの仕組み">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i3" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<marker id="i4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="330" y="20" width="240" height="54" rx="8" fill="#f2f5fb" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="450" y="43" text-anchor="middle" fill="#1c2330" font-size="14" font-family="sans-serif" font-weight="600">r.status を見る</text>
+			<text x="450" y="63" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">判別のためのプロパティ</text>
+
+			<rect x="20" y="140" width="250" height="90" rx="8" fill="url(#i1)"/>
+			<text x="145" y="166" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">"success"</text>
+			<text x="145" y="190" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">status: "success"</text>
+			<text x="145" y="210" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">data: string</text>
+
+			<rect x="325" y="140" width="250" height="90" rx="8" fill="url(#i2)"/>
+			<text x="450" y="166" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">"error"</text>
+			<text x="450" y="190" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">status: "error"</text>
+			<text x="450" y="210" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">message: string</text>
+
+			<rect x="630" y="140" width="250" height="90" rx="8" fill="url(#i3)"/>
+			<text x="755" y="166" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">"loading"</text>
+			<text x="755" y="190" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">status: "loading"</text>
+			<text x="755" y="210" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif">（他のプロパティなし）</text>
+
+			<path d="M400,78 L160,132" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M450,78 L450,132" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M500,78 L740,132" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+
+			<text x="450" y="266" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">分岐に入った時点で、その形のプロパティだけが使える</text>
+			<text x="450" y="286" text-anchor="middle" fill="#4a5568" font-size="12.5" font-family="sans-serif">"loading" の分岐で r.data と書くとエラーになる</text>
+		</svg>

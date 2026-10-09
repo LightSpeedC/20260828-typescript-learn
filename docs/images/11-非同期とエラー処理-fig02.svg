@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" width="900" height="260" role="img" aria-label="catch は何でも受け取るため unknown になる">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i3" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i4" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<marker id="i5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<text x="20" y="28" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">JavaScript では何でも throw できる</text>
+
+			<rect x="20" y="42" width="160" height="34" rx="6" fill="url(#i1)"/>
+			<text x="100" y="65" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">new Error(...)</text>
+
+			<rect x="20" y="84" width="160" height="34" rx="6" fill="url(#i2)"/>
+			<text x="100" y="107" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">"文字列"</text>
+
+			<rect x="20" y="126" width="160" height="34" rx="6" fill="url(#i3)"/>
+			<text x="100" y="149" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">42</text>
+
+			<rect x="20" y="168" width="160" height="34" rx="6" fill="url(#i4)"/>
+			<text x="100" y="191" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">&#123; code: "E001" &#125;</text>
+
+			<rect x="330" y="90" width="180" height="64" rx="8" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="420" y="116" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">catch (e)</text>
+			<text x="420" y="138" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">e は unknown</text>
+
+			<path d="M180,59 L322,110" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+			<path d="M180,101 L322,118" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+			<path d="M180,143 L322,128" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+			<path d="M180,185 L322,138" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+
+			<rect x="600" y="60" width="270" height="44" rx="8" fill="url(#i4)"/>
+			<text x="735" y="88" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">e instanceof Error → Error として扱う</text>
+
+			<rect x="600" y="116" width="270" height="44" rx="8" fill="url(#i2)"/>
+			<text x="735" y="144" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">それ以外 → String(e) でログに残す</text>
+
+			<path d="M510,110 L592,84" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+			<path d="M510,130 L592,138" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i5)"/>
+
+			<text x="450" y="236" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">型で捕まえ分けられないため、catch の中で自分で判定する</text>
+		</svg>

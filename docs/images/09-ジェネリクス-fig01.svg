@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 280" width="900" height="280" role="img" aria-label="any とジェネリクスの違い">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i3" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<marker id="i4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<text x="20" y="28" fill="#a51f22" font-size="13.5" font-family="sans-serif" font-weight="700">any[] で受けた場合 — 入れた型が出口で失われる</text>
+
+			<rect x="20" y="42" width="180" height="52" rx="8" fill="url(#i1)"/>
+			<text x="110" y="74" text-anchor="middle" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">string[]</text>
+
+			<rect x="270" y="42" width="240" height="52" rx="8" fill="url(#i2)"/>
+			<text x="390" y="66" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">firstAny(items: any[]): any</text>
+			<text x="390" y="85" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">型の情報がここで消える</text>
+
+			<rect x="580" y="42" width="180" height="52" rx="8" fill="url(#i2)"/>
+			<text x="670" y="74" text-anchor="middle" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">any</text>
+
+			<path d="M200,68 L262,68" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M510,68 L572,68" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<text x="800" y="72" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">検査が効かない</text>
+
+			<text x="20" y="158" fill="#1d7a3c" font-size="13.5" font-family="sans-serif" font-weight="700">&lt;T&gt; で受けた場合 — 入れた型がそのまま出口に届く</text>
+
+			<rect x="20" y="172" width="180" height="52" rx="8" fill="url(#i1)"/>
+			<text x="110" y="204" text-anchor="middle" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">string[]</text>
+
+			<rect x="270" y="172" width="240" height="52" rx="8" fill="url(#i3)"/>
+			<text x="390" y="196" text-anchor="middle" fill="#fff" font-size="13" font-family="sans-serif" font-weight="600">first&lt;T&gt;(items: T[]): T</text>
+			<text x="390" y="215" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">T = string と決まる</text>
+
+			<rect x="580" y="172" width="180" height="52" rx="8" fill="url(#i1)"/>
+			<text x="670" y="204" text-anchor="middle" fill="#fff" font-size="13.5" font-family="sans-serif" font-weight="600">string</text>
+
+			<path d="M200,198 L262,198" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M510,198 L572,198" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<text x="800" y="202" text-anchor="middle" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">検査が効く</text>
+
+			<text x="450" y="262" text-anchor="middle" fill="#4a5568" font-size="12.5" font-family="sans-serif">T は「呼び出し時に決まる型」の入れ物。渡した値から自動で決まる</text>
+		</svg>

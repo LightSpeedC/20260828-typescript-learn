@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 270" width="900" height="270" role="img" aria-label="戻り値と引数で代入できる向きが逆になる">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(210,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(210,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<marker id="i3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#1d7a3c"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="330" y="14" width="240" height="30" rx="6" fill="#f2f5fb" stroke="#d9dfe8"/>
+			<text x="450" y="34" text-anchor="middle" fill="#1c2330" font-size="12.5" font-family="sans-serif" font-weight="600">Dog は Animal より狭い型</text>
+
+			
+			<text x="20" y="80" fill="#1c2330" font-size="13.5" font-family="sans-serif" font-weight="700">戻り値 — 狭い型を返す関数を渡せる（共変）</text>
+
+			<rect x="60" y="94" width="220" height="52" rx="8" fill="url(#i1)"/>
+			<text x="170" y="118" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">要求: () =&gt; Animal</text>
+			<text x="170" y="137" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">Animal が返ればよい</text>
+
+			<rect x="480" y="94" width="220" height="52" rx="8" fill="url(#i2)"/>
+			<text x="590" y="118" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">渡す: () =&gt; Dog</text>
+			<text x="590" y="137" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">Dog は Animal でもある</text>
+
+			<path d="M470,120 L292,120" stroke="#1d7a3c" stroke-width="2.5" fill="none" marker-end="url(#i3)"/>
+			<text x="740" y="124" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="600">狭い → 広い ならOK</text>
+
+			
+			<text x="20" y="192" fill="#a51f22" font-size="13.5" font-family="sans-serif" font-weight="700">引数 — 広い型を受け取る関数を渡せる（反変・向きが逆）</text>
+
+			<rect x="60" y="206" width="220" height="52" rx="8" fill="url(#i1)"/>
+			<text x="170" y="230" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">要求: (d: Dog) =&gt; void</text>
+			<text x="170" y="249" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">Dog を渡して呼ぶ</text>
+
+			<rect x="480" y="206" width="220" height="52" rx="8" fill="url(#i2)"/>
+			<text x="590" y="230" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">渡す: (a: Animal) =&gt; void</text>
+			<text x="590" y="249" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">Animal なら何でも扱える</text>
+
+			<path d="M470,232 L292,232" stroke="#1d7a3c" stroke-width="2.5" fill="none" marker-end="url(#i3)"/>
+			<text x="740" y="228" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">広い → 狭い でOK</text>
+			<text x="740" y="248" fill="#4a5568" font-size="12" font-family="sans-serif">戻り値と逆向き</text>
+		</svg>

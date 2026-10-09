@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" width="900" height="260" role="img" aria-label="union は絞り込んでから使う">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(280,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(280,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i3" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(40,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(40,58%,55%)"/>
+				</linearGradient>
+				<marker id="i4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+					<path d="M0,0 L10,5 L0,10 z" fill="#6b7686"/>
+				</marker>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect x="20" y="98" width="210" height="64" rx="8" fill="url(#i1)"/>
+			<text x="125" y="124" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">string | number</text>
+			<text x="125" y="146" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">共通の操作しかできない</text>
+
+			<rect x="300" y="106" width="180" height="48" rx="8" fill="#fff" stroke="#8aa0c0" stroke-width="2"/>
+			<text x="390" y="136" text-anchor="middle" fill="#1c2330" font-size="13" font-family="sans-serif" font-weight="600">typeof x === "string"</text>
+
+			<rect x="560" y="34" width="230" height="64" rx="8" fill="url(#i2)"/>
+			<text x="675" y="60" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">string</text>
+			<text x="675" y="82" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">toUpperCase() が使える</text>
+
+			<rect x="560" y="162" width="230" height="64" rx="8" fill="url(#i3)"/>
+			<text x="675" y="188" text-anchor="middle" fill="#fff" font-size="14" font-family="sans-serif" font-weight="600">number</text>
+			<text x="675" y="210" text-anchor="middle" fill="#fff" font-size="12" font-family="sans-serif">toFixed() が使える</text>
+
+			<path d="M230,130 L292,130" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M480,120 L552,80" stroke="#1d7a3c" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+			<path d="M480,142 L552,186" stroke="#6b7686" stroke-width="2" fill="none" marker-end="url(#i4)"/>
+
+			<text x="516" y="88" fill="#1d7a3c" font-size="12" font-family="sans-serif" font-weight="600">true</text>
+			<text x="512" y="178" fill="#4a5568" font-size="12" font-family="sans-serif">false</text>
+
+			<text x="125" y="192" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">この位置では</text>
+			<text x="125" y="210" text-anchor="middle" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="600">toUpperCase() は呼べない</text>
+		</svg>

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 250" width="900" height="250" role="img" aria-label="順次実行と並行実行のタイムライン">
+			<defs>
+				<linearGradient id="i1" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(0,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(0,58%,55%)"/>
+				</linearGradient>
+				<linearGradient id="i2" x1="0" y1="1" x2="0" y2="0">
+					<stop offset="0" stop-color="hsl(140,78%,25%)"/>
+					<stop offset="1" stop-color="hsl(140,58%,55%)"/>
+				</linearGradient>
+			</defs>
+	<rect width="100%" height="100%" fill="#ffffff"/>
+
+			<rect width="100%" height="100%" fill="#ffffff"/>
+
+			
+			<line x1="150" y1="220" x2="820" y2="220" stroke="#8a94a4" stroke-width="1.5"/>
+			<line x1="150" y1="214" x2="150" y2="226" stroke="#8a94a4" stroke-width="1.5"/>
+			<line x1="373" y1="214" x2="373" y2="226" stroke="#8a94a4" stroke-width="1.5"/>
+			<line x1="596" y1="214" x2="596" y2="226" stroke="#8a94a4" stroke-width="1.5"/>
+			<line x1="819" y1="214" x2="819" y2="226" stroke="#8a94a4" stroke-width="1.5"/>
+			<text x="150" y="242" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">0ms</text>
+			<text x="373" y="242" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">100ms</text>
+			<text x="596" y="242" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">200ms</text>
+			<text x="819" y="242" text-anchor="middle" fill="#4a5568" font-size="12" font-family="sans-serif">300ms</text>
+
+			
+			<text x="20" y="52" fill="#a51f22" font-size="13" font-family="sans-serif" font-weight="700">順次: await を2回</text>
+			<rect x="150" y="30" width="446" height="34" rx="6" fill="url(#i1)"/>
+			<text x="373" y="53" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">wait(200, "A")</text>
+			<rect x="596" y="30" width="223" height="34" rx="6" fill="url(#i1)"/>
+			<text x="707" y="53" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">wait(100, "B")</text>
+			<text x="840" y="52" fill="#a51f22" font-size="12.5" font-family="sans-serif" font-weight="700">300ms</text>
+
+			
+			<text x="20" y="120" fill="#1d7a3c" font-size="13" font-family="sans-serif" font-weight="700">並行: Promise.all</text>
+			<rect x="150" y="98" width="446" height="34" rx="6" fill="url(#i2)"/>
+			<text x="373" y="121" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">wait(200, "C")</text>
+			<rect x="150" y="140" width="223" height="34" rx="6" fill="url(#i2)"/>
+			<text x="261" y="163" text-anchor="middle" fill="#fff" font-size="12.5" font-family="sans-serif" font-weight="600">wait(100, "D")</text>
+			<text x="620" y="120" fill="#1d7a3c" font-size="12.5" font-family="sans-serif" font-weight="700">200ms</text>
+
+			<line x1="596" y1="24" x2="596" y2="200" stroke="#c8cedb" stroke-width="1" stroke-dasharray="4 4"/>
+
+			<text x="150" y="196" fill="#4a5568" font-size="12.5" font-family="sans-serif">互いに依存しない処理は Promise.all でまとめる。依存があるなら順次にする</text>
+		</svg>
