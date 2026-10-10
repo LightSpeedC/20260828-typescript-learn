@@ -29,7 +29,7 @@
 	<div class="inner">
 		<h1>09. ジェネリクス</h1>
 		<p class="lead">型を引数として受け取る ／ Java・C# との違い</p>
-		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-10-10</p>
 	</div>
 </div>
 
@@ -202,9 +202,9 @@ const a = getProp(user, "age");      // number
 const x = getProp(user, "email");
 //                      ~~~~~~~
 // error TS2345: Argument of type '"email"' is not assignable to
-//               parameter of type '"name" | "age"'.
+//               parameter of type '"age" | "name"'.
 //
-// 訳: 型 '"email"' の引数を型 '"name" | "age"' のパラメーターに割り当てることはできません。</code></pre>
+// 訳: 型 '"email"' の引数を型 '"age" | "name"' のパラメーターに割り当てることはできません。</code></pre>
 
 	<div class="callout">
 		<p><strong>存在しないキーを弾き、キーごとに戻り値の型が変わります。</strong></p>
