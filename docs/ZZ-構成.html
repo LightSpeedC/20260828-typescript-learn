@@ -32,7 +32,7 @@
 	<div class="inner">
 		<h1>ZZ. 資料の構成</h1>
 		<p class="lead">Node+JavaScript／Java／C# のいずれかを知っている読者を対象にした、本編12章＋付録4本のカリキュラム設計</p>
-		<p class="date">📅 作成: 2026-08-28 / 更新: 2026-08-29 ／ ステータス: 本編12章 ＋ 付録4本 完成</p>
+		<p class="date">📅 作成: 2026-08-28 / 更新: 2026-10-10 ／ ステータス: 本編12章 ＋ 付録4本 完成</p>
 	</div>
 </div>
 
@@ -736,7 +736,7 @@
 
 	<h2>ディレクトリ構成</h2>
 
-<pre><code class="language-typescript">typescript-learn/
+<pre><code class="language-text">typescript-learn/
 ├─ index.html              README.html へのリダイレクト
 ├─ README.html             原本（目次・約束事・逆引き入口）
 ├─ README.md               生成物
@@ -781,7 +781,7 @@
 	</table>
 	</div>
 
-<pre><code class="language-typescript"># 検証用プロジェクトの作り方
+<pre><code class="language-shell"># 検証用プロジェクトの作り方
 cd tmp
 npm init -y
 npm i -D typescript tsx
@@ -793,7 +793,23 @@ npx tsx ファイル名.ts            # 実行結果の実物を得る</code></p
 	<div class="callout callout-important">
 		<p><strong>バージョンは必ず実測します。</strong></p>
 		<p>この構成案を書いた時点では TypeScript 5.x 系を想定していましたが、<strong>実際の環境は 7.0.2 でした。</strong>想定と実機は食い違います。<strong>動作確認環境は README に明記</strong>し、実測した値を書きます。</p>
-		<p>本資料は <strong>TypeScript 7.0.2 と 5.9.3 の両方で検証</strong>しました。エラーメッセージ・<code>--pretty</code> の表示形式・出力される JavaScript のいずれにも差はありません。実行環境は <strong>Node.js 26 系</strong>を対象とします。</p>
+		<p>どの版の組み合わせで検証したかは、下の「検証の履歴」に残します。実行環境は <strong>Node.js 26 系</strong>を対象とします。</p>
+	</div>
+
+	<h2 id="verify-history">検証の履歴</h2>
+
+	<p>新しい検証を上に足します。過去の行は書き換えません。全コード例の型検査は <code>tools/40_test/verify-versions.ts</code> で行い、版ごとのエラーの差を出します。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">日付</th><th class="nowrap">TypeScript</th><th class="nowrap">Node.js</th><th class="nowrap">npm</th><th>対象</th><th>結果</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">2026-10-10</td><td class="nowrap">7.0.2 ・ 6.0.3</td><td class="nowrap">26.10.0</td><td class="nowrap">11.19.1</td><td>全資料のコード例 177 本の型検査、<code>docs\samples\</code> の実行</td><td>⚠️ 差 2 種。union の並び順（7.0.2 は <code>"age" | "name"</code>、6.0.3 は <code>"name" | "age"</code>。09 章を 7.0.2 の出力に直した）と、未定義名への候補の提示（7.0.2 は <code>TS2552</code>、6.0.3 は <code>TS2304</code>。断片のコードだけで、本文には出ない）</td></tr>
+			<tr><td class="nowrap">2026-08-29</td><td class="nowrap">7.0.2 ・ 5.9.3</td><td class="nowrap">26.8.1</td><td class="nowrap">11.19.0</td><td>全資料</td><td>✅ エラーメッセージ・<code>--pretty</code> の表示形式・出力される JavaScript に差なし</td></tr>
+		</tbody>
+	</table>
 	</div>
 
 	<div class="callout callout-warning">
@@ -840,7 +856,7 @@ npx tsx ファイル名.ts            # 実行結果の実物を得る</code></p
 		<p>目次の資料番号を直し忘れると、02 の目次が <code>01.1</code>〜と表示されます。<strong>本文の見出しは <code>02.1</code> なので、目次と本文で番号が食い違います。</strong>SVG の id は、重複しても片方の図が正しく表示されることがあり、崩れて初めて気づきます。<strong>機械的に確認します。</strong></p>
 	</div>
 
-<pre><code class="language-typescript"># 目次の資料番号がファイル名の番号と一致しているか
+<pre><code class="language-powershell"># 目次の資料番号がファイル名の番号と一致しているか
 Select-String -Path docs\*.html -Pattern 'content: "([0-9A]\w)\." counter'
 
 # SVG の defs id に、そのファイルの番号が入っているか
