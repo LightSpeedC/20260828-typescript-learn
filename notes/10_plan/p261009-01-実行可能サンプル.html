@@ -263,7 +263,7 @@ tr:nth-child(even) td { background: #fafbfe; }
 	<div class="inner">
 		<h1>計画 p261009-01 — サンプルコードをページ上で実行できるようにする</h1>
 		<p class="lead">jsprimer のように、資料のコードをその場で実行して出力を見られるようにする。変換ライブラリを <code>docs/js/lib/</code> に置き、CDN を使わない</p>
-		<p class="date">📅 作成: 2026-10-09 / 更新: 2026-10-09</p>
+		<p class="date">📅 作成: 2026-10-09 / 更新: 2026-10-10</p>
 	</div>
 </div>
 
@@ -315,7 +315,7 @@ tr:nth-child(even) td { background: #fafbfe; }
 <tr><td class="nowrap">対象の指定</td><td>コードブロックの前に <code>&lt;!-- js-console --&gt;</code> を書いたものだけ</td><td>同じ考え方（<code>data-run</code>）</td></tr>
 <tr><td class="nowrap">実行の場所</td><td>非表示の iframe ＋ <code>postMessage</code>（codemirror-console）</td><td>Web Worker</td></tr>
 <tr><td class="nowrap">編集</td><td>CodeMirror 5 で編集して再実行</td><td><code>textarea</code> で編集して再実行</td></tr>
-<tr><td class="nowrap">変換</td><td>無し（JavaScript をそのまま実行）</td><td>TypeScript 5.9.3 で型検査と変換</td></tr>
+<tr><td class="nowrap">変換</td><td>無し（JavaScript をそのまま実行）</td><td>TypeScript 6.0.3 で型検査と変換</td></tr>
 <tr><td class="nowrap">検証</td><td>power-doctest。<code>式; // =&gt; 値</code> の注記をビルド時に比較テストへ変換</td><td>同じ書き方の注記を使う</td></tr>
 </tbody>
 </table>
@@ -326,7 +326,7 @@ tr:nth-child(even) td { background: #fafbfe; }
 <table>
 <thead><tr><th>論点</th><th>決定</th><th>理由</th></tr></thead>
 <tbody>
-<tr><td class="nowrap">1. 変換器</td><td>TypeScript 5.9.3 の <code>lib/typescript.js</code> を <code>docs/js/lib/</code> に置く</td><td>型エラーを見せられるのはこれだけ。「実行」を押したときだけ読み込む</td></tr>
+<tr><td class="nowrap">1. 変換器</td><td>TypeScript 6.0.3 の <code>lib/typescript.js</code> を <code>docs/js/lib/</code> に置く</td><td>型エラーを見せられるのはこれだけ。「実行」を押したときだけ読み込む</td></tr>
 <tr><td class="nowrap">2. 実行の場所</td><td>Web Worker</td><td>無限ループでもページが固まらず、時間切れで止められる</td></tr>
 <tr><td class="nowrap">3. 対象の指定</td><td><code>&lt;pre data-run&gt;</code> を付けたものだけ</td><td>断片・Node 専用の例に動かないボタンを並べない</td></tr>
 <tr><td class="nowrap">4. 編集</td><td><code>textarea</code> に差し替えて編集・再実行できる</td><td>ライブラリを増やさずに「書き換えて試す」を再現する</td></tr>
@@ -339,19 +339,20 @@ tr:nth-child(even) td { background: #fafbfe; }
 <p><strong>注記は <code>data-run</code> を付けるコードにだけ書く。</strong>型エラーは注記ではなく、エラー番号（<code>TS2345</code> 等）で照合する。既存の <code>$ npx tsx</code> の結果ブロックと内容が重なるものは、手順 4 で残すか消すかを決める。</p>
 </div>
 
-<h2>変換器の実測（手順 2・2026-10-09）</h2>
+<h2>変換器の実測（手順 2・2026-10-10）</h2>
 <div class="tablewrap">
 <table>
 <thead><tr><th>項目</th><th>値</th></tr></thead>
 <tbody>
-<tr><td><code>lib/typescript.js</code></td><td class="num">9,112,572 バイト（gzip 後 1,646,996 バイト）</td></tr>
-<tr><td>型検査に要る <code>lib.es*.d.ts</code></td><td class="num">89 本 575,031 バイト</td></tr>
-<tr><td>読込（Node v26.10.0）</td><td class="num">146〜161 ms</td></tr>
-<tr><td>型検査＋変換 1 回目</td><td class="num">294〜1,101 ms</td></tr>
-<tr><td>型検査＋変換 2 回目以降</td><td class="num">141〜147 ms</td></tr>
+<tr><td><code>lib/typescript.js</code></td><td class="num">9,144,216 バイト（gzip 後 1,652,436 バイト）</td></tr>
+<tr><td>型検査に要る <code>lib.es*.d.ts</code></td><td class="num">97 本 618,660 バイト</td></tr>
+<tr><td>読込（Node v26.10.0）</td><td class="num">約 167 ms</td></tr>
+<tr><td>型検査＋変換 1 回目</td><td class="num">298〜928 ms</td></tr>
+<tr><td>型検査＋変換 2 回目以降</td><td class="num">144〜165 ms</td></tr>
 </tbody>
 </table>
 </div>
+<p>6.0.3 は 7 系と違い、JS の API を持つ（<code>main</code> が <code>./lib/typescript.js</code>）。<code>docs/samples/</code> を 6.0.3 の <code>tsc</code> で型検査し、7.0.2 と同じくエラー 0 件だった。</p>
 <p>3 行のコード（<code>greet(1)</code> を含む）で <code>TS2345</code> が出ることも確かめた。ブラウザでの時間は未実測で、手順 3 で測る。<code>console</code> の型は <code>lib.dom.d.ts</code> を読まずに、1 行の宣言で足りた。</p>
 </section>
 <section class="ch03" id="ch03">
