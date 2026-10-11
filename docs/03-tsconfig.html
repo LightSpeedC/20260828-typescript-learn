@@ -29,7 +29,7 @@
 	<div class="inner">
 		<h1>03. tsconfig</h1>
 		<p class="lead">検査の厳しさ・出力する JavaScript・<code>import</code> の解決を決める</p>
-		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-10-11</p>
 	</div>
 </div>
 
@@ -180,7 +180,7 @@
 
 	<h2>TypeScript 7 では既定で有効になった</h2>
 
-	<p><span class="badge b-ts7">TS7</span> <strong>TypeScript 7 は <code>strict</code> が既定で <code>true</code> です。</strong>5 系は既定で <code>false</code> でした。</p>
+	<p><span class="badge b-ts7">TS7</span> <strong>TypeScript 7 は <code>strict</code> が既定で <code>true</code> です。</strong>6.0.3 でも同じで、5 系は既定で <code>false</code> でした。</p>
 
 <pre><code class="language-typescript">// strict-test.ts
 function greet(name) {
@@ -196,6 +196,7 @@ console.log(u.name.length);</code></pre>
 		</thead>
 		<tbody>
 			<tr><td class="nowrap">TypeScript 7.0.2</td><td class="nowrap"><code>npx tsc --noEmit</code></td><td><span class="badge b-ng">エラー2件</span> <code>TS7006</code> と <code>TS18048</code></td></tr>
+			<tr><td class="nowrap">TypeScript 6.0.3</td><td class="nowrap"><code>npx tsc --noEmit</code></td><td><span class="badge b-ng">エラー2件</span> <code>TS7006</code> と <code>TS18048</code></td></tr>
 			<tr><td class="nowrap">TypeScript 5.9.3</td><td class="nowrap"><code>npx tsc --noEmit</code></td><td><span class="badge b-ok">エラーなし</span> 素通りする</td></tr>
 		</tbody>
 	</table>

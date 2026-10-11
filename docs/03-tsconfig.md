@@ -2,7 +2,7 @@
 
 検査の厳しさ・出力する JavaScript・`import` の解決を決める
 
-> 📅 作成: 2026-08-29 / 更新: 2026-08-29
+> 📅 作成: 2026-08-29 / 更新: 2026-10-11
 
 [02. 実行環境](02-実行環境.md) [04. 型の基本](04-型の基本.md) [資料トップへ戻る](../README.md)
 
@@ -71,7 +71,7 @@ Node で動かす前提なら、まずこれで足ります。
 
 ### TypeScript 7 では既定で有効になった
 
-**TS7** <strong>TypeScript 7 は `strict` が既定で `true` です。</strong>5 系は既定で `false` でした。
+**TS7** <strong>TypeScript 7 は `strict` が既定で `true` です。</strong>6.0.3 でも同じで、5 系は既定で `false` でした。
 
 ```typescript
 // strict-test.ts
@@ -85,6 +85,7 @@ console.log(u.name.length);
 | バージョン | 設定なしで実行 | 結果 |
 |---|---|---|
 | TypeScript 7.0.2 | `npx tsc --noEmit` | ❌ **エラー2件** `TS7006` と `TS18048` |
+| TypeScript 6.0.3 | `npx tsc --noEmit` | ❌ **エラー2件** `TS7006` と `TS18048` |
 | TypeScript 5.9.3 | `npx tsc --noEmit` | ✅ **エラーなし** 素通りする |
 
 > [!IMPORTANT]
