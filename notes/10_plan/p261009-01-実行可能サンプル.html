@@ -254,6 +254,12 @@ tr:nth-child(even) td { background: #fafbfe; }
 .toc ol { counter-reset: tocnum; }
 .toc li { counter-increment: tocnum; }
 .toc ol a::before { content: counter(tocnum) "."; }
+
+/* README へ戻るリンク */
+.backlink { margin: 18px 0 0; }
+a.doclink { display: inline-block; background: linear-gradient(100deg, var(--navy1, #12224d), var(--navy2, #2f5fbf)); color: #fff; border-radius: 6px; padding: 0 9px; text-decoration: none; }
+.navicon { width: 16px; height: 16px; vertical-align: -2px; }
+footer { max-width: 1600px; margin: 0 auto; padding: 18px 30px 30px; }
 </style>
 </head>
 
@@ -268,6 +274,8 @@ tr:nth-child(even) td { background: #fafbfe; }
 </div>
 
 <div class="wrap">
+
+<p class="backlink"><a class="doclink" href="../../README.html" aria-label="README へ戻る"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg></a></p>
 
 <div class="toc">
 	<h2>目次</h2>
@@ -397,6 +405,10 @@ tr:nth-child(even) td { background: #fafbfe; }
 </section>
 
 </div>
+
+<footer>
+	<a class="doclink" href="../../README.html" aria-label="README へ戻る"><svg class="navicon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 L15 8 h-2 v6.5 H9.5 V10 h-3 v4.5 H3 V8 H1 Z" fill="currentColor"/></svg></a>
+</footer>
 
 </body>
 </html>
