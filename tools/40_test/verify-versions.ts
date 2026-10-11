@@ -15,7 +15,7 @@ import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "../..");
 
-function parseArgs(argv: string[]): { out: string; tscs: { name: string; cmd: string }[] } {
+export function parseArgs(argv: string[]): { out: string; tscs: { name: string; cmd: string }[] } {
 	let out = "";
 	const tscs: { name: string; cmd: string }[] = [];
 	for (let i = 0; i < argv.length; i++) {
@@ -32,7 +32,7 @@ function parseArgs(argv: string[]): { out: string; tscs: { name: string; cmd: st
 	return { out: path.resolve(root, out), tscs };
 }
 
-function decode(s: string): string {
+export function decode(s: string): string {
 	// &amp; は最後に戻す。先に戻すと &amp;lt; が < になる
 	return s
 		.replace(/<[^>]+>/g, "")
@@ -79,6 +79,23 @@ function extract(outDir: string): number {
 	return count;
 }
 
+// エラー行だけを残し、先頭のパスを作業フォルダからの相対に揃える
+export function normalize(lines: string[]): string[] {
+	return lines
+		.filter((l) => /error TS\d+/.test(l))
+		.map((l) => l.replace(/^.*[\\/]blocks[\\/]/, ""))
+		.sort();
+}
+
+// 片方にだけある行を返す
+export function compare(a: string[], b: string[]): { onlyA: string[]; onlyB: string[]; count: number } {
+	const setA = new Set(a);
+	const setB = new Set(b);
+	const onlyA = a.filter((l) => !setB.has(l));
+	const onlyB = b.filter((l) => !setA.has(l));
+	return { onlyA, onlyB, count: onlyA.length + onlyB.length };
+}
+
 function check(outDir: string, name: string, cmd: string): string[] {
 	const project = path.join(outDir, "blocks");
 	let text = "";
@@ -90,34 +107,34 @@ function check(outDir: string, name: string, cmd: string): string[] {
 		if (typeof err.stdout !== "string") throw e;
 		text = err.stdout;
 	}
-	const lines = text.split(/\r?\n/).filter((l) => /error TS\d+/.test(l));
-	// 先頭のパスを、作業フォルダからの相対に揃える
-	const norm = lines.map((l) => l.replace(/^.*[\\/]blocks[\\/]/, "")).sort();
+	const norm = normalize(text.split(/\r?\n/));
 	fs.writeFileSync(path.join(outDir, `result-${name}.txt`), norm.join("\n") + "\n");
 	return norm;
 }
 
-const { out, tscs } = parseArgs(process.argv.slice(2));
-const count = extract(out);
-console.log(`取り出したコード例: ${count} 本`);
+function main(): void {
+	const { out, tscs } = parseArgs(process.argv.slice(2));
+	const count = extract(out);
+	console.log(`取り出したコード例: ${count} 本`);
 
-const results = tscs.map((t) => {
-	const r = check(out, t.name, t.cmd);
-	const files = new Set(r.map((l) => l.split("(")[0])).size;
-	console.log(`${t.name}: エラー ${r.length} 件（${files} ファイル）`);
-	return { name: t.name, lines: r };
-});
+	const results = tscs.map((t) => {
+		const r = check(out, t.name, t.cmd);
+		const files = new Set(r.map((l) => l.split("(")[0])).size;
+		console.log(`${t.name}: エラー ${r.length} 件（${files} ファイル）`);
+		return { name: t.name, lines: r };
+	});
 
-let diff = 0;
-const base = results[0];
-for (const other of results.slice(1)) {
-	const a = new Set(base.lines);
-	const b = new Set(other.lines);
-	const onlyA = base.lines.filter((l) => !b.has(l));
-	const onlyB = other.lines.filter((l) => !a.has(l));
-	diff += onlyA.length + onlyB.length;
-	for (const l of onlyA) console.log(`  ${base.name} だけ: ${l}`);
-	for (const l of onlyB) console.log(`  ${other.name} だけ: ${l}`);
+	let diff = 0;
+	const base = results[0];
+	for (const other of results.slice(1)) {
+		const r = compare(base.lines, other.lines);
+		diff += r.count;
+		for (const l of r.onlyA) console.log(`  ${base.name} だけ: ${l}`);
+		for (const l of r.onlyB) console.log(`  ${other.name} だけ: ${l}`);
+	}
+	console.log(diff === 0 ? "版の差: なし" : `版の差: ${diff} 件`);
+	process.exitCode = diff === 0 ? 0 : 1;
 }
-console.log(diff === 0 ? "版の差: なし" : `版の差: ${diff} 件`);
-process.exitCode = diff === 0 ? 0 : 1;
+
+// テストから読み込んだときは実行しない
+if (import.meta.main) main();

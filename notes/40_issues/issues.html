@@ -64,10 +64,10 @@ footer { max-width: 1600px; margin: 0 auto; padding: 18px 30px 30px; }
 <section class="ch01" id="ch01">
 	<h1>検証（2 件）</h1>
 
-	<details open class="md-flat">
-		<summary><span class="no">i261011-01</span><span class="badge b-warn">着手</span>検証スクリプトにテストが無い</summary>
+	<details class="md-flat">
+		<summary><span class="no">i261011-01</span><span class="badge b-ok">済</span>検証スクリプトにテストが無い</summary>
 		<p><code>tools/40_test/verify-versions.ts</code> は版の差を判定するが、判定そのものを確かめるテストが無い。HTML の実体参照の戻し方・パスの揃え方・差の数え方を <code>tests/</code> で押さえる。</p>
-		<p>やること: <span class="badge b-warn">着手</span>判定部分を関数に分けてテストを書く ／ <span class="badge b-none">未</span><code>tools/40_test/run-tests.ps1</code> と同名の cmd を置く</p>
+		<p>やること: <span class="badge b-ok">済</span>判定部分を関数に分けてテストを書く（<code>tests/verify-versions.test.ts</code>） ／ <span class="badge b-ok">済</span><code>tools/40_test/run-tests.ps1</code> と同名の cmd を置く</p>
 	</details>
 
 	<details open class="md-flat">
