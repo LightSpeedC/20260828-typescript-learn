@@ -176,7 +176,7 @@ f(undefined);     // OK — undefined を渡すと既定値が使われる</code
 
 	<h2>動かしてみる</h2>
 
-<pre><code class="language-typescript">// args.ts
+<pre data-run><code class="language-typescript">// args.ts
 function greet(name: string, title = "様"): string {
 	return `${title} ${name}`;
 }
@@ -185,9 +185,9 @@ function join(sep: string, ...parts: string[]): string {
 	return parts.join(sep);
 }
 
-console.log(greet("田中"));
-console.log(greet("Alice", "Ms."));
-console.log(join(" / ", "a", "b", "c"));</code></pre>
+console.log(greet("田中"));                 // => 様 田中
+console.log(greet("Alice", "Ms."));         // => Ms. Alice
+console.log(join(" / ", "a", "b", "c"));    // => a / b / c</code></pre>
 
 <pre><code class="language-shell">$ npx tsx args.ts
 様 田中
@@ -336,7 +336,7 @@ users.forEach((u) =&gt; ids.push(u.id));   // push は number を返すが、無
 
 	<h2>関数を引数に取る関数を書く</h2>
 
-<pre><code class="language-typescript">// callback.ts
+<pre data-run><code class="language-typescript">// callback.ts
 type Mapper&lt;T, U&gt; = (item: T, index: number) =&gt; U;
 
 function mapAll&lt;T, U&gt;(items: T[], fn: Mapper&lt;T, U&gt;): U[] {
@@ -347,8 +347,8 @@ function mapAll&lt;T, U&gt;(items: T[], fn: Mapper&lt;T, U&gt;): U[] {
 	return out;
 }
 
-console.log(mapAll([1, 2, 3], (n) =&gt; n * 10));
-console.log(mapAll(["a", "b"], (s, i) =&gt; `${i}:${s}`));</code></pre>
+console.log(mapAll([1, 2, 3], (n) =&gt; n * 10));             // => [ 10, 20, 30 ]
+console.log(mapAll(["a", "b"], (s, i) =&gt; `${i}:${s}`));    // => [ '0:a', '1:b' ]</code></pre>
 
 <pre><code class="language-shell">$ npx tsx callback.ts
 [ 10, 20, 30 ]
@@ -395,5 +395,6 @@ console.log(mapAll(["a", "b"], (s, i) =&gt; `${i}:${s}`));</code></pre>
 </footer>
 
 <script src="js/highlight.js" defer></script>
+<script src="js/runner.js" defer></script>
 </body>
 </html>

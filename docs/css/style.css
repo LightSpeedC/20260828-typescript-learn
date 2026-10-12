@@ -358,3 +358,57 @@ footer {
 footer .inner { max-width: 1600px; margin: 0 auto; padding-bottom: 30px; }
 footer .navlabel { color: var(--ink-soft, #4a5568); margin: 0 4px 0 14px; }
 footer .navlabel:first-child { margin-left: 0; }
+
+/* ---- 実行可能サンプル（runner.js が足す） ---- */
+
+.runbar { display: flex; gap: 8px; margin: -6px 0 10px; }
+
+.runbtn {
+	background: linear-gradient(100deg, var(--accent, #12224d), var(--accent2, #2f5fbf));
+	color: #fff;
+	border: none;
+	border-radius: 6px;
+	padding: 3px 14px;
+	font: inherit;
+	font-size: 0.9em;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.runbtn:disabled { filter: grayscale(0.6); cursor: wait; }
+
+.runbtn-sub { background: #fff; color: var(--accent, #12224d); border: 1px solid var(--accent2, #2f5fbf); }
+
+.runedit {
+	display: block;
+	width: 100%;
+	background: #fff;
+	color: var(--ink, #1c2330);
+	border: 1px solid var(--line, #d9dfe8);
+	border-left: 5px solid var(--accent2, #2f5fbf);
+	border-radius: 0 8px 8px 0;
+	padding: 13px 16px;
+	margin: 14px 0;
+	font-family: "Cascadia Mono", "Consolas", monospace;
+	font-size: 0.92em;
+	line-height: 1.65;
+	tab-size: 4;
+}
+
+.runout {
+	background: #fffdf3;
+	color: var(--ink, #1c2330);
+	border: 1px dashed var(--accent2, #2f5fbf);
+	border-radius: 8px;
+	padding: 10px 16px;
+	margin: 0 0 16px;
+	font-family: "Cascadia Mono", "Consolas", monospace;
+	font-size: 0.9em;
+	line-height: 1.6;
+	white-space: pre-wrap;
+	overflow-x: auto;
+}
+
+.runline { background: transparent; color: var(--ink, #1c2330); }
+.runerr { background: transparent; color: #a51f22; }
+.runstatus { background: transparent; color: #4a5568; }

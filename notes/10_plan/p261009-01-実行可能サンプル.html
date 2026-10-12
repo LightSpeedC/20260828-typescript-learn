@@ -269,7 +269,7 @@ footer { max-width: 1600px; margin: 0 auto; padding: 18px 30px 30px; }
 	<div class="inner">
 		<h1>計画 p261009-01 — サンプルコードをページ上で実行できるようにする</h1>
 		<p class="lead">jsprimer のように、資料のコードをその場で実行して出力を見られるようにする。変換ライブラリを <code>docs/js/lib/</code> に置き、CDN を使わない</p>
-		<p class="date">📅 作成: 2026-10-09 / 更新: 2026-10-10</p>
+		<p class="date">📅 作成: 2026-10-09 / 更新: 2026-10-12</p>
 	</div>
 </div>
 
@@ -361,7 +361,19 @@ footer { max-width: 1600px; margin: 0 auto; padding: 18px 30px 30px; }
 </table>
 </div>
 <p>6.0.3 は 7 系と違い、JS の API を持つ（<code>main</code> が <code>./lib/typescript.js</code>）。<code>docs/samples/</code> を 6.0.3 の <code>tsc</code> で型検査し、7.0.2 と同じくエラー 0 件だった。</p>
-<p>3 行のコード（<code>greet(1)</code> を含む）で <code>TS2345</code> が出ることも確かめた。ブラウザでの時間は未実測で、手順 3 で測る。<code>console</code> の型は <code>lib.dom.d.ts</code> を読まずに、1 行の宣言で足りた。</p>
+<p>3 行のコード（<code>greet(1)</code> を含む）で <code>TS2345</code> が出ることも確かめた。ブラウザでの時間は手順 3 で測った（下の表）。<code>console</code> の型は <code>lib.dom.d.ts</code> を読まずに、1 行の宣言で足りた。</p>
+<h3>ブラウザでの実測（手順 3・2026-10-12）</h3>
+<p>手元の HTTP サーバから 07 章を開き、「実行」を押してから出力が出るまで。PlayWright 共有環境で測った。公開 URL では変換器（約 9 MB）のダウンロードが 1 回目に加わる。</p>
+<div class="tablewrap">
+<table>
+<thead><tr><th>ブラウザ</th><th class="num">1 回目（変換器の読込を含む）</th><th class="num">2 回目</th></tr></thead>
+<tbody>
+<tr><td>chromium</td><td class="num">902 ms</td><td class="num">223 ms</td></tr>
+<tr><td>firefox</td><td class="num">1,692 ms</td><td class="num">294 ms</td></tr>
+<tr><td>webkit</td><td class="num">1,169 ms</td><td class="num">449 ms</td></tr>
+</tbody>
+</table>
+</div>
 </section>
 <section class="ch03" id="ch03">
 <h1>作るもの</h1>
@@ -390,7 +402,7 @@ footer { max-width: 1600px; margin: 0 auto; padding: 18px 30px 30px; }
 <ol>
 <li>1〜5 を決める（済）</li>
 <li>変換器の大きさと読込時間を実測し、ここに書く（済）</li>
-<li><code>runner.js</code> と Worker を作り、1 章分（07 章）で試す</li>
+<li><code>runner.js</code> と Worker を作り、1 章分（07 章）で試す（済）</li>
 <li>全資料のコードを調べ、<code>data-run</code> を付けるものを一覧にする。結果ブロックの扱いもここで決める</li>
 <li>付けたものに <code>// =&gt; 値</code> の注記を書き、注記を照合するテストを作る</li>
 <li>ブラウザでも同じ注記が満たされるかを PlayWright 共有環境で確かめる</li>
