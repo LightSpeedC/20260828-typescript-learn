@@ -29,7 +29,7 @@
 	<div class="inner">
 		<h1>01. 背景</h1>
 		<p class="lead">TypeScript は何を解決したのか ／ 型は実行時に消える</p>
-		<p class="date">📅 作成: 2026-08-28 / 更新: 2026-08-29</p>
+		<p class="date">📅 作成: 2026-08-28 / 更新: 2026-10-12</p>
 	</div>
 </div>
 
@@ -83,16 +83,16 @@ function greet(user: User) {
 }
 
 console.log(greet({ namae: "Alice" }));
-//                  ~~~~
-// error TS2353: Object literal may only specify known properties,
-//               and 'namae' does not exist in type 'User'.
+//                  ~~~~~
+// error TS2561: Object literal may only specify known properties,
+//               but 'namae' does not exist in type 'User'. Did you mean to write 'name'?
 //
-// 訳: オブジェクト リテラルは既知のプロパティのみ指定できます。
-//     'namae' は型 'User' に存在しません。</code></pre>
+// 訳: オブジェクト リテラルで指定できるのは既知のプロパティのみですが、
+//     'namae' は型 'User' に存在しません。書こうとしたのは 'name' ですか?</code></pre>
 
 	<div class="callout">
 		<p><strong>エラーメッセージは既定で英語です。</strong></p>
-		<p>この資料では<strong>実際に出力される英語をそのまま載せ、日本語訳を添えます。</strong>訳は <code>tsc --locale ja</code> の出力に合わせてあります。エラー番号（<code>TS2353</code> など）で検索する場合、<strong>英語のほうが情報が見つかります。</strong></p>
+		<p>この資料では<strong>実際に出力される英語をそのまま載せ、日本語訳を添えます。</strong>訳は <code>tsc --locale ja</code> の出力に合わせてあります。エラー番号（<code>TS2561</code> など）で検索する場合、<strong>英語のほうが情報が見つかります。</strong></p>
 	</div>
 
 	<h2>問題は「間違えること」ではなく「気づけないこと」</h2>
@@ -212,11 +212,11 @@ export function greet(user) {
 	<p>意外に思われる点ですが、<strong><code>tsc</code> は型エラーを報告しても JavaScript の出力は行います</strong>（既定の設定の場合）。型検査と出力は独立した処理だからです。</p>
 
 <pre><code class="language-shell">$ npx tsc greet.ts
-greet.ts:7:21 - error TS2353: Object literal may only specify known properties,
-                              and 'namae' does not exist in type 'User'.
+greet.ts:7:21 - error TS2561: Object literal may only specify known properties, but 'namae' does not exist in type 'User'. Did you mean to write 'name'?
 
 7 console.log(greet({ namae: "Alice" }));
-                      ~~~~
+                      ~~~~~
+
 
 Found 1 error in greet.ts:7
 

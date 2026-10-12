@@ -32,7 +32,7 @@
 	<div class="inner">
 		<h1>ZZ. 資料の構成</h1>
 		<p class="lead">Node+JavaScript／Java／C# のいずれかを知っている読者を対象にした、本編12章＋付録4本のカリキュラム設計</p>
-		<p class="date">📅 作成: 2026-08-28 / 更新: 2026-10-10 ／ ステータス: 本編12章 ＋ 付録4本 完成</p>
+		<p class="date">📅 作成: 2026-08-28 / 更新: 2026-10-12 ／ ステータス: 本編12章 ＋ 付録4本 完成</p>
 	</div>
 </div>
 
@@ -233,18 +233,18 @@
 	<div class="callout">
 		<p><strong>章番号だけ CSS カウンタで自動採番します。</strong></p>
 		<p>目次の <code>a::before</code> を <code>content: "01." counter(tocnum)</code> の形にすると、<strong>資料番号は固定文字列、章番号だけが自動採番</strong>されます。章を増減しても番号を書き直す必要がありません。</p>
-		<p>ただし <strong>README の資料一覧はカウンタを使えません。</strong><code>01</code>〜<code>12</code> と <code>A1</code>〜<code>A4</code> で番号体系が違うためです。ここだけは直書きし、資料を増減したときに手で直します。h1 の見出しも直書きです。</p>
+		<p>ただし <strong>README の資料一覧はカウンタを使えません。</strong><code>01</code>〜<code>12</code> と <code>A1</code>〜<code>A4</code> で番号体系が違うためです。ここだけは直書きし、資料を増減したときに手で直します。</p>
 	</div>
 
 	<h2>エラーメッセージの載せ方</h2>
 
 	<p><code>tsc</code> のエラーは<strong>既定で英語</strong>です。実際に出力される英語をそのまま載せ、日本語訳を添えます。</p>
 
-<pre><code class="language-typescript">// error TS2353: Object literal may only specify known properties,
-//               and 'namae' does not exist in type 'User'.
+<pre><code class="language-typescript">// error TS2561: Object literal may only specify known properties,
+//               but 'namae' does not exist in type 'User'. Did you mean to write 'name'?
 //
-// 訳: オブジェクト リテラルは既知のプロパティのみ指定できます。
-//     'namae' は型 'User' に存在しません。</code></pre>
+// 訳: オブジェクト リテラルで指定できるのは既知のプロパティのみですが、
+//     'namae' は型 'User' に存在しません。書こうとしたのは 'name' ですか?</code></pre>
 
 	<div class="tablewrap">
 	<table>

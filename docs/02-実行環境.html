@@ -30,7 +30,7 @@
 	<div class="inner">
 		<h1>02. 実行環境</h1>
 		<p class="lead">検査する道具と、実行する道具は別 ／ 手元で <code>.ts</code> が動く状態を作る</p>
-		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-10-12</p>
 	</div>
 </div>
 
@@ -200,11 +200,11 @@ Version 7.0.2</code></pre>
 	<p><code>tsc</code> は既定で JavaScript を出力します。<strong>検査だけしたいときは <code>--noEmit</code></strong> を付けます。</p>
 
 <pre><code class="language-shell">$ npx tsc --noEmit greet.ts
-greet.ts:7:21 - error TS2353: Object literal may only specify known properties,
-                              and 'namae' does not exist in type 'User'.
+greet.ts:7:21 - error TS2561: Object literal may only specify known properties, but 'namae' does not exist in type 'User'. Did you mean to write 'name'?
 
 7 console.log(greet({ namae: "Alice" }));
-                      ~~~~
+                      ~~~~~
+
 
 Found 1 error in greet.ts:7</code></pre>
 
