@@ -269,7 +269,7 @@ footer { max-width: 1600px; margin: 0 auto; padding: 18px 30px 30px; }
 	<div class="inner">
 		<h1>ローカルルール — 20260828-typescript-learn</h1>
 		<p class="lead">このプロジェクトでだけ通る決めごと。共通ルールと食い違うときはこちらが優先する</p>
-		<p class="date">📅 作成: 2026-10-09 / 更新: 2026-10-09</p>
+		<p class="date">📅 作成: 2026-10-09 / 更新: 2026-10-18</p>
 	</div>
 </div>
 
@@ -283,6 +283,9 @@ footer { max-width: 1600px; margin: 0 auto; padding: 18px 30px 30px; }
 <ul>
 <li><strong>作業の区切りごとに commit と push を指示なしで行う</strong>。区切りは、意味のまとまり 1 つ（1 つの修正・1 つの資料・生成物の更新）</li>
 <li><strong>commit の前に検査を通す</strong>。html2md の指摘 0 件、<code>check-markdown</code> と <code>check-public</code> も指摘なし。通らなければ commit せずに報告する</li>
+<li><strong>check-public の誤検出として扱ってよいのは、<code>docs/js/lib/typescript.js</code>（TypeScript の配布物）の [認証情報] で、指摘された行がすべて <code>token</code> を含むときだけ</strong>。字句解析器の変数名・メソッド名（<code>token = scanner.scan()</code> 等）に反応したもの。ほかのファイルに 1 件でも指摘があるか、<code>token</code> を含まない行があれば、今までどおり commit せずに報告する</li>
+<li><strong>check-public は <code>-a</code> を付けて流す</strong>。付けないと未追跡のファイルを見ず、新しく足したファイルが検査から漏れる（df0c980 で typescript.js が漏れた）</li>
+<li><strong>check-public に除外の指定が入ったら、上の扱いをその指定に置き換える</strong></li>
 <li><strong>push のあとは、共通ルール「push のあとに公開を確かめる」に従う</strong></li>
 <li><strong>変えないもの</strong>: 載せるファイルを名指しで <code>git add</code> すること、履歴を書き換える操作（amend・reset・force push）に明示の語が要ること、release・master へのマージに明示の語が要ること</li>
 <li><strong>理由</strong>: 公開資料を少しずつ進めるプロジェクトで、区切りごとに公開して確かめたいため</li>
