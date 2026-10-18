@@ -30,7 +30,7 @@
 	<div class="inner">
 		<h1>A2. 型レシピ集</h1>
 		<p class="lead">コピーして使う型定義の断片 ／ 1レシピ20行以内</p>
-		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-10-12</p>
 	</div>
 </div>
 
@@ -324,7 +324,7 @@ const f3: Filter = {};                           // エラー（何も指定し�
 
 	<h3>キーと値を対応させる</h3>
 
-<pre><code class="language-typescript">type EventMap = {
+<pre data-run><code class="language-typescript">type EventMap = {
 	click: { x: number; y: number };
 	key: { code: string };
 	close: undefined;
@@ -334,8 +334,8 @@ function emit&lt;K extends keyof EventMap&gt;(type: K, payload: EventMap[K]): vo
 	console.log(type, payload);
 }
 
-emit("click", { x: 1, y: 2 });      // OK
-emit("key", { x: 1, y: 2 });        // エラー（key の payload は { code: string }）</code></pre>
+emit("click", { x: 1, y: 2 });      // OK // => click { x: 1, y: 2 }
+emit("key", { x: 1, y: 2 });        // エラー TS2353（key の payload は { code: string }） // => key { x: 1, y: 2 }</code></pre>
 
 	<p><strong>イベント名ごとにデータの形が違う</strong>場合に有効です（<a class="doclink doc09" href="09-ジェネリクス.html">09.2</a>）。</p>
 </section>
@@ -349,5 +349,6 @@ emit("key", { x: 1, y: 2 });        // エラー（key の payload は { code: s
 </footer>
 
 <script src="js/highlight.js" defer></script>
+<script src="js/runner.js" defer></script>
 </body>
 </html>

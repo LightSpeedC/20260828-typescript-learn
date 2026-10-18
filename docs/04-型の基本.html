@@ -30,7 +30,7 @@
 	<div class="inner">
 		<h1>04. 型の基本</h1>
 		<p class="lead">プリミティブ・配列・オブジェクト・union ／ <code>type</code> と <code>interface</code> の使い分け</p>
-		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-10-12</p>
 	</div>
 </div>
 
@@ -447,15 +447,15 @@ const port2 = 0 ?? 3000;     // 0 のまま</code></pre>
 
 	<h2>動かしてみる</h2>
 
-<pre><code class="language-typescript">// null-check.ts
+<pre data-run><code class="language-typescript">// null-check.ts
 type User = { name: string; age?: number };
 
 function describe(u: User): string {
 	return `${u.name} (${u.age ?? "年齢不明"})`;
 }
 
-console.log(describe({ name: "Alice", age: 30 }));
-console.log(describe({ name: "Bob" }));</code></pre>
+console.log(describe({ name: "Alice", age: 30 }));   // => Alice (30)
+console.log(describe({ name: "Bob" }));              // => Bob (年齢不明)</code></pre>
 
 <pre><code class="language-shell">$ npx tsx null-check.ts
 Alice (30)
@@ -491,5 +491,6 @@ Bob (年齢不明)</code></pre>
 </footer>
 
 <script src="js/highlight.js" defer></script>
+<script src="js/runner.js" defer></script>
 </body>
 </html>

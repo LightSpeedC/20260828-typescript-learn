@@ -258,10 +258,10 @@ Hello, TypeScript!</code></pre>
 
 	<p>Node の型ストリップは<strong>「取り除く」だけで、変換はしません。</strong>そのため、<strong>JavaScript のコードを生成する必要がある構文は使えません。</strong></p>
 
-<pre><code class="language-typescript">// enum-test.ts
+<pre data-run><code class="language-typescript">// enum-test.ts
 enum Color { Red, Green, Blue }
 const c: Color = Color.Green;
-console.log(Color[c]);</code></pre>
+console.log(Color[c]);    // => Green</code></pre>
 
 <pre><code class="language-shell">$ node enum-test.ts
 SyntaxError [ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX]:
@@ -505,5 +505,6 @@ $ npx tsc --noEmit                  # 検査が動くこと</code></pre>
 </footer>
 
 <script src="js/highlight.js" defer></script>
+<script src="js/runner.js" defer></script>
 </body>
 </html>

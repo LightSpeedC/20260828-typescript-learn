@@ -2,7 +2,7 @@
 
 型検査から降りる3つの方法と、その代償
 
-> 📅 作成: 2026-08-29 / 更新: 2026-08-29
+> 📅 作成: 2026-08-29 / 更新: 2026-10-12
 
 [05. 構造的型付け](05-構造的型付け.md) [07. 関数の型](07-関数の型.md) [資料トップへ戻る](../README.md)
 
@@ -132,12 +132,12 @@ function isUser(v: unknown): v is User {
 const data = parseJson('{"name":"Alice","age":30}');
 
 if (isUser(data)) {
-	console.log(`${data.name} は ${data.age} 歳`);
+	console.log(`${data.name} は ${data.age} 歳`);    // => Alice は 30 歳
 } else {
 	console.log("User の形ではありません");
 }
 
-console.log(isUser(parseJson('{"name":"Bob"}')));
+console.log(isUser(parseJson('{"name":"Bob"}')));    // => false
 ```
 
 ```shell
@@ -269,12 +269,12 @@ function getUserOrThrow(id: string): { name: string } {
 	return user;      // ここでは undefined でないことが型でも分かる
 }
 
-console.log(getUserOrThrow("1").name);
+console.log(getUserOrThrow("1").name);    // => Alice
 
 try {
 	getUserOrThrow("999");
 } catch (e) {
-	console.log((e as Error).message);
+	console.log((e as Error).message);    // => ユーザーが見つかりません: 999
 }
 ```
 

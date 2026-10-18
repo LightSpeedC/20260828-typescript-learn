@@ -75,14 +75,14 @@ console.log(greet({ namae: "Alice" }));   // "Hello, undefined"</code></pre>
 
 	<p>同じコードに型を付けると、実行する前に止まります。</p>
 
-<pre><code class="language-typescript">// TypeScript
+<pre data-run><code class="language-typescript">// TypeScript
 type User = { name: string };
 
 function greet(user: User) {
 	return `Hello, ${user.name}`;
 }
 
-console.log(greet({ namae: "Alice" }));
+console.log(greet({ namae: "Alice" }));   // => Hello, undefined
 //                  ~~~~~
 // error TS2561: Object literal may only specify known properties,
 //               but 'namae' does not exist in type 'User'. Did you mean to write 'name'?
@@ -229,9 +229,9 @@ greet.js  greet.ts     ← エラーがあっても .js は出力されている
 
 	<p><code>tsx</code> を使うと、コンパイルの手順を意識せずに <code>.ts</code> をそのまま実行できます。</p>
 
-<pre><code class="language-typescript">// hello.ts
+<pre data-run><code class="language-typescript">// hello.ts
 const name: string = "TypeScript";
-console.log(`Hello, ${name}!`);</code></pre>
+console.log(`Hello, ${name}!`);    // => Hello, TypeScript!</code></pre>
 
 <pre><code class="language-shell">$ npx tsx hello.ts
 Hello, TypeScript!</code></pre>
@@ -420,5 +420,6 @@ function greet(user) {
 </footer>
 
 <script src="js/highlight.js" defer></script>
+<script src="js/runner.js" defer></script>
 </body>
 </html>

@@ -29,7 +29,7 @@
 	<div class="inner">
 		<h1>09. ジェネリクス</h1>
 		<p class="lead">型を引数として受け取る ／ Java・C# との違い</p>
-		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-10-10</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-10-12</p>
 	</div>
 </div>
 
@@ -179,13 +179,13 @@ type Result&lt;T, E = Error&gt; =
 
 	<p><code>extends</code> で<strong>「少なくともこれを持っている」</strong>と制約します。</p>
 
-<pre><code class="language-typescript">function showLength&lt;T extends { length: number }&gt;(x: T) {
+<pre data-run><code class="language-typescript">function showLength&lt;T extends { length: number }&gt;(x: T) {
 	console.log(x.length);      // OK
 }
 
-showLength("abc");            // OK（string は length を持つ）
-showLength([1, 2, 3]);        // OK
-showLength(42);               // エラー TS2345</code></pre>
+showLength("abc");            // OK（string は length を持つ） // => 3
+showLength([1, 2, 3]);        // OK // => 3
+showLength(42);               // エラー TS2345 // => undefined</code></pre>
 
 	<h2>keyof と組み合わせる</h2>
 
@@ -213,7 +213,7 @@ const x = getProp(user, "email");
 
 	<h2>動かしてみる</h2>
 
-<pre><code class="language-typescript">// generics.ts
+<pre data-run><code class="language-typescript">// generics.ts
 function getProp&lt;T, K extends keyof T&gt;(obj: T, key: K): T[K] {
 	return obj[key];
 }
@@ -228,10 +228,10 @@ function groupBy&lt;T, K extends string&gt;(items: T[], toKey: (item: T) =&gt; K
 }
 
 const user = { name: "Alice", age: 30 };
-console.log(getProp(user, "name"));
+console.log(getProp(user, "name"));    // => Alice
 
 const words = ["apple", "avocado", "banana"];
-console.log(groupBy(words, (w) =&gt; w[0]));</code></pre>
+console.log(groupBy(words, (w) =&gt; w[0]));    // => { a: [ 'apple', 'avocado' ], b: [ 'banana' ] }</code></pre>
 
 <pre><code class="language-shell">$ npx tsx generics.ts
 Alice
@@ -428,5 +428,6 @@ const h: HandleDog = (a: Animal) =&gt; console.log(a.name);         // OK</code>
 </footer>
 
 <script src="js/highlight.js" defer></script>
+<script src="js/runner.js" defer></script>
 </body>
 </html>

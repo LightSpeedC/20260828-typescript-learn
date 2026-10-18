@@ -29,7 +29,7 @@
 	<div class="inner">
 		<h1>06. any・unknown・型アサーション</h1>
 		<p class="lead">型検査から降りる3つの方法と、その代償</p>
-		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-10-12</p>
 	</div>
 </div>
 
@@ -238,7 +238,7 @@ if (typeof x === "string") {
 
 	<p><code>JSON.parse</code> の戻り値は <code>any</code> です。<strong>受け口で <code>unknown</code> に変えると、検証を強制できます。</strong></p>
 
-<pre><code class="language-typescript">// unknown-parse.ts
+<pre data-run><code class="language-typescript">// unknown-parse.ts
 function parseJson(text: string): unknown {
 	return JSON.parse(text);
 }
@@ -256,12 +256,12 @@ function isUser(v: unknown): v is User {
 const data = parseJson('{"name":"Alice","age":30}');
 
 if (isUser(data)) {
-	console.log(`${data.name} は ${data.age} 歳`);
+	console.log(`${data.name} は ${data.age} 歳`);    // => Alice は 30 歳
 } else {
 	console.log("User の形ではありません");
 }
 
-console.log(isUser(parseJson('{"name":"Bob"}')));</code></pre>
+console.log(isUser(parseJson('{"name":"Bob"}')));    // => false</code></pre>
 
 <pre><code class="language-shell">$ npx tsx unknown-parse.ts
 Alice は 30 歳
@@ -436,7 +436,7 @@ console.log(user!.name);     // ! を付けると通る（検査されない）<
 
 	<h2>! の代わりに例外を投げる</h2>
 
-<pre><code class="language-typescript">// assert.ts
+<pre data-run><code class="language-typescript">// assert.ts
 function findUser(id: string): { name: string } | undefined {
 	const db: Record&lt;string, { name: string }&gt; = { "1": { name: "Alice" } };
 	return db[id];
@@ -451,12 +451,12 @@ function getUserOrThrow(id: string): { name: string } {
 	return user;      // ここでは undefined でないことが型でも分かる
 }
 
-console.log(getUserOrThrow("1").name);
+console.log(getUserOrThrow("1").name);    // => Alice
 
 try {
 	getUserOrThrow("999");
 } catch (e) {
-	console.log((e as Error).message);
+	console.log((e as Error).message);    // => ユーザーが見つかりません: 999
 }</code></pre>
 
 <pre><code class="language-shell">$ npx tsx assert.ts
@@ -498,5 +498,6 @@ Alice
 </footer>
 
 <script src="js/highlight.js" defer></script>
+<script src="js/runner.js" defer></script>
 </body>
 </html>

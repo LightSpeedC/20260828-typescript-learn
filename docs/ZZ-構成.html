@@ -740,15 +740,17 @@
 ├─ index.html              README.html へのリダイレクト
 ├─ README.html             原本（目次・約束事・逆引き入口）
 ├─ README.md               生成物
-├─ docs\                   公開資料（読者に配るもの）
+├─ docs/                   公開資料（読者に配るもの）
 │   ├─ 01-背景.html 〜 12-ハンズオン.html
 │   ├─ A1-逆引き.html 〜 A4-型レベルプログラミング.html
 │   ├─ ZZ-構成.html         このファイル
 │   ├─ *.md                生成物
-│   ├─ images\             切り出した SVG（Markdown 生成時に作る）
-│   └─ samples\            動作確認済みサンプル（.ts）
-├─ etc\c.bat
-└─ tmp\</code></pre>
+│   ├─ images/             切り出した SVG（Markdown 生成時に作る）
+│   ├─ css/ ・ js/          共通の見た目・色付け・実行可能サンプル
+│   │   └─ js/lib/         ブラウザで使う TypeScript の変換器
+│   └─ samples/            動作確認済みサンプル（.ts）
+├─ etc/c.bat
+└─ tmp/</code></pre>
 
 	<h2>サンプルコードの文字コード</h2>
 
@@ -775,8 +777,8 @@
 			<tr><th class="nowrap">場所</th><th>用途</th><th class="nowrap">git</th></tr>
 		</thead>
 		<tbody>
-			<tr><td class="nowrap"><code>tmp\</code></td><td>検証用の使い捨てプロジェクト。<code>npm init</code> と <code>node_modules</code> はここに置く</td><td class="nowrap">管理外</td></tr>
-			<tr><td class="nowrap"><code>docs\samples\</code></td><td>動作確認が済んだサンプル。資料から参照する</td><td class="nowrap">管理対象</td></tr>
+			<tr><td class="nowrap"><code>tmp/</code></td><td>検証用の使い捨てプロジェクト。<code>npm init</code> と <code>node_modules</code> はここに置く</td><td class="nowrap">管理外</td></tr>
+			<tr><td class="nowrap"><code>docs/samples/</code></td><td>動作確認が済んだサンプル。資料から参照する</td><td class="nowrap">管理対象</td></tr>
 		</tbody>
 	</table>
 	</div>
@@ -806,7 +808,8 @@ npx tsx ファイル名.ts            # 実行結果の実物を得る</code></p
 			<tr><th class="nowrap">日付</th><th class="nowrap">TypeScript</th><th class="nowrap">Node.js</th><th class="nowrap">npm</th><th>対象</th><th>結果</th></tr>
 		</thead>
 		<tbody>
-			<tr><td class="nowrap">2026-10-10</td><td class="nowrap">7.0.2 ・ 6.0.3</td><td class="nowrap">26.10.0</td><td class="nowrap">11.19.1</td><td>全資料のコード例 177 本の型検査、<code>docs\samples\</code> の実行</td><td>⚠️ 差 2 種。union の並び順（7.0.2 は <code>"age" | "name"</code>、6.0.3 は <code>"name" | "age"</code>。09 章を 7.0.2 の出力に直した）と、未定義名への候補の提示（7.0.2 は <code>TS2552</code>、6.0.3 は <code>TS2304</code>。断片のコードだけで、本文には出ない）</td></tr>
+			<tr><td class="nowrap">2026-10-12</td><td class="nowrap">7.0.2 ・ 6.0.3</td><td class="nowrap">26.11.1</td><td class="nowrap">11.20.0</td><td>全資料のコード例 177 本の型検査、実行可能サンプル 17 本の実行（Node と、chromium・firefox・webkit）</td><td>⚠️ 版の差は前回と同じ 2 種。実行可能サンプルの照合で、打ち間違いの例（01・02 章とこの資料）の型エラーが実際は <code>TS2561</code> だったと分かり、直した（どちらの版でも <code>TS2561</code>）</td></tr>
+			<tr><td class="nowrap">2026-10-10</td><td class="nowrap">7.0.2 ・ 6.0.3</td><td class="nowrap">26.10.0</td><td class="nowrap">11.19.1</td><td>全資料のコード例 177 本の型検査、<code>docs/samples/</code> の実行</td><td>⚠️ 差 2 種。union の並び順（7.0.2 は <code>"age" | "name"</code>、6.0.3 は <code>"name" | "age"</code>。09 章を 7.0.2 の出力に直した）と、未定義名への候補の提示（7.0.2 は <code>TS2552</code>、6.0.3 は <code>TS2304</code>。断片のコードだけで、本文には出ない）</td></tr>
 			<tr><td class="nowrap">2026-08-29</td><td class="nowrap">7.0.2 ・ 5.9.3</td><td class="nowrap">26.8.1</td><td class="nowrap">11.19.0</td><td>全資料</td><td>✅ エラーメッセージ・<code>--pretty</code> の表示形式・出力される JavaScript に差なし</td></tr>
 		</tbody>
 	</table>
@@ -814,7 +817,7 @@ npx tsx ファイル名.ts            # 実行結果の実物を得る</code></p
 
 	<div class="callout callout-warning">
 		<p><strong>検証で出たエラーが、書いたコードのものとは限りません。</strong></p>
-		<p>検証中、<strong>プロジェクトの親ディレクトリにある <code>node_modules\@types\node</code> を <code>tsc</code> が拾い</strong>、無関係な型定義エラーが6件出ました。TypeScript のバージョン差だと誤認しかけましたが、原因は環境でした。<strong>自分のファイル名が行頭にないエラーは、まず環境を疑います。</strong></p>
+		<p>検証中、<strong>プロジェクトの親ディレクトリにある <code>node_modules/@types/node</code> を <code>tsc</code> が拾い</strong>、無関係な型定義エラーが6件出ました。TypeScript のバージョン差だと誤認しかけましたが、原因は環境でした。<strong>自分のファイル名が行頭にないエラーは、まず環境を疑います。</strong></p>
 	</div>
 
 	<div class="callout">
@@ -822,10 +825,33 @@ npx tsx ファイル名.ts            # 実行結果の実物を得る</code></p
 		<p>サンプルを動かす <code>.cmd</code> ランチャーと、その中身の <code>.ts</code> が別の規則になるため、<strong>どちらのファイルを編集しているか</strong>を常に意識する必要があります。02 の章でこの点に触れます。</p>
 	</div>
 
+	<h2>実行可能サンプル</h2>
+
+	<p>コードの下の「▶ 実行」で、その場で型検査と実行をします。<code>&lt;pre data-run&gt;</code> を付けたコードだけが対象です。断片や Node 専用のコードには付けません。</p>
+
+	<div class="tablewrap">
+	<table>
+		<thead>
+			<tr><th class="nowrap">部分</th><th>中身</th></tr>
+		</thead>
+		<tbody>
+			<tr><td class="nowrap">変換器</td><td>TypeScript <strong>6.0.3</strong> の <code>typescript.js</code> を <code>docs/js/lib/</code> に置く。7 系は JS の API を持たないため。作り直しは <code>tools/20_build/build-runner-lib.ts</code></td></tr>
+			<tr><td class="nowrap">実行</td><td>Web Worker で動かす。5 秒で止まらなければ、Worker ごと止める</td></tr>
+			<tr><td class="nowrap">注記</td><td>出力を起こす行の末尾に <code>// =&gt; 出力</code> と書く。型エラーを見せるコードは、コメントに <code>error TSxxxx</code>（または <code>エラー TSxxxx</code>）と番号を書く</td></tr>
+			<tr><td class="nowrap">照合</td><td><code>tests/samples-run.test.ts</code> が、型エラーの番号と、ブラウザ用の整形・本物の Node の出力を注記と比べる。直後に貼った <code>$ npx tsx</code> の結果とも比べる。ブラウザでの確認は <code>tests/browser/</code></td></tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="callout callout-important">
+		<p><strong>実行の途中で例外が出るコードには、<code>data-run</code> を付けません。</strong></p>
+		<p>注記は出力を順に並べたものなので、例外で止まる様子を表せません。<code>// =&gt;</code> を書けるコードだけを対象にします。</p>
+	</div>
+
 	<h2>Markdown の生成と検証</h2>
 
 	<ul>
-		<li>インライン SVG は <code>docs\images\</code> に切り出し、<code>![](images/xxx.svg)</code> で参照する（GitHub がインライン SVG を除去するため）</li>
+		<li>インライン SVG は <code>docs/images/</code> に切り出し、<code>![](images/xxx.svg)</code> で参照する（GitHub がインライン SVG を除去するため）</li>
 		<li>日本語の <code>**</code> 強調が効かない箇所は <code>&lt;strong&gt;</code> に置換する。判定は変換スクリプト側で機械的に行う</li>
 		<li>生成後、リンク切れと <code>**</code> の残りを機械的に検査する</li>
 	</ul>
@@ -857,10 +883,10 @@ npx tsx ファイル名.ts            # 実行結果の実物を得る</code></p
 	</div>
 
 <pre><code class="language-powershell"># 目次の資料番号がファイル名の番号と一致しているか
-Select-String -Path docs\*.html -Pattern 'content: "([0-9A]\w)\." counter'
+Select-String -Path docs/*.html -Pattern 'content: "([0-9A]\w)\." counter'
 
 # SVG の defs id に、そのファイルの番号が入っているか
-Select-String -Path docs\*.html -Pattern '&lt;(?:linearGradient|marker|clipPath|filter) id="([^"]+)"'</code></pre>
+Select-String -Path docs/*.html -Pattern '&lt;(?:linearGradient|marker|clipPath|filter) id="([^"]+)"'</code></pre>
 
 	<h2>章を増減したときの手順</h2>
 

@@ -29,7 +29,7 @@
 	<div class="inner">
 		<h1>05. 構造的型付け</h1>
 		<p class="lead">名前ではなく「形」で互換を判定する ／ この資料の山場①</p>
-		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-10-12</p>
 	</div>
 </div>
 
@@ -366,7 +366,7 @@ getUser(orderId);
 
 	<p><code>as</code> を書く場所を1か所に閉じ込めると、検証も一緒に行えます。</p>
 
-<pre><code class="language-typescript">// branded.ts
+<pre data-run><code class="language-typescript">// branded.ts
 type UserId = string &amp; { readonly __brand: "UserId" };
 
 function toUserId(s: string): UserId {
@@ -377,12 +377,12 @@ function toUserId(s: string): UserId {
 }
 
 const id = toUserId("user-001");
-console.log(id);
+console.log(id);    // => user-001
 
 try {
 	toUserId("order-123");
 } catch (e) {
-	console.log((e as Error).message);
+	console.log((e as Error).message);    // => UserId の形式が不正です: order-123
 }</code></pre>
 
 <pre><code class="language-shell">$ npx tsx branded.ts
@@ -426,5 +426,6 @@ UserId の形式が不正です: order-123</code></pre>
 </footer>
 
 <script src="js/highlight.js" defer></script>
+<script src="js/runner.js" defer></script>
 </body>
 </html>

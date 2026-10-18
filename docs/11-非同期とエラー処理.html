@@ -29,7 +29,7 @@
 	<div class="inner">
 		<h1>11. 非同期とエラー処理</h1>
 		<p class="lead"><code>Promise</code> の型 ／ <code>catch</code> が <code>unknown</code> である理由</p>
-		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-10-12</p>
 	</div>
 </div>
 
@@ -332,7 +332,7 @@ throw { code: "E001" };</code></pre>
 
 	<h2>独自のエラークラス</h2>
 
-<pre><code class="language-typescript">// custom-error.ts
+<pre data-run><code class="language-typescript">// custom-error.ts
 class ApiError extends Error {
 	constructor(
 		public readonly status: number,
@@ -361,7 +361,10 @@ for (const id of ["1", "", "999"]) {
 			console.log(`Error ではない値: ${String(e)}`);
 		}
 	}
-}</code></pre>
+}
+// => user-1
+// => [400] id が空です
+// => [404] 見つかりません</code></pre>
 
 <pre><code class="language-shell">$ npx tsx custom-error.ts
 user-1
@@ -394,7 +397,7 @@ user-1
 
 	<h2>Result 型</h2>
 
-<pre><code class="language-typescript">// result.ts
+<pre data-run><code class="language-typescript">// result.ts
 type Result&lt;T, E = Error&gt; =
 	| { ok: true; value: T }
 	| { ok: false; error: E };
@@ -417,7 +420,10 @@ for (const s of ["3000", "abc", "99999"]) {
 	} else {
 		console.log(`NG: ${r.error.message}`);
 	}
-}</code></pre>
+}
+// => OK: 3000
+// => NG: 整数ではありません: abc
+// => NG: 範囲外です: 99999</code></pre>
 
 <pre><code class="language-shell">$ npx tsx result.ts
 OK: 3000
@@ -478,5 +484,6 @@ NG: 範囲外です: 99999</code></pre>
 </footer>
 
 <script src="js/highlight.js" defer></script>
+<script src="js/runner.js" defer></script>
 </body>
 </html>

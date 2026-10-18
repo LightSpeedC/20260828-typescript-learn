@@ -12,14 +12,24 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import { format } from "node:util";
 import { annotations, expectedErrors, readBlocks } from "./doc-blocks.ts";
-import { loadCore } from "./runner-core.ts";
+import { loadCore, root } from "./runner-core.ts";
 
 const blocks = readBlocks().filter((b) => b.run);
 
 test("data-run を付けたコード例がある", () => {
 	assert.ok(blocks.length > 0);
+});
+
+test("data-run があるページは runner.js を読み込む", () => {
+	// 読み込み忘れると、ボタンが出ないだけで何も起きない。気づきにくいので検査する
+	for (const doc of new Set(blocks.map((b) => b.doc))) {
+		const html = fs.readFileSync(path.join(root, "docs", `${doc}.html`), "utf8");
+		assert.ok(html.includes('<script src="js/runner.js" defer></script>'), doc);
+	}
 });
 
 for (const b of blocks) {

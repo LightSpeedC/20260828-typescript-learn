@@ -56,7 +56,12 @@ let server: http.Server;
 let base = "";
 
 // Worker は file:// では動かないので、プロジェクトを HTTP で配る
+// 環境変数 RUNNER_BASE に公開 URL（末尾の / なし）を渡すと、手元のサーバを立てずにそちらを開く
 test.beforeAll(async () => {
+	if (process.env.RUNNER_BASE) {
+		base = process.env.RUNNER_BASE;
+		return;
+	}
 	server = http.createServer((req, res) => {
 		const rel = decodeURIComponent(new URL(req.url ?? "/", "http://x").pathname);
 		const file = path.join(root, rel);
@@ -73,6 +78,7 @@ test.beforeAll(async () => {
 });
 
 test.afterAll(async () => {
+	if (!server) return;
 	await new Promise<void>((r) => server.close(() => r()));
 });
 
@@ -99,6 +105,61 @@ test("編集したコードを実行でき、型エラーと時間切れを表�
 	await bar.getByRole("button", { name: "元に戻す" }).click();
 	await expect(editor).toHaveCount(0);
 	await expect(page.locator("pre[data-run]").first()).toBeVisible();
+});
+
+// check-contrast はファイルを直接開くので、JS が足す部品は検査されない。ここで実測する
+// 判定は共通ルールと同じ。グラデーションは色停止点の平均を背景とし、1.5:1 未満を 0 件にする
+test("実行ボタンと出力欄の文字が読める配色になっている", async ({ page }) => {
+	test.setTimeout(180_000);
+	await page.goto(`${base}/docs/${encodeURI("07-関数の型")}.html`);
+	const bar = page.locator(".runbar").first();
+	await bar.getByRole("button", { name: "編集" }).click();
+	await page.locator("textarea.runedit").first().fill('console.log("ok");\nconst n: number = "x";');
+	await bar.locator(".runbtn").first().click();
+	await expect(page.locator(".runout .runline").first()).toHaveText("ok", { timeout: 90_000 });
+
+	const ratios = await page.evaluate(() => {
+		function parse(c: string): number[] | null {
+			const m = /rgba?\(([^)]+)\)/.exec(c);
+			if (!m) return null;
+			const v = m[1].split(/[ ,/]+/).filter(Boolean).map(Number);
+			return v.length > 3 && v[3] === 0 ? null : v.slice(0, 3);
+		}
+		function background(e: Element | null): number[] {
+			for (let x = e; x; x = x.parentElement) {
+				const s = getComputedStyle(x);
+				const stops = s.backgroundImage.match(/rgba?\([^)]+\)/g);
+				if (stops) {
+					const cs = stops.map((t) => parse(t)).filter((t): t is number[] => !!t);
+					return [0, 1, 2].map((i) => cs.reduce((a, c) => a + c[i], 0) / cs.length);
+				}
+				const b = parse(s.backgroundColor);
+				if (b) return b;
+			}
+			return [255, 255, 255];
+		}
+		function lum(c: number[]): number {
+			const [r, g, b] = c.map((v) => {
+				const s = v / 255;
+				return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+			});
+			return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+		}
+		const out: { sel: string; ratio: number }[] = [];
+		for (const sel of [".runbtn", ".runbtn-sub", ".runedit", ".runline", ".runerr"]) {
+			const e = document.querySelector(sel);
+			if (!e) {
+				out.push({ sel, ratio: 0 });
+				continue;
+			}
+			const fg = parse(getComputedStyle(e).color) ?? [0, 0, 0];
+			const [a, b] = [lum(fg), lum(background(e))].sort((x, y) => y - x);
+			out.push({ sel, ratio: (a + 0.05) / (b + 0.05) });
+		}
+		return out;
+	});
+	for (const r of ratios) expect(r.ratio, r.sel).toBeGreaterThanOrEqual(1.5);
+	console.log(ratios.map((r) => `${r.sel} ${r.ratio.toFixed(2)}`).join(" / "));
 });
 
 for (const [doc, expected] of readExpected()) {

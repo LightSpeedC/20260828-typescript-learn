@@ -30,7 +30,7 @@
 	<div class="inner">
 		<h1>08. 型の絞り込み</h1>
 		<p class="lead">union を安全に使う ／ この資料の山場②</p>
-		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-08-29</p>
+		<p class="date">📅 作成: 2026-08-29 / 更新: 2026-10-12</p>
 	</div>
 </div>
 
@@ -288,7 +288,7 @@ type Result = {
 
 	<h2>動かしてみる</h2>
 
-<pre><code class="language-typescript">// discriminated.ts
+<pre data-run><code class="language-typescript">// discriminated.ts
 type Shape =
 	| { kind: "circle"; radius: number }
 	| { kind: "rect"; width: number; height: number };
@@ -300,8 +300,8 @@ function area(s: Shape): number {
 	}
 }
 
-console.log(area({ kind: "circle", radius: 2 }).toFixed(2));
-console.log(area({ kind: "rect", width: 3, height: 4 }));</code></pre>
+console.log(area({ kind: "circle", radius: 2 }).toFixed(2));    // => 12.57
+console.log(area({ kind: "rect", width: 3, height: 4 }));       // => 12</code></pre>
 
 <pre><code class="language-shell">$ npx tsx discriminated.ts
 12.57
@@ -316,7 +316,7 @@ console.log(area({ kind: "rect", width: 3, height: 4 }));</code></pre>
 
 	<p>判定を関数にすると、<strong>戻り値の型を <code>x is T</code> と書くことで絞り込みを伝えられます。</strong></p>
 
-<pre><code class="language-typescript">type User = { name: string; age: number };
+<pre data-run><code class="language-typescript">type User = { name: string; age: number };
 
 function isUser(v: unknown): v is User {
 	if (typeof v !== "object" || v === null) return false;
@@ -327,7 +327,7 @@ function isUser(v: unknown): v is User {
 const data: unknown = JSON.parse('{"name":"Alice","age":30}');
 
 if (isUser(data)) {
-	console.log(data.name);      // User として扱える
+	console.log(data.name);      // User として扱える // => Alice
 }</code></pre>
 
 	<div class="callout callout-warning">
@@ -485,7 +485,7 @@ function area(s: Shape): number {
 
 	<h2>動かしてみる</h2>
 
-<pre><code class="language-typescript">// exhaustive.ts
+<pre data-run><code class="language-typescript">// exhaustive.ts
 type Event =
 	| { type: "click"; x: number; y: number }
 	| { type: "key"; code: string }
@@ -503,9 +503,9 @@ function describe(e: Event): string {
 	}
 }
 
-console.log(describe({ type: "click", x: 10, y: 20 }));
-console.log(describe({ type: "key", code: "Enter" }));
-console.log(describe({ type: "close" }));</code></pre>
+console.log(describe({ type: "click", x: 10, y: 20 }));    // => クリック (10, 20)
+console.log(describe({ type: "key", code: "Enter" }));      // => キー Enter
+console.log(describe({ type: "close" }));                   // => 閉じる</code></pre>
 
 <pre><code class="language-shell">$ npx tsx exhaustive.ts
 クリック (10, 20)
@@ -555,5 +555,6 @@ console.log(describe({ type: "close" }));</code></pre>
 </footer>
 
 <script src="js/highlight.js" defer></script>
+<script src="js/runner.js" defer></script>
 </body>
 </html>
