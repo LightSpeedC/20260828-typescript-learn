@@ -1,0 +1,6 @@
+docs/js/lib/typescript.js secret scanner2.
+docs/js/lib/typescript.js secret parseOptionalToken(
+docs/js/lib/typescript.js secret parseExpectedToken(
+docs/js/lib/typescript.js secret getFirstToken()
+docs/js/lib/typescript.js secret parent2
+docs/js/lib/typescript.js secret Unexpected_token_1012
